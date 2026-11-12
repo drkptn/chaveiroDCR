@@ -100,9 +100,9 @@ function Ring() {
       const near = Math.max(0, 1 - Math.abs(rel) / (STEP * 0.9));
       const out = (isSel ? 1 : 0) * near;
       h.position.set(4.2 + 2.9 + out * 1.6, 0, 0);
-      h.scale.setScalar(0.78 + out * 0.42);
+      h.scale.setScalar(0.78 + out * 0.57);
       // a selecionada gira 360° em torno da lâmina
-      s.rotation.x = isSel ? tmp.t * 0.9 : Math.sin(tmp.t * 0.6 + i) * 0.25;
+      s.rotation.x = isSel ? tmp.t * 0.55 : Math.sin(tmp.t * 0.6 + i) * 0.25;
       s.rotation.y = isSel ? Math.sin(tmp.t * 0.5) * 0.2 : 0;
       // brilho
       const lit = isSel ? 1 : 0.18 + near * 0.2;

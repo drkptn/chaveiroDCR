@@ -73,7 +73,7 @@ const LAYOUTS: Record<"wide" | "tall", Layout> = {
     cylDir: V(1, -0.36, -0.62),
     keyPos: V(2.9, 1.72, 0.6),
     keyDir: V(-0.92, -0.38, 0.12),
-    keyNormal: V(0.2, 0.7, 1),
+    keyNormal: V(0.2, 0.35, 1),
     cam0: [V(0, 0.2, 14), V(0.25, -0.25, 0)],
     cam1: [V(-1.2, 1.1, 12.2), V(0.6, -0.7, -0.6)],
     camDist2: 15,
