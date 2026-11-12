@@ -9,6 +9,7 @@ import { buildCylinder, CYL, KEY_PIN_LEN } from "../models/cylinder";
 import { gearShape, extrude, pinGeometry, screwGroup, shavingGeometry, springGeometry } from "../models/geo";
 import { heroKey } from "../models/keys";
 import { StudioEnv } from "../StudioEnv";
+import { AdaptiveQuality, dprCap } from "../Quality";
 import { heroState, smooth } from "./heroState";
 
 type Props = { compact: boolean; active: boolean; onReady?: () => void; capture?: boolean };
@@ -16,7 +17,7 @@ type Props = { compact: boolean; active: boolean; onReady?: () => void; capture?
 export default function HeroScene({ compact, active, onReady, capture = false }: Props) {
   return (
     <Canvas
-      dpr={capture ? 1 : compact ? [1, 1.5] : [1, 1.75]}
+      dpr={capture ? 1 : [1, dprCap(compact)]}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: capture }}
       camera={{ fov: 30, position: [0, 0.3, 13.5], near: 0.1, far: 90 }}
       frameloop={active ? "always" : "never"}
@@ -28,6 +29,7 @@ export default function HeroScene({ compact, active, onReady, capture = false }:
       style={{ pointerEvents: "none" }}
     >
       <StudioEnv follow={!capture} />
+      {!capture && <AdaptiveQuality max={dprCap(compact)} active={active} />}
       <Rig compact={compact} onReady={onReady} />
     </Canvas>
   );
@@ -175,7 +177,16 @@ function Rig({ compact, onReady }: { compact: boolean; onReady?: () => void }) {
       camPos: new THREE.Vector3(),
       o: new THREE.Object3D(),
       flip: new THREE.Matrix4().makeRotationX(Math.PI),
-      history: [] as { p: THREE.Vector3; q: THREE.Quaternion }[],
+      // tudo pré-alocado: zero lixo de memória por quadro (sem pausas do GC)
+      e: new THREE.Euler(),
+      v: new THREE.Vector3(),
+      v2: new THREE.Vector3(),
+      v3: new THREE.Vector3(),
+      idleQ: new THREE.Quaternion(),
+      X: new THREE.Vector3(1, 0, 0),
+      history: Array.from({ length: 12 }, () => ({ p: new THREE.Vector3(), q: new THREE.Quaternion() })),
+      hHead: 0,
+      hCount: 0,
       clock: 0,
       frames: 0,
       intro: 0,
@@ -184,8 +195,10 @@ function Rig({ compact, onReady }: { compact: boolean; onReady?: () => void }) {
   );
 
   useEffect(() => {
-    tmp.history.length = 0;
+    tmp.hCount = 0;
   }, [tmp]);
+  // orientações fixas por layout (calculadas uma vez, não a cada quadro)
+  const baseQ = useMemo(() => ({ cyl: quatFromDir(layout.cylDir), key: quatFromNormal(layout.keyDir, layout.keyNormal) }), [layout]);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 1 / 30);
@@ -210,7 +223,7 @@ function Rig({ compact, onReady }: { compact: boolean; onReady?: () => void }) {
     const scatter = smooth(0, 0.5, p);
 
     // ---------- cilindro ----------
-    const cylQ = quatFromDir(L.cylDir);
+    const cylQ = baseQ.cyl;
     if (cylHolder.current) {
       const bob = frozen ? 0 : Math.sin(t * 0.6) * 0.06 * (1 - align);
       cylHolder.current.position.copy(L.cylPos).add(tmp.p.set(0, bob, 0));
@@ -239,34 +252,45 @@ function Rig({ compact, onReady }: { compact: boolean; onReady?: () => void }) {
       tmp.m.decompose(tmp.p2, tmp.q2, tmp.s);
 
       // pose ociosa (diagonal, segredo para cima, flutuando)
-      const idleQ = quatFromNormal(L.keyDir, L.keyNormal);
+      const idleQ = tmp.idleQ.copy(baseQ.key);
       const sway = frozen ? 0 : 1;
-      idleQ.multiply(tmp.q.setFromEuler(new THREE.Euler(Math.sin(t * 0.5) * 0.12 * sway + light.y * 0.12, light.x * 0.18, Math.sin(t * 0.37) * 0.05 * sway)));
+      idleQ.multiply(tmp.q.setFromEuler(tmp.e.set(Math.sin(t * 0.5) * 0.12 * sway + light.y * 0.12, light.x * 0.18, Math.sin(t * 0.37) * 0.05 * sway)));
       // giro de entrada em torno da própria lâmina
-      idleQ.multiply(tmp.q.setFromAxisAngle(V(1, 0, 0), (1 - intro) * Math.PI * 1.6));
-      const idleP = tmp.p.copy(L.keyPos).add(V(0, Math.sin(t * 0.8) * 0.12 * sway, 0));
-      idleP.add(V(9 * (1 - intro), 3.2 * (1 - intro), -3 * (1 - intro)));
+      if (intro < 1) idleQ.multiply(tmp.q.setFromAxisAngle(tmp.X, (1 - intro) * Math.PI * 1.6));
+      const idleP = tmp.p.copy(L.keyPos);
+      idleP.y += Math.sin(t * 0.8) * 0.12 * sway;
+      idleP.x += 9 * (1 - intro);
+      idleP.y += 3.2 * (1 - intro);
+      idleP.z += -3 * (1 - intro);
 
       keyHolder.current.position.lerpVectors(idleP, tmp.p2, align);
       keyHolder.current.quaternion.slerpQuaternions(idleQ, tmp.q2, align);
 
-      // rastro
+      // rastro (buffer circular pré-alocado)
       const h = tmp.history;
-      h.unshift({ p: keyHolder.current.position.clone(), q: keyHolder.current.quaternion.clone() });
-      if (h.length > 12) h.pop();
-      const speed = h.length > 2 ? h[0].p.distanceTo(h[2].p) : 0;
+      const N = h.length;
+      tmp.hHead = (tmp.hHead + 1) % N;
+      h[tmp.hHead].p.copy(keyHolder.current.position);
+      h[tmp.hHead].q.copy(keyHolder.current.quaternion);
+      tmp.hCount = Math.min(N, tmp.hCount + 1);
+      const at = (back: number) => h[(tmp.hHead - Math.min(back, tmp.hCount - 1) + N) % N];
+      const speed = tmp.hCount > 2 ? at(0).p.distanceTo(at(2).p) : 0;
       ghostMat.opacity = Math.min(0.32, speed * 0.55);
+      const showGhosts = ghostMat.opacity > 0.01;
       ghosts.forEach((g, i) => {
-        const e = h[Math.min(h.length - 1, (i + 1) * 2)];
-        if (!e) return;
+        g.visible = showGhosts;
+        if (!showGhosts) return;
+        const e = at((i + 1) * 2);
         g.position.copy(e.p);
         g.quaternion.copy(e.q);
-        g.visible = ghostMat.opacity > 0.01;
       });
     }
 
-    // ---------- detritos e limalha ----------
-    parts.forEach((d) => {
+    // ---------- detritos e limalha (param de calcular quando somem) ----------
+    const debrisOn = scatter < 0.98;
+    if (debris.current) debris.current.visible = debrisOn;
+    if (shav.current) shav.current.visible = debrisOn;
+    if (debrisOn) parts.forEach((d) => {
       const o = d.obj;
       o.position.copy(d.base).addScaledVector(d.drift, scatter);
       o.position.y += frozen ? 0 : Math.sin(t * 0.7 + d.phase) * 0.18;
@@ -275,9 +299,8 @@ function Rig({ compact, onReady }: { compact: boolean; onReady?: () => void }) {
       o.rotation.y = d.phase * 0.5 + t * d.spin.y;
       o.rotation.z = t * d.spin.z;
     });
-    if (debris.current) debris.current.visible = scatter < 0.98;
 
-    if (shav.current) {
+    if (shav.current && debrisOn) {
       shavings.forEach((s, i) => {
         tmp.o.position.copy(s.p);
         tmp.o.position.y += ((t * s.v + i) % 8) - 4 + scatter * 2;
@@ -298,10 +321,10 @@ function Rig({ compact, onReady }: { compact: boolean; onReady?: () => void }) {
     tmp.look.lerpVectors(c0t, c1t, k1);
     if (portal > 0 && cylHolder.current && root.current) {
       // de frente para a face do cilindro (o "buraco da fechadura")
-      const face = cylHolder.current.position.clone().multiplyScalar(L.scale);
-      const axis = V(1, 0, 0).applyQuaternion(cylHolder.current.quaternion).normalize();
+      const face = tmp.v.copy(cylHolder.current.position).multiplyScalar(L.scale);
+      const axis = tmp.v2.copy(tmp.X).applyQuaternion(cylHolder.current.quaternion).normalize();
       const fit = camAspect < 0.95 ? 1.25 : 1;
-      const front = face.clone().addScaledVector(axis, -L.camDist2 * fit);
+      const front = tmp.v3.copy(face).addScaledVector(axis, -L.camDist2 * fit);
       tmp.camPos.lerp(front, portal);
       tmp.look.lerp(face, portal);
     }
@@ -312,10 +335,10 @@ function Rig({ compact, onReady }: { compact: boolean; onReady?: () => void }) {
     cam.lookAt(tmp.look);
 
     // projeta a face do cilindro (centro + raio) para o portal do DOM
-    if (cylHolder.current) {
+    if (cylHolder.current && p > 0.6) {
       cam.updateMatrixWorld();
-      const c = cylHolder.current.position.clone().multiplyScalar(L.scale);
-      const edge = c.clone().add(V(0, CYL.rBody * L.scale, 0).applyQuaternion(cam.quaternion));
+      const c = tmp.v.copy(cylHolder.current.position).multiplyScalar(L.scale);
+      const edge = tmp.v2.set(0, CYL.rBody * L.scale, 0).applyQuaternion(cam.quaternion).add(c);
       c.project(cam);
       edge.project(cam);
       heroState.faceX = (c.x * 0.5 + 0.5) * size.width;

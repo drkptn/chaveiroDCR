@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { LaserText } from "@/components/ui/LaserText";
 import { Screw } from "@/components/ui/Screw";
 import { SectionMark } from "@/components/ui/SectionMark";
-import { Turntable } from "@/components/ui/Turntable";
+import { Emblem3D } from "@/components/ui/Emblem3D";
 import { about } from "@/config/content";
 import { asset } from "@/lib/asset";
 import { gsap, useGSAP } from "@/lib/gsap";
@@ -45,12 +45,12 @@ export function About() {
             <Screw className={styles.s2} size={14} angle={65} />
             <Screw className={styles.s3} size={14} angle={110} />
             <Screw className={styles.s4} size={14} angle={155} />
-            <div className={styles.photo} data-photo>
+            <div className={styles.photo} data-photo data-lit>
               {about.photo ? (
                 <img src={asset(about.photo)} alt={about.photoAlt} loading="lazy" decoding="async" />
               ) : (
                 <div className={styles.slot}>
-                  <Turntable name="emblema" alt="Símbolo do Chaveiro DCR em 3D" className={styles.emblem} />
+                  <Emblem3D label="Símbolo do Chaveiro DCR em 3D" className={styles.emblem} />
                   <p className="mono">Espaço reservado para a fotografia do profissional</p>
                 </div>
               )}

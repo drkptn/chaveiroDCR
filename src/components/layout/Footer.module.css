@@ -90,7 +90,7 @@
   letter-spacing: -0.04em;
   color: transparent;
   background:
-    radial-gradient(420px 320px at var(--lx) var(--ly), rgb(243 246 248 / 0.65), rgb(121 233 255 / 0.15) 45%, transparent 70%) fixed,
+    radial-gradient(420px 320px at var(--mx, 50%) var(--my, 45%), rgb(243 246 248 / 0.65), rgb(121 233 255 / 0.15) 45%, transparent 70%),
     linear-gradient(180deg, #1a2027, #0b0f14);
   -webkit-background-clip: text;
   background-clip: text;

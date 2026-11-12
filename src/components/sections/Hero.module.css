@@ -83,9 +83,6 @@
   left: 3px;
 }
 
-.filters {
-  position: absolute;
-}
 
 /* ---------- camadas ---------- */
 .back,
@@ -134,6 +131,11 @@
 .l2 span,
 .l3 span {
   display: inline-block;
+}
+.l1,
+.l2,
+.l3 {
+  will-change: transform, opacity;
 }
 .l1 {
   position: absolute;
@@ -216,8 +218,7 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr) 1.15fr;
   border-top: 1px solid rgb(167 177 188 / 0.16);
-  background: linear-gradient(180deg, rgb(9 12 17 / 0.4), rgb(9 12 17 / 0.85));
-  backdrop-filter: blur(6px);
+  background: linear-gradient(180deg, rgb(9 12 17 / 0.72), rgb(9 12 17 / 0.94));
 }
 .cell {
   display: flex;
@@ -305,8 +306,7 @@
   width: 230px;
   padding: 16px 16px 14px;
   border: 1px solid rgb(121 233 255 / 0.22);
-  background: linear-gradient(180deg, rgb(9 16 24 / 0.72), rgb(9 12 17 / 0.55));
-  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgb(9 16 24 / 0.9), rgb(9 12 17 / 0.82));
   clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
   opacity: 0;
   pointer-events: none !important;

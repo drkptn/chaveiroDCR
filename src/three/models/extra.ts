@@ -3,8 +3,8 @@ import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
 import { SYMBOL_PATH } from "@/components/brand/logoPaths";
 import { mat } from "../materials";
 import { circle, extrude, gearShape, roundRect, screwGroup, shapeOf, type P2 } from "./geo";
-import { buildKey, flatKey } from "./keys";
-import { buildCylinder } from "./cylinder";
+import { buildKey, flatKey, flipKey, heroKey } from "./keys";
+import { buildCylinder, CYL } from "./cylinder";
 
 /** Leque de chaves — categoria "Cópias". */
 export function keyFan() {
@@ -155,3 +155,27 @@ export function emblem(depth = 6) {
   g.add(m);
   return g;
 }
+
+/** Cilindro sólido com a chave parcialmente inserida — categoria "Fechaduras". */
+export function cylinderWithKey(insert = 1) {
+  const g = new THREE.Group();
+  const c = buildCylinder("solid");
+  const k = heroKey();
+  const holder = new THREE.Group();
+  holder.add(k.group);
+  holder.rotation.x = Math.PI;
+  holder.position.x = THREE.MathUtils.lerp(-3.5, CYL.seat, insert);
+  c.update(k, holder.position.x, 0, 0);
+  g.add(c.root, holder);
+  g.position.x = 0.6;
+  return g;
+}
+
+/** Objetos das gavetas de serviço (mesmos do estúdio de renders). */
+export const SERVICE_MODELS: Record<string, { build: () => THREE.Object3D; tilt: [number, number, number]; fit: number }> = {
+  copias: { build: keyFan, tilt: [0.35, 0, 0], fit: 0.82 },
+  automotivas: { build: () => flipKey().group, tilt: [0.5, 0, 0.1], fit: 0.84 },
+  fechaduras: { build: () => cylinderWithKey(0.55), tilt: [0.3, 0, 0], fit: 0.86 },
+  abertura: { build: mortiseLock, tilt: [0.25, 0, 0], fit: 0.86 },
+  seguranca: { build: digitalLock, tilt: [0.15, 0, 0], fit: 0.88 },
+};

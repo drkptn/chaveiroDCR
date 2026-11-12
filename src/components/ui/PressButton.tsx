@@ -40,6 +40,7 @@ export function PressButton({ href, onClick, children, variant = "chrome", size 
         onClick={onClick}
         aria-label={ariaLabel}
         data-cursor="key"
+        data-lit
         {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
         {inner}
@@ -47,7 +48,7 @@ export function PressButton({ href, onClick, children, variant = "chrome", size 
     );
   }
   return (
-    <button type={type} className={cls} onClick={onClick} aria-label={ariaLabel} data-cursor="key" disabled={disabled}>
+    <button type={type} className={cls} onClick={onClick} aria-label={ariaLabel} data-cursor="key" data-lit disabled={disabled}>
       {inner}
     </button>
   );

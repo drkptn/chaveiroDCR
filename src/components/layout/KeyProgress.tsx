@@ -17,30 +17,36 @@ export function KeyProgress() {
   const svg = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    let raf = 0;
+    // medidas das seções em cache: nada de getBoundingClientRect a cada quadro
+    let tops: { t: number; h: number }[] = [];
+    let W = 1;
     let spin = 0;
-    const tick = () => {
-      const el = svg.current;
-      if (!el) return;
-      const W = el.clientWidth || 1;
-      const H = 14;
-      const top = 3;
-      const bottom = 11;
-      const n = sectionsOrder.length;
-      const vh = window.innerHeight;
-      const mid = window.scrollY + vh * 0.5;
+    let lastY = window.scrollY;
+    let queued = false;
+    const top = 3;
+    const bottom = 11;
+    const n = sectionsOrder.length;
+
+    const measure = () => {
+      W = svg.current?.clientWidth || 1;
+      tops = sectionsOrder.map((id) => {
+        const s = document.getElementById(id);
+        if (!s) return { t: 0, h: 1 };
+        const r = s.getBoundingClientRect();
+        return { t: r.top + window.scrollY, h: Math.max(1, r.height) };
+      });
+    };
+
+    const draw = () => {
+      queued = false;
+      const y = window.scrollY;
+      const mid = y + window.innerHeight * 0.5;
       let cursorX = 0;
       const pts: string[] = [`M0 ${top}`];
-      sectionsOrder.forEach((id, i) => {
-        const s = document.getElementById(id);
-        let prog = 0;
-        if (s) {
-          const r = s.getBoundingClientRect();
-          const t = r.top + window.scrollY;
-          prog = Math.min(1, Math.max(0, (mid - t) / Math.max(1, r.height)));
-          if (mid >= t && mid < t + r.height) cursorX = ((i + prog) / n) * W;
-          if (i === n - 1 && mid >= t + r.height) cursorX = W;
-        }
+      tops.forEach(({ t, h }, i) => {
+        const prog = Math.min(1, Math.max(0, (mid - t) / h));
+        if (mid >= t && mid < t + h) cursorX = ((i + prog) / n) * W;
+        if (i === n - 1 && mid >= t + h) cursorX = W;
         const c = ((i + 0.5) / n) * W;
         const d = BITTING[i % BITTING.length] * 1.4 * Math.min(1, prog * 2.2);
         const w = 3;
@@ -48,13 +54,36 @@ export function KeyProgress() {
       });
       pts.push(`L${W - 10} ${top}`, `L${W} ${(top + bottom) / 2}`, `L${W - 10} ${bottom}`, `L0 ${bottom}`, "Z");
       path.current?.setAttribute("d", pts.join(" "));
-      spin += 18;
-      cutter.current?.setAttribute("transform", `translate(${cursorX.toFixed(1)} ${top}) rotate(${spin % 360})`);
-      void H;
-      raf = requestAnimationFrame(tick);
+      // a fresa só gira quando há rolagem
+      spin += (y - lastY) * 0.8;
+      lastY = y;
+      cutter.current?.setAttribute("transform", `translate(${cursorX.toFixed(1)} ${top}) rotate(${(spin % 360).toFixed(1)})`);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
+    const schedule = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(draw);
+      }
+    };
+    const remeasure = () => {
+      measure();
+      schedule();
+    };
+
+    measure();
+    draw();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", remeasure);
+    // gavetas abrindo etc. mudam a altura da página
+    const ro = new ResizeObserver(() => remeasure());
+    ro.observe(document.body);
+    const late = window.setTimeout(remeasure, 1500);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", remeasure);
+      ro.disconnect();
+      window.clearTimeout(late);
+    };
   }, []);
 
   return (

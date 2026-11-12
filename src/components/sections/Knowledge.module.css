@@ -120,8 +120,7 @@
   display: grid;
   padding: 8px 12px;
   border: 1px solid rgb(121 233 255 / 0.4);
-  background: rgb(9 14 20 / 0.85);
-  backdrop-filter: blur(6px);
+  background: rgb(9 14 20 / 0.94);
   opacity: 0;
   pointer-events: none;
   white-space: nowrap;
@@ -264,8 +263,7 @@
     display: none;
     padding: 12px 14px;
     border: 1px solid rgb(121 233 255 / 0.4);
-    background: rgb(9 14 20 / 0.88);
-    backdrop-filter: blur(8px);
+    background: rgb(9 14 20 / 0.95);
     width: 100%;
   }
   .legend li.on {

@@ -110,13 +110,14 @@ export function LiquidChrome({ className }: { className?: string }) {
 
     const coarse = window.matchMedia("(pointer: coarse)").matches;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const scale = coarse ? 0.5 : 0.62;
-    gl.uniform1f(uSteps, coarse ? 56 : 80);
+    // metal líquido tem bordas suaves: meia resolução (sem multiplicar pelo DPR) é imperceptível e ~6x mais leve
+    const scale = coarse ? 0.42 : 0.5;
+    gl.uniform1f(uSteps, coarse ? 44 : 64);
 
     const resize = () => {
       const r = cv.getBoundingClientRect();
-      cv.width = Math.max(2, Math.round(r.width * scale * Math.min(2, devicePixelRatio)));
-      cv.height = Math.max(2, Math.round(r.height * scale * Math.min(2, devicePixelRatio)));
+      cv.width = Math.max(2, Math.round(r.width * scale));
+      cv.height = Math.max(2, Math.round(r.height * scale));
       gl.viewport(0, 0, cv.width, cv.height);
       gl.uniform2f(uRes, cv.width, cv.height);
     };

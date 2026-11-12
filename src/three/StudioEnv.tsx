@@ -1,25 +1,24 @@
 "use client";
 
 import { Environment, Lightformer } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
-import type * as THREE from "three";
+import { useFrame, useThree } from "@react-three/fiber";
 import { light } from "@/lib/light";
 
 /**
- * Estúdio de fotografia virtual: faixas de luz (softboxes) que desenham
- * os reflexos no cromo. Uma das luzes é a "lanterna" — segue o cursor,
- * então o reflexo desliza pela peça de verdade (não é um brilho em CSS).
+ * Estúdio de fotografia virtual: faixas de luz (softboxes) que desenham os
+ * reflexos no cromo. O mapa de reflexo é fotografado UMA vez (frames=1) e,
+ * para a "lanterna", o estúdio inteiro gira conforme o cursor
+ * (scene.environmentRotation) — o reflexo desliza pela peça sem custo de GPU.
  */
-export function StudioEnv({ follow = true, frames = Infinity, warm = 0.6 }: { follow?: boolean; frames?: number; warm?: number }) {
-  const lamp = useRef<THREE.Mesh>(null);
-  const strip = useRef<THREE.Mesh>(null);
+export function StudioEnv({ follow = true, frames = 1, warm = 0.6 }: { follow?: boolean; frames?: number; warm?: number }) {
+  const scene = useThree((s) => s.scene);
 
-  useFrame(() => {
-    if (!follow || !lamp.current) return;
-    lamp.current.position.x += (light.x * 7 - lamp.current.position.x) * 0.12;
-    lamp.current.position.y += (light.y * 4.5 - lamp.current.position.y) * 0.12;
-    if (strip.current) strip.current.position.x = -6 + light.x * 1.5;
+  useFrame((_, delta) => {
+    if (!follow) return;
+    const k = Math.min(1, delta * 4);
+    const r = scene.environmentRotation;
+    r.y += (light.x * 0.75 - r.y) * k;
+    r.x += (-light.y * 0.22 - r.x) * k;
   });
 
   return (
@@ -28,7 +27,7 @@ export function StudioEnv({ follow = true, frames = Infinity, warm = 0.6 }: { fo
       {/* teto: softbox grande — desenha o "céu" claro no cromo */}
       <Lightformer form="rect" intensity={2.4} color="#eef5fb" scale={[18, 5, 1]} position={[0, 6, 0]} rotation-x={Math.PI / 2} />
       {/* faixa lateral esquerda — risco vertical clássico do cromo */}
-      <Lightformer ref={strip} form="rect" intensity={3.2} color="#ffffff" scale={[1.3, 14, 1]} position={[-6, 0, 3]} rotation-y={Math.PI / 2.4} />
+      <Lightformer form="rect" intensity={3.2} color="#ffffff" scale={[1.3, 14, 1]} position={[-6, 0, 3]} rotation-y={Math.PI / 2.4} />
       {/* painel frio à direita */}
       <Lightformer form="rect" intensity={1.1} color="#a9cbe8" scale={[7, 12, 1]} position={[8, 0, 1]} rotation-y={-Math.PI / 2} />
       {/* contraluz ciano */}
@@ -40,8 +39,8 @@ export function StudioEnv({ follow = true, frames = Infinity, warm = 0.6 }: { fo
       {/* frente: rebatedor suave (atrás da câmera) */}
       <Lightformer form="rect" intensity={1.5} color="#e3ecf4" scale={[34, 7, 1]} position={[0, 4.6, 12]} rotation-y={Math.PI} />
       <Lightformer form="rect" intensity={0.25} color="#8fa4b8" scale={[34, 5, 1]} position={[0, -3.5, 12]} rotation-y={Math.PI} />
-      {/* a lanterna */}
-      <Lightformer ref={lamp} form="circle" intensity={4} color="#ffffff" scale={3} position={[3, 2, 7]} />
+      {/* a lanterna (ponto de luz forte) */}
+      <Lightformer form="circle" intensity={4} color="#ffffff" scale={3} position={[3, 2, 7]} />
     </Environment>
   );
 }

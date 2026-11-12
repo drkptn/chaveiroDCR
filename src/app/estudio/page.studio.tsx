@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { StudioEnv } from "@/three/StudioEnv";
 import { buildCylinder, CYL } from "@/three/models/cylinder";
-import { digitalLock, emblem, keyFan, mortiseLock } from "@/three/models/extra";
+import { cylinderWithKey, digitalLock, emblem, keyFan, mortiseLock } from "@/three/models/extra";
 import { buildKey, flipKey, heroKey } from "@/three/models/keys";
 import { pinGeometry, screwGroup, springGeometry } from "@/three/models/geo";
 import { mat } from "@/three/materials";
@@ -21,20 +21,6 @@ import { SYMBOL_PATH } from "@/components/brand/logoPaths";
 const HeroScene = dynamic(() => import("@/three/scenes/HeroScene"), { ssr: false });
 
 type Shot = { build: () => THREE.Object3D; tilt?: [number, number, number]; fit?: number; turn?: boolean };
-
-function cylinderWithKey(insert = 1) {
-  const g = new THREE.Group();
-  const c = buildCylinder("solid");
-  const k = heroKey();
-  const holder = new THREE.Group();
-  holder.add(k.group);
-  holder.rotation.x = Math.PI;
-  holder.position.x = THREE.MathUtils.lerp(-3.5, CYL.seat, insert);
-  c.update(k, holder.position.x, 0, 0);
-  g.add(c.root, holder);
-  g.position.x = 0.6;
-  return g;
-}
 
 const SHOTS: Record<string, Shot> = {
   copias: { build: keyFan, tilt: [0.35, 0, 0], fit: 0.82 },

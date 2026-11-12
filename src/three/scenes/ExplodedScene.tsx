@@ -7,6 +7,7 @@ import { cylinderParts, type CylinderPartId } from "@/config/content";
 import { buildCylinder, CYL } from "../models/cylinder";
 import { heroKey } from "../models/keys";
 import { StudioEnv } from "../StudioEnv";
+import { AdaptiveQuality, dprCap } from "../Quality";
 import { smooth } from "./heroState";
 import { explodedState } from "./sceneState";
 
@@ -17,7 +18,7 @@ type Props = { active: boolean; compact: boolean };
 export default function ExplodedScene({ active, compact }: Props) {
   return (
     <Canvas
-      dpr={compact ? [1, 1.5] : [1, 1.75]}
+      dpr={[1, dprCap(compact)]}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       camera={{ fov: 28, position: [0, 0, 22], near: 0.1, far: 100 }}
       frameloop={active ? "always" : "never"}
@@ -29,10 +30,24 @@ export default function ExplodedScene({ active, compact }: Props) {
       style={{ pointerEvents: "none" }}
     >
       <StudioEnv warm={0.9} />
+      <AdaptiveQuality max={dprCap(compact)} active={active} />
       <Exploded compact={compact} />
     </Canvas>
   );
 }
+
+/** pontos de ancoragem das cotas (local de cada peça) — fora do loop: sem lixo por quadro */
+const OFFSETS: Record<CylinderPartId, [number, number, number]> = {
+  body: [0, 0.7, 0.5],
+  plug: [0, 0.3, 0.5],
+  keyPins: [0, 0.2, 0],
+  driverPins: [0, 0.2, 0],
+  springs: [0, 0.5, 0],
+  shear: [0.4, 0, 0.5],
+  cam: [0, -0.4, 0],
+  key: [-1.6, 0, 0],
+};
+const IDS = cylinderParts.map((c) => c.id);
 
 type Tracked = { obj: THREE.Object3D; mats: THREE.Material[]; lines: THREE.LineBasicMaterial[] };
 
@@ -112,7 +127,7 @@ function Exploded({ compact }: { compact: boolean }) {
 
     // destaque: peça em foco nítida, demais em raio-x
     const focus = explodedState.focus;
-    const ids = cylinderParts.map((c) => c.id);
+    const ids = IDS;
     ids.forEach((id, i) => {
       const list = groups.get(id);
       if (!list) return;
@@ -171,21 +186,11 @@ function Exploded({ compact }: { compact: boolean }) {
           return key.group;
       }
     };
-    const offsets: Record<CylinderPartId, [number, number, number]> = {
-      body: [0, 0.7, 0.5],
-      plug: [0, 0.3, 0.5],
-      keyPins: [0, 0.2, 0],
-      driverPins: [0, 0.2, 0],
-      springs: [0, 0.5, 0],
-      shear: [0.4, 0, 0.5],
-      cam: [0, -0.4, 0],
-      key: [-1.6, 0, 0],
-    };
     ids.forEach((id, i) => {
       const o = anchorOf(id);
       if (!o) return;
       o.updateWorldMatrix(true, false);
-      tmp.v.set(...offsets[id]);
+      tmp.v.set(...OFFSETS[id]);
       o.localToWorld(tmp.v);
       tmp.v.project(camera);
       const a = explodedState.anchors[i];

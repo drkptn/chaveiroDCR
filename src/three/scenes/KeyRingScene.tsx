@@ -7,6 +7,7 @@ import { keyTypes } from "@/config/keys";
 import { mat } from "../materials";
 import { buildKey } from "../models/keys";
 import { StudioEnv } from "../StudioEnv";
+import { AdaptiveQuality, dprCap } from "../Quality";
 import { ringState } from "./sceneState";
 
 export { ringState };
@@ -16,7 +17,7 @@ type Props = { active: boolean; compact: boolean };
 export default function KeyRingScene({ active, compact }: Props) {
   return (
     <Canvas
-      dpr={compact ? [1, 1.5] : [1, 1.75]}
+      dpr={[1, dprCap(compact)]}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       camera={{ fov: 30, position: [0, 0, 20], near: 0.1, far: 100 }}
       frameloop={active ? "always" : "never"}
@@ -28,6 +29,7 @@ export default function KeyRingScene({ active, compact }: Props) {
       style={{ pointerEvents: "none" }}
     >
       <StudioEnv />
+      <AdaptiveQuality max={dprCap(compact)} active={active} />
       <Ring />
     </Canvas>
   );

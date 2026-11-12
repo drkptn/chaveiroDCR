@@ -149,6 +149,10 @@ export function Process() {
                 <stop offset="0.6" stopColor="#5e4b43" />
                 <stop offset="1" stopColor="#e7c98a" />
               </linearGradient>
+              <radialGradient id="gearShadow">
+                <stop offset="0.55" stopColor="#000" stopOpacity="0.55" />
+                <stop offset="1" stopColor="#000" stopOpacity="0" />
+              </radialGradient>
               <radialGradient id="hubDark">
                 <stop offset="0" stopColor="#1a2027" />
                 <stop offset="1" stopColor="#07090c" />
@@ -161,6 +165,8 @@ export function Process() {
               const rIn = g.r - MODULE * 2.6;
               return (
                 <g key={i} className={styles.gearWrap}>
+                  {/* sombra estática (não gira → não é recalculada a cada quadro) */}
+                  <circle cx={g.x} cy={r2(g.y + 12)} r={r2(g.r * 1.08)} className={styles.shadow} />
                   <g ref={(el) => void (gearEls.current[i] = el)} transform={`translate(${g.x} ${g.y}) rotate(${((g.phase * 180) / Math.PI).toFixed(2)})`}>
                     <path d={gearPath(g.z)} fill={i % 2 ? "url(#gearBrass)" : "url(#gearMetal)"} className={styles.gear} />
                     <circle r={r2(rIn)} className={styles.web} />

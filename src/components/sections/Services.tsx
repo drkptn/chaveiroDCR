@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
 import { goTo } from "@/components/layout/Navbar";
 import { categoryIcon } from "@/components/ui/Icons";
 import { LaserText } from "@/components/ui/LaserText";
@@ -11,7 +12,12 @@ import { Turntable } from "@/components/ui/Turntable";
 import { activeCategories, type ServiceCategory } from "@/config/services";
 import { preselect, type ContactOptionId } from "@/lib/events";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { asset } from "@/lib/asset";
+import { supportsWebGL, useNearScreen } from "@/lib/hooks";
+import type { SpinControl } from "@/three/scenes/ObjectScene";
 import styles from "./Services.module.css";
+
+const ObjectScene = dynamic(() => import("@/three/scenes/ObjectScene"), { ssr: false });
 
 const toContact: Record<string, ContactOptionId> = {
   copias: "copia",
@@ -47,7 +53,7 @@ export function Services() {
       <div className={styles.bgLines} aria-hidden="true" />
       <header className={`wrap ${styles.head}`}>
         <SectionMark letter="B" label="Serviços" sheet="Folha 02 / 09" />
-        <h2 id="servicos-title" className={`display chrome ${styles.title}`}>
+        <h2 id="servicos-title" tabIndex={-1} className={`display chrome ${styles.title}`}>
           Serviços
         </h2>
         <div className={styles.intro}>
@@ -111,7 +117,7 @@ function Drawer({ cat, index, open, onToggle }: { cat: ServiceCategory; index: n
   return (
     <article className={`${styles.drawer} ${open ? styles.isOpen : ""}`} data-drawer>
       <h3 className={styles.h3}>
-        <button className={styles.front} aria-expanded={open} aria-controls={`gaveta-${cat.id}`} id={`gaveta-btn-${cat.id}`} onClick={onToggle}>
+        <button className={styles.front} data-lit aria-expanded={open} aria-controls={`gaveta-${cat.id}`} id={`gaveta-btn-${cat.id}`} onClick={onToggle}>
           <span className={styles.frontInner}>
             <Screw className={styles.sa} angle={index * 37} />
             <Screw className={styles.sb} angle={index * 53 + 20} />
@@ -147,7 +153,7 @@ function Drawer({ cat, index, open, onToggle }: { cat: ServiceCategory; index: n
         <div ref={tray} className={styles.tray}>
           <div className={styles.vitrine}>
             <span className={styles.corner} aria-hidden="true" />
-            <Turntable name={cat.render} alt={`Ilustração 3D: ${cat.title}`} eager={open} className={styles.tt} />
+            <ServiceStage name={cat.render} alt={`Ilustração 3D: ${cat.title}`} open={open} />
             <span className={`mono ${styles.vitLabel}`}>Vista 360° · arraste</span>
           </div>
           <div className={styles.list}>
@@ -188,5 +194,63 @@ function Drawer({ cat, index, open, onToggle }: { cat: ServiceCategory; index: n
         </div>
       </div>
     </article>
+  );
+}
+
+/**
+ * Vitrine da gaveta: poster instantâneo + objeto 3D ao vivo (60 fps) por cima.
+ * Arraste para girar (com inércia). Sem WebGL, cai para o visor de fotos 360°.
+ */
+function ServiceStage({ name, alt, open }: { name: string; alt: string; open: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const near = useNearScreen(ref, "300px");
+  const visible = useNearScreen(ref, "0px");
+  const [webgl, setWebgl] = useState<boolean | null>(null);
+  const [ready, setReady] = useState(false);
+  const ctl = useRef<SpinControl>({ vel: 0.6, dragging: false, push: 0, auto: 0.6 });
+  const drag = useRef({ x: 0 });
+
+  useEffect(() => {
+    setWebgl(supportsWebGL());
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      ctl.current.auto = 0;
+      ctl.current.vel = 0;
+    }
+  }, []);
+  // a cena só existe com a gaveta aberta e perto da tela (fechar libera a GPU)
+  const mounted = webgl === true && open && near;
+  useEffect(() => {
+    if (!mounted) setReady(false);
+  }, [mounted]);
+
+  if (webgl === false) return <Turntable name={name} alt={alt} eager={open} className={styles.tt} />;
+
+  return (
+    <div
+      ref={ref}
+      className={styles.stage3d}
+      role="img"
+      aria-label={alt}
+      data-cursor="rotate"
+      onPointerDown={(e) => {
+        ctl.current.dragging = true;
+        drag.current.x = e.clientX;
+        (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      }}
+      onPointerMove={(e) => {
+        if (!ctl.current.dragging) return;
+        ctl.current.push += (e.clientX - drag.current.x) * 0.012;
+        drag.current.x = e.clientX;
+      }}
+      onPointerUp={() => (ctl.current.dragging = false)}
+      onPointerCancel={() => (ctl.current.dragging = false)}
+    >
+      <img className={styles.poster} src={asset(`/renders/${name}.webp`)} alt="" loading="lazy" decoding="async" style={{ opacity: ready ? 0 : 1 }} />
+      {mounted && (
+        <div className={styles.canvas3d} style={{ opacity: ready ? 1 : 0 }}>
+          <ObjectScene name={name} active={open && visible} ctl={ctl.current} onReady={() => setReady(true)} />
+        </div>
+      )}
+    </div>
   );
 }

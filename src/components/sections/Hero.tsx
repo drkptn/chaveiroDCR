@@ -60,26 +60,18 @@ export function Hero() {
       const services = document.getElementById("servicos");
       // ---------- entrada: linhas chegam com motion blur horizontal ----------
       if (!reduce) {
-        const blurs = gsap.utils.toArray<SVGFEGaussianBlurElement>("[data-mblur]");
         // a entrada anima o miolo ([data-in]); a saída por rolagem anima a linha — sem conflito
         const lines = ["0", "1", "2"].map((n) => root.current!.querySelector<HTMLElement>(`[data-line="${n}"] [data-in]`)!);
         const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
+        // motion blur na GPU: desfoque CSS + estiramento horizontal que "assenta"
         lines.forEach((ln, i) => {
-          const blur = blurs[i];
           const from = i % 2 === 0 ? -1 : 1;
-          const proxy = { b: 60 };
-          intro.fromTo(ln, { x: from * 220, opacity: 0 }, { x: 0, opacity: 1, duration: 1.3 }, 0.12 + i * 0.12);
-          if (blur)
-            intro.to(
-              proxy,
-              {
-                b: 0,
-                duration: 1.1,
-                onUpdate: () => blur.setAttribute("stdDeviation", `${proxy.b.toFixed(1)} 0`),
-                onComplete: () => ln.style.removeProperty("filter"),
-              },
-              0.12 + i * 0.12,
-            );
+          intro.fromTo(
+            ln,
+            { x: from * 180, opacity: 0, scaleX: 1.18, filter: "blur(14px)", transformOrigin: from < 0 ? "100% 50%" : "0% 50%" },
+            { x: 0, opacity: 1, scaleX: 1, filter: "blur(0px)", duration: 1.15, clearProps: "filter,transform,transformOrigin,willChange" },
+            0.12 + i * 0.12,
+          );
         });
         intro.from("[data-fade]", { y: 18, opacity: 0, duration: 1, stagger: 0.08 }, 0.5);
         intro.from("[data-block] > *", { y: 24, opacity: 0, duration: 0.9, stagger: 0.06 }, 0.7);
@@ -93,9 +85,9 @@ export function Hero() {
         defaults: { ease: "none" },
       });
       exit
-        .to("[data-line='0']", { xPercent: -18, opacity: 0, filter: "blur(10px)", duration: 0.2 }, 0)
-        .to("[data-line='1']", { xPercent: 14, opacity: 0, filter: "blur(10px)", duration: 0.2 }, 0.02)
-        .to("[data-line='2']", { xPercent: -12, opacity: 0, filter: "blur(10px)", duration: 0.2 }, 0.04)
+        .to("[data-line='0']", { xPercent: -18, opacity: 0, duration: 0.2 }, 0)
+        .to("[data-line='1']", { xPercent: 14, opacity: 0, duration: 0.2 }, 0.02)
+        .to("[data-line='2']", { xPercent: -12, opacity: 0, duration: 0.2 }, 0.04)
         .to("[data-fade]", { y: -30, opacity: 0, duration: 0.14, stagger: 0.01 }, 0)
         .to("[data-block]", { yPercent: 120, opacity: 0, duration: 0.14 }, 0)
         .fromTo("[data-hud]", { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.06 }, 0.16)
@@ -166,27 +158,43 @@ export function Hero() {
       const ins = hud.current?.querySelector<HTMLElement>("[data-insert]");
       const turn = hud.current?.querySelector<HTMLElement>("[data-turn]");
       const status = hud.current?.querySelector<HTMLElement>("[data-status]");
+      const last = { g: [] as string[], ins: "", turn: "", status: "" };
       const loop = () => {
+        raf = requestAnimationFrame(loop);
+        // fora da fase em que aparece, o HUD não toca no DOM
+        if (heroState.p < 0.12 || heroState.p > 0.84) return;
         heroState.gaps.forEach((g, i) => {
           const b = bars[i];
           if (!b) return;
-          const v = Math.max(-1, Math.min(1, g / 0.45));
-          b.style.setProperty("--g", v.toFixed(3));
+          const v = Math.max(-1, Math.min(1, g / 0.45)).toFixed(2);
+          if (last.g[i] === v) return;
+          last.g[i] = v;
+          b.style.setProperty("--g", v);
           b.toggleAttribute("data-ok", Math.abs(g) < 0.012);
         });
-        if (ins) ins.textContent = `${String(Math.round(heroState.insert * 100)).padStart(3, "0")}%`;
+        const insTxt = `${String(Math.round(heroState.insert * 100)).padStart(3, "0")}%`;
+        if (ins && insTxt !== last.ins) ins.textContent = last.ins = insTxt;
         const deg = Math.round((heroState.turn / (Math.PI / 2)) * 90);
-        if (turn) turn.textContent = `${String(deg).padStart(2, "0")}°`;
+        const turnTxt = `${String(deg).padStart(2, "0")}°`;
+        if (turn && turnTxt !== last.turn) turn.textContent = last.turn = turnTxt;
         if (status) {
           const open = deg >= 88;
-          status.textContent = open ? "Liberado" : heroState.gaps.every((g) => Math.abs(g) < 0.012) ? "Alinhado" : "Travado";
-          status.toggleAttribute("data-open", open);
+          const label = open ? "Liberado" : heroState.gaps.every((g) => Math.abs(g) < 0.012) ? "Alinhado" : "Travado";
+          if (label !== last.status) {
+            status.textContent = last.status = label;
+            status.toggleAttribute("data-open", open);
+          }
         }
-        raf = requestAnimationFrame(loop);
       };
-      raf = requestAnimationFrame(loop);
+      // o HUD só roda enquanto o hero está na tela
+      const io = new IntersectionObserver(([e]) => {
+        cancelAnimationFrame(raf);
+        if (e.isIntersecting) raf = requestAnimationFrame(loop);
+      });
+      if (track.current) io.observe(track.current);
 
       return () => {
+        io.disconnect();
         cancelAnimationFrame(raf);
         st.kill();
         if (services) {
@@ -235,23 +243,16 @@ export function Hero() {
           {hero.headline.join(" ")} — Chaveiro DCR, especialista em chaves e fechaduras.
         </h1>
 
-        <svg className={styles.filters} aria-hidden="true" width="0" height="0">
-          {[0, 1, 2].map((i) => (
-            <filter key={i} id={`mblur${i}`} x="-20%" y="-10%" width="140%" height="120%">
-              <feGaussianBlur data-mblur stdDeviation="0 0" />
-            </filter>
-          ))}
-        </svg>
 
         {/* ---------- camada de trás (o 3D passa na frente) ---------- */}
         <div className={styles.back} aria-hidden="true">
           <p data-line="0" className={`display ${styles.l1}`}>
-            <span data-in className="chrome" style={{ filter: reduce ? undefined : "url(#mblur0)" }}>
+            <span data-in className="chrome">
               {hero.headline[0]}
             </span>
           </p>
           <p data-line="2" className={`display ${styles.l3}`}>
-            <span data-in style={{ filter: reduce ? undefined : "url(#mblur2)" }}>
+            <span data-in>
               {hero.headline[2]}
             </span>
           </p>
@@ -280,7 +281,7 @@ export function Hero() {
           </div>
 
           <p data-line="1" className={`serif ${styles.l2}`} aria-hidden="true">
-            <span data-in style={{ filter: reduce ? undefined : "url(#mblur1)" }}>
+            <span data-in>
               {hero.headline[1]}
             </span>
           </p>

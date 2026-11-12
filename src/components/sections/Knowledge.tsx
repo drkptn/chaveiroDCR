@@ -32,6 +32,7 @@ export function Knowledge() {
   const reduce = useReducedMotion();
   const compact = useMedia("(max-width: 767px)");
   const near = useNearScreen(track, "300px");
+  const onScreen = useNearScreen(track, "0px");
   const [webgl, setWebgl] = useState<boolean | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -119,8 +120,16 @@ export function Knowledge() {
       }
       raf = requestAnimationFrame(loop);
     };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    // as cotas só são recalculadas com a seção na tela
+    const io = new IntersectionObserver(([e]) => {
+      cancelAnimationFrame(raf);
+      if (e.isIntersecting) raf = requestAnimationFrame(loop);
+    });
+    if (track.current) io.observe(track.current);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(raf);
+    };
   }, [compact]);
 
   const active = focus >= 0 ? cylinderParts[focus] : null;
@@ -142,7 +151,7 @@ export function Knowledge() {
       <div ref={track} className={`${styles.track} ${reduce ? styles.static : ""}`}>
         <div className={styles.stage}>
           <div className={`${styles.canvas} blueprint`} aria-hidden="true">
-            {mounted && webgl && <ExplodedScene active={near} compact={compact} />}
+            {mounted && webgl && <ExplodedScene active={onScreen} compact={compact} />}
             {webgl === false && <img className={styles.fallback} src={asset("/renders/gal-cilindro.webp")} alt="" />}
           </div>
 

@@ -1,9 +1,12 @@
 "use client";
 
 /**
- * "Lanterna" global — a posição do cursor vira uma fonte de luz.
- * Superfícies metálicas leem --lx/--ly (px, viewport) e o 3D lê `light`.
- * Em telas de toque, a luz passeia sozinha e acompanha a rolagem.
+ * "Lanterna" — a posição do cursor vira uma fonte de luz.
+ *
+ * Desempenho: nada é escrito no :root. O 3D e o shader leem o objeto `light`
+ * (só números, sem tocar no DOM). As superfícies metálicas marcadas com
+ * [data-lit] recebem --mx/--my LOCAIS, apenas a que está sob o cursor e apenas
+ * quando o mouse se move — sem recálculo de estilo da página inteira.
  */
 export const light = {
   /** posição normalizada -1..1 (suavizada) */
@@ -12,8 +15,6 @@ export const light = {
   /** px na viewport (suavizado) */
   px: 0,
   py: 0,
-  /** velocidade do ponteiro (px/frame, suavizada) */
-  speed: 0,
   active: false,
 };
 
@@ -22,14 +23,34 @@ let started = false;
 export function startLight() {
   if (started || typeof window === "undefined") return;
   started = true;
-  const root = document.documentElement;
   const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let tx = window.innerWidth * 0.68;
   let ty = window.innerHeight * 0.3;
+  let lx = tx;
+  let ly = ty;
   light.px = tx;
   light.py = ty;
-  let lastMove = 0;
+  let lastMove = -1e9;
+
+  // ---------- luz local nas superfícies [data-lit] ----------
+  let litEl: HTMLElement | null = null;
+  let pending: PointerEvent | null = null;
+  const applyLit = () => {
+    const e = pending;
+    pending = null;
+    if (!e) return;
+    const el = (e.target as Element | null)?.closest?.<HTMLElement>("[data-lit]") ?? null;
+    if (el !== litEl) {
+      litEl?.removeAttribute("data-lit-on");
+      litEl = el;
+      el?.setAttribute("data-lit-on", "");
+    }
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${(e.clientX - r.left).toFixed(0)}px`);
+    el.style.setProperty("--my", `${(e.clientY - r.top).toFixed(0)}px`);
+  };
 
   if (fine) {
     window.addEventListener(
@@ -40,33 +61,29 @@ export function startLight() {
         ty = e.clientY;
         lastMove = performance.now();
         light.active = true;
+        if (!pending) requestAnimationFrame(applyLit);
+        pending = e;
       },
       { passive: true },
     );
   }
 
-  let lx = tx;
-  let ly = ty;
+  // ---------- luz numérica para o 3D (sem DOM) ----------
   const tick = (t: number) => {
-    const idle = !fine || t - lastMove > 4000;
+    const idle = t - lastMove > 4000;
     if (idle && !reduce) {
-      // passeio lento em lemniscata + leve influência da rolagem
-      const s = t * 0.00018 + window.scrollY * 0.0009;
+      // passeio lento em lemniscata quando ninguém mexe o mouse (e no toque)
+      const s = t * 0.00018;
       tx = window.innerWidth * (0.5 + Math.sin(s) * 0.34);
       ty = window.innerHeight * (0.38 + Math.sin(s * 2) * 0.2);
     }
     const k = idle ? 0.04 : 0.16;
-    const dx = (tx - lx) * k;
-    const dy = (ty - ly) * k;
-    lx += dx;
-    ly += dy;
-    light.speed += (Math.hypot(dx, dy) - light.speed) * 0.2;
+    lx += (tx - lx) * k;
+    ly += (ty - ly) * k;
     light.px = lx;
     light.py = ly;
     light.x = (lx / window.innerWidth) * 2 - 1;
     light.y = -((ly / window.innerHeight) * 2 - 1);
-    root.style.setProperty("--lx", `${lx.toFixed(1)}px`);
-    root.style.setProperty("--ly", `${ly.toFixed(1)}px`);
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);

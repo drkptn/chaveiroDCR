@@ -8,22 +8,13 @@
   overflow: clip;
 }
 .rings {
+  /* anéis concêntricos estáticos (sem camada gigante girando) */
   position: absolute;
-  left: 28%;
-  top: 58%;
-  width: 1600px;
-  height: 1600px;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: repeating-radial-gradient(circle, rgb(121 233 255 / 0.05) 0 1px, transparent 1px 80px);
-  mask-image: radial-gradient(circle, #000 20%, transparent 60%);
+  inset: 0;
   pointer-events: none;
-  animation: ring-spin 120s linear infinite;
-}
-@keyframes ring-spin {
-  to {
-    rotate: 360deg;
-  }
+  background: repeating-radial-gradient(circle at 28% 58%, rgb(121 233 255 / 0.05) 0 1px, transparent 1px 80px);
+  -webkit-mask-image: radial-gradient(circle at 28% 58%, #000 10%, transparent 45%);
+  mask-image: radial-gradient(circle at 28% 58%, #000 10%, transparent 45%);
 }
 .head {
   display: grid;
@@ -460,8 +451,9 @@
     grid-template-columns: 1fr 1fr;
   }
   .rings {
-    left: 50%;
-    top: 40%;
+    background: repeating-radial-gradient(circle at 50% 40%, rgb(121 233 255 / 0.05) 0 1px, transparent 1px 80px);
+    -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 10%, transparent 55%);
+    mask-image: radial-gradient(circle at 50% 40%, #000 10%, transparent 55%);
   }
   .slots {
     grid-template-columns: repeat(2, minmax(0, 1fr));

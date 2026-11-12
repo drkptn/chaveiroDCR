@@ -1,0 +1,73 @@
+.scene {
+  position: relative;
+  aspect-ratio: 1;
+  perspective: 900px;
+}
+.tilt,
+.spin {
+  position: absolute;
+  inset: 8%;
+  transform-style: preserve-3d;
+}
+.tilt {
+  inset: 0;
+  transform: rotateX(var(--tiltX, 0deg)) rotateY(var(--tilt, 0deg));
+  transition: transform 0.8s var(--e-machine);
+}
+.spin {
+  animation: spin 11s linear infinite;
+}
+.layer {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  background: rgb(calc(90 * var(--shade)) calc(102 * var(--shade)) calc(114 * var(--shade)));
+  backface-visibility: visible;
+}
+/* faces cromadas: céu claro, horizonte escuro, reflexo que desliza no giro */
+.face {
+  background:
+    linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 0.85) 46%, transparent 58%) 0 0 / 300% 100% no-repeat,
+    linear-gradient(178deg, #ffffff 0%, #dfe6ec 30%, #8d98a4 47%, #20262d 51%, #6f7a85 60%, #dce3e9 85%, #f3f6f8 100%);
+  animation: sheen 11s linear infinite;
+}
+.floor {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -2%;
+  height: 10%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(0 217 255 / 0.22), transparent);
+  pointer-events: none;
+}
+@keyframes spin {
+  to {
+    transform: rotateY(360deg);
+  }
+}
+@keyframes sheen {
+  0% {
+    background-position: 120% 0, 0 0;
+  }
+  50% {
+    background-position: -20% 0, 0 0;
+  }
+  100% {
+    background-position: 120% 0, 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spin,
+  .face {
+    animation: none;
+  }
+  .spin {
+    transform: rotateY(-24deg);
+  }
+}

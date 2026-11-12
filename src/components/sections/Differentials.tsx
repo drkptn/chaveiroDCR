@@ -42,7 +42,7 @@ export function Differentials() {
 
         <div className={styles.grid}>
           {differentials.map((d, i) => (
-            <article key={d.title} className={`${styles.plate} ${styles[`p${i + 1}`]}`} data-plate>
+            <article key={d.title} className={`${styles.plate} ${styles[`p${i + 1}`]}`} data-plate data-lit>
               <div className={styles.rim}>
               <div className={styles.face}>
                 <Screw className={styles.s1} angle={i * 31} size={11} />

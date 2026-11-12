@@ -1,6 +1,7 @@
 import { Lamp } from "@/components/cursor/Lamp";
 import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
+import { SkipLink } from "@/components/layout/SkipLink";
 import { About } from "@/components/sections/About";
 import { Contact } from "@/components/sections/Contact";
 import { Differentials } from "@/components/sections/Differentials";
@@ -15,9 +16,7 @@ import { structuredData } from "@/lib/structured-data";
 export default function Home() {
   return (
     <>
-      <a className="skip-link" href="#servicos">
-        Pular para o conteúdo
-      </a>
+      <SkipLink />
       <Lamp />
       <Navbar />
       <main>

@@ -110,7 +110,7 @@
   clip-path: inherit;
   color: #11161c;
   background:
-    radial-gradient(360px 220px at var(--lx) var(--ly), rgb(255 255 255 / 0.55), transparent 70%) fixed,
+    radial-gradient(360px 220px at var(--mx, 30%) var(--my, 0%), rgb(255 255 255 / 0.55), transparent 70%),
     repeating-linear-gradient(90deg, rgb(0 0 0 / 0.035) 0 1px, transparent 1px 2px, rgb(255 255 255 / 0.05) 2px 3px),
     linear-gradient(175deg, #e9eef2 0%, #b9c2ca 45%, #a7b1bc 55%, #cfd7de 100%);
 }
@@ -157,16 +157,16 @@
   margin-top: 6px;
   font-size: 0.56rem;
   letter-spacing: 0.24em;
-  color: transparent;
-  background: radial-gradient(140px 140px at var(--lx) var(--ly), rgb(0 120 150 / 0.95), rgb(0 120 150 / 0.2) 60%, transparent 75%) fixed;
-  -webkit-background-clip: text;
-  background-clip: text;
+  color: rgb(0 90 115 / 0);
+  transition: color 0.6s;
+}
+[data-lit-on] .hidden {
+  color: rgb(0 105 135 / 0.9);
 }
 
 @media (hover: none) {
   .hidden {
     color: rgb(0 90 115 / 0.55);
-    background: none;
   }
 }
 

@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { light, startLight } from "@/lib/light";
+import { startLight } from "@/lib/light";
 import styles from "./Lamp.module.css";
 
 /**
  * O cursor é uma lanterna de chaveiro: um núcleo luminoso com um anel de bezel
  * (marcas de 15°) que ROLA conforme o movimento. Sobre botões e links o anel
  * vira um buraco de fechadura. Deixa um rastro de luz bem discreto.
- * Também liga a "luz global" (--lx/--ly) que ilumina as superfícies metálicas.
+ * Também liga a "lanterna" (lib/light) que ilumina o 3D e as superfícies [data-lit].
  */
 export function Lamp() {
   const core = useRef<HTMLDivElement>(null);
@@ -74,38 +74,48 @@ export function Lamp() {
     window.addEventListener("pointerup", onUp);
 
     let raf = 0;
+    let lastX = -1;
+    let lastY = -1;
+    let trailDirty = false;
     const tick = () => {
+      raf = requestAnimationFrame(tick);
       const dx = x - bx;
       const dy = y - by;
-      bx += dx * 0.2;
-      by += dy * 0.2;
-      // o anel rola: distância percorrida → rotação
-      roll += (Math.abs(dx) + Math.abs(dy)) * 0.9 * Math.sign(dx || 1) * 0.2;
-      if (core.current) core.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      if (bezel.current) {
-        bezel.current.style.transform = `translate3d(${bx}px, ${by}px, 0)`;
-        bezel.current.style.setProperty("--roll", `${roll.toFixed(1)}deg`);
-      }
-      // rastro
-      ctx.clearRect(0, 0, cv.width, cv.height);
-      if (!reduce) {
-        const now = performance.now();
-        while (pts.length && now - pts[0].t > 220) pts.shift();
-        if (pts.length > 2) {
-          ctx.lineCap = "round";
-          for (let i = 1; i < pts.length; i++) {
-            const a = 1 - (now - pts[i].t) / 220;
-            ctx.strokeStyle = `rgba(121, 233, 255, ${(a * 0.35).toFixed(3)})`;
-            ctx.lineWidth = a * 2.2 * dpr;
-            ctx.beginPath();
-            ctx.moveTo(pts[i - 1].x * dpr, pts[i - 1].y * dpr);
-            ctx.lineTo(pts[i].x * dpr, pts[i].y * dpr);
-            ctx.stroke();
-          }
+      // parado: nada a escrever no DOM nem a desenhar
+      const moving = Math.abs(dx) + Math.abs(dy) > 0.05 || x !== lastX || y !== lastY;
+      if (moving) {
+        bx += dx * 0.2;
+        by += dy * 0.2;
+        // o anel rola: distância percorrida → rotação
+        roll += (Math.abs(dx) + Math.abs(dy)) * 0.9 * Math.sign(dx || 1) * 0.2;
+        if (core.current && (x !== lastX || y !== lastY)) core.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+        if (bezel.current) {
+          bezel.current.style.transform = `translate3d(${bx.toFixed(1)}px, ${by.toFixed(1)}px, 0)`;
+          bezel.current.style.setProperty("--roll", `${roll.toFixed(1)}deg`);
         }
+        lastX = x;
+        lastY = y;
       }
-      void light;
-      raf = requestAnimationFrame(tick);
+      // rastro: só limpa/desenha quando existe rastro
+      if (reduce) return;
+      const now = performance.now();
+      while (pts.length && now - pts[0].t > 220) pts.shift();
+      if (!pts.length && !trailDirty) return;
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      trailDirty = false;
+      if (pts.length > 2) {
+        ctx.lineCap = "round";
+        for (let i = 1; i < pts.length; i++) {
+          const a = 1 - (now - pts[i].t) / 220;
+          ctx.strokeStyle = `rgba(121, 233, 255, ${(a * 0.35).toFixed(3)})`;
+          ctx.lineWidth = a * 2.2 * dpr;
+          ctx.beginPath();
+          ctx.moveTo(pts[i - 1].x * dpr, pts[i - 1].y * dpr);
+          ctx.lineTo(pts[i].x * dpr, pts[i].y * dpr);
+          ctx.stroke();
+        }
+        trailDirty = true;
+      }
     };
     raf = requestAnimationFrame(tick);
     return () => {

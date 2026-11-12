@@ -135,7 +135,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(260px 260px at var(--lx) var(--ly), rgb(255 255 255 / 0.08), transparent 70%) fixed;
+  background: radial-gradient(260px 260px at var(--mx, 50%) var(--my, 30%), rgb(255 255 255 / 0.08), transparent 70%);
   pointer-events: none;
 }
 .slot {

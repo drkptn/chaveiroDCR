@@ -55,13 +55,14 @@
 .shaftFill {
   fill: none;
   stroke: var(--cyan);
-  stroke-width: 2;
-  filter: drop-shadow(0 0 6px var(--cyan));
+  stroke-width: 2.5;
 }
 .gear {
   stroke: rgb(0 0 0 / 0.5);
   stroke-width: 0.8;
-  filter: drop-shadow(0 10px 14px rgb(0 0 0 / 0.6));
+}
+.shadow {
+  fill: url(#gearShadow);
 }
 .web {
   fill: rgb(9 12 17 / 0.35);

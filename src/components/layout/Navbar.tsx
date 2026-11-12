@@ -12,11 +12,23 @@ import styles from "./Navbar.module.css";
 
 export function goTo(id: string) {
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const behavior: ScrollBehavior = reduce ? "auto" : "smooth";
   if (id === "inicio") {
-    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    window.scrollTo({ top: 0, behavior });
     return;
   }
-  document.getElementById(id)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  // Serviços fica "atrás" do portal do hero: o destino é o fim do portal
+  // (fechadura totalmente aberta), não o topo da seção — senão cai no meio da animação.
+  if (id === "servicos") {
+    const s = document.getElementById("servicos");
+    const track = document.getElementById("inicio")?.parentElement;
+    if (s && track && parseFloat(getComputedStyle(s).marginTop) < 0) {
+      const y = track.getBoundingClientRect().top + window.scrollY + track.offsetHeight - window.innerHeight + 1;
+      window.scrollTo({ top: y, behavior });
+      return;
+    }
+  }
+  document.getElementById(id)?.scrollIntoView({ behavior, block: "start" });
 }
 
 export function Navbar() {

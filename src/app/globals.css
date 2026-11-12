@@ -49,9 +49,6 @@
   --nav-h: 76px;
   --chamfer: 14px;
 
-  /* Lanterna (atualizada via JS) */
-  --lx: 70vw;
-  --ly: 30vh;
 
   /* Curvas */
   --e-machine: cubic-bezier(0.19, 1, 0.22, 1);
@@ -242,13 +239,10 @@ body::after {
   font-weight: 500;
 }
 
-/* Texto cromado com reflexo que acompanha a lanterna (desktop) */
+/* Texto cromado: céu claro, horizonte escuro, chão refletido (estático = barato) */
 .chrome {
   color: var(--chrome);
-  background-image:
-    radial-gradient(240px 240px at var(--lx) var(--ly), rgb(255 255 255 / 0.9), rgb(121 233 255 / 0.12) 45%, transparent 70%),
-    var(--chrome-grad);
-  background-attachment: fixed, scroll;
+  background-image: var(--chrome-grad);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -289,6 +283,13 @@ body::after {
   }
 }
 
+/* celulares: sem camada de grão em tela cheia (economiza GPU) */
+@media (pointer: coarse) {
+  body::after {
+    display: none;
+  }
+}
+
 /* Cursor próprio apenas em ponteiro fino */
 @media (hover: hover) and (pointer: fine) {
   html.has-lamp,
@@ -318,4 +319,8 @@ body::after {
   -webkit-mask-size: var(--mw) var(--mh);
   mask-size: var(--mw) var(--mh);
   will-change: transform, mask-size;
+}
+/* durante o portal só o cabeçalho aparece pelo "buraco" — o resto nem é pintado */
+#servicos[data-portal] [data-cabinet] {
+  visibility: hidden;
 }
