@@ -1,0 +1,484 @@
+.contact {
+  position: relative;
+  padding: clamp(100px, 13vw, 190px) 0 clamp(80px, 10vw, 140px);
+  background:
+    radial-gradient(50% 55% at 28% 58%, rgb(57 120 168 / 0.22), transparent 70%),
+    radial-gradient(40% 40% at 80% 20%, rgb(196 160 98 / 0.06), transparent 70%),
+    var(--bg);
+  overflow: clip;
+}
+.rings {
+  position: absolute;
+  left: 28%;
+  top: 58%;
+  width: 1600px;
+  height: 1600px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, rgb(121 233 255 / 0.05) 0 1px, transparent 1px 80px);
+  mask-image: radial-gradient(circle, #000 20%, transparent 60%);
+  pointer-events: none;
+  animation: ring-spin 120s linear infinite;
+}
+@keyframes ring-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+.head {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  align-items: end;
+  gap: 30px;
+  margin: 26px 0 clamp(40px, 6vw, 80px);
+}
+.title {
+  display: grid;
+  line-height: 0.92;
+}
+.title :global(.display) {
+  font-size: clamp(2.2rem, 5.6vw, 5.8rem);
+}
+.title :global(.serif) {
+  font-size: clamp(2.4rem, 5.6vw, 6rem);
+  color: var(--ice);
+  text-shadow: 0 0 30px rgb(0 217 255 / 0.35);
+}
+.lead {
+  color: var(--text-2);
+  max-width: 40ch;
+  font-size: 1.05rem;
+}
+
+.panel {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(30px, 5vw, 80px);
+  align-items: center;
+}
+
+/* ---------- dial ---------- */
+.dialCol {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+.dial {
+  position: relative;
+  width: min(100%, 500px);
+  aspect-ratio: 1;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.dial:active {
+  cursor: grabbing;
+}
+.bezel {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 66%, rgb(0 0 0 / 0.6) 67%, transparent 69%),
+    repeating-conic-gradient(from 0deg, rgb(255 255 255 / 0.04) 0 0.6deg, rgb(0 0 0 / 0.06) 0.6deg 1.2deg),
+    conic-gradient(from 210deg, #f3f6f8, #727d89 18%, #2a3138 30%, #c9d2da 45%, #5a6570 62%, #e9eef2 78%, #8d98a4 90%, #f3f6f8);
+  box-shadow:
+    0 50px 90px -30px rgb(0 0 0 / 0.9),
+    0 0 0 1px rgb(0 0 0 / 0.6),
+    inset 0 0 0 2px rgb(255 255 255 / 0.25),
+    0 0 80px rgb(57 120 168 / 0.25);
+}
+.bezel svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.bezel line {
+  stroke: #1a2027;
+  stroke-width: 0.6;
+}
+.bezel line.major {
+  stroke-width: 1.2;
+}
+.bezel text {
+  font-family: var(--f-mono);
+  font-size: 6.5px;
+  fill: #1a2027;
+  text-anchor: middle;
+}
+.knob {
+  --a: 0deg;
+  position: absolute;
+  inset: 17%;
+  border-radius: 50%;
+  rotate: var(--a);
+  background:
+    radial-gradient(circle at 50% 50%, transparent 62%, rgb(0 0 0 / 0.5) 63%, transparent 66%),
+    repeating-conic-gradient(from 0deg, #3a434d 0 3deg, #c9d2da 3deg 4.5deg, #3a434d 4.5deg 6deg),
+    #5a6570;
+  mask: radial-gradient(circle, #000 0 92%, transparent 92.5%);
+  box-shadow: 0 0 0 2px #0b0f14;
+}
+.knob::before {
+  /* face lisa do botão */
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 52%, rgb(255 255 255 / 0.12) 53%, transparent 55%),
+    conic-gradient(from 160deg, #e9eef2, #6f7a85 20%, #20262d 35%, #b9c2ca 55%, #4a5560 72%, #dce3e9 90%, #e9eef2);
+  box-shadow:
+    inset 0 2px 6px rgb(255 255 255 / 0.4),
+    inset 0 -8px 24px rgb(0 0 0 / 0.55),
+    0 8px 20px rgb(0 0 0 / 0.6);
+}
+.pointer {
+  position: absolute;
+  left: 50%;
+  top: 9%;
+  width: 14px;
+  height: 22px;
+  translate: -50% 0;
+  background: var(--cyan);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  filter: drop-shadow(0 0 6px var(--cyan));
+  z-index: 1;
+}
+.core {
+  position: absolute;
+  inset: 39%;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 40% 35%, #fff1c8, #c4a062 40%, #5e4b43 85%);
+  box-shadow:
+    0 0 0 4px #0b0f14,
+    0 0 0 6px rgb(220 227 233 / 0.5),
+    inset 0 -4px 10px rgb(0 0 0 / 0.5);
+  transition: box-shadow 0.5s;
+}
+.coreOn {
+  box-shadow:
+    0 0 0 4px #0b0f14,
+    0 0 0 6px var(--cyan),
+    0 0 40px 6px rgb(0 217 255 / 0.55),
+    inset 0 -4px 10px rgb(0 0 0 / 0.5);
+}
+.keyway {
+  width: 16%;
+  height: 58%;
+  background: #0b0f14;
+  clip-path: polygon(30% 0, 70% 0, 70% 30%, 50% 40%, 80% 52%, 80% 100%, 20% 100%, 20% 62%, 45% 50%, 30% 38%);
+  transition: rotate 0.8s var(--e-latch);
+}
+.coreOn .keyway {
+  rotate: 90deg;
+}
+.pulse {
+  animation: pulse 0.9s var(--e-machine);
+}
+@keyframes pulse {
+  0% {
+    scale: 1;
+  }
+  30% {
+    scale: 1.08;
+  }
+  100% {
+    scale: 1;
+  }
+}
+.led {
+  position: absolute;
+  right: 14%;
+  top: 14%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #5a2a20;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.6);
+  transition: background 0.4s, box-shadow 0.4s;
+}
+.ledOn {
+  background: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan);
+}
+.dialHint {
+  font-size: 0.58rem;
+  color: var(--text-3);
+}
+
+/* ---------- opções ---------- */
+.side {
+  display: grid;
+  gap: 22px;
+}
+.options {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.options legend,
+.console label {
+  margin-bottom: 12px;
+  font-size: 0.62rem;
+  color: var(--ice);
+}
+.optList {
+  display: grid;
+  gap: 6px;
+}
+.opt {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px 1fr 18px;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 16px 0 12px;
+  text-align: left;
+  font-size: 0.98rem;
+  color: var(--text-2);
+  border: 1px solid var(--line);
+  background: linear-gradient(90deg, rgb(18 23 30 / 0.85), rgb(12 16 22 / 0.6));
+  transition:
+    color 0.3s,
+    border-color 0.3s,
+    background 0.3s,
+    transform 0.4s var(--e-machine);
+}
+.opt::before {
+  /* linha de luz que liga a opção ao dial */
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  width: clamp(20px, 5vw, 80px);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s var(--e-machine);
+  box-shadow: 0 0 8px var(--cyan);
+}
+.optCode {
+  display: grid;
+  place-items: center;
+  height: 28px;
+  font-size: 0.6rem;
+  color: var(--text-3);
+  border: 1px solid var(--line-2);
+}
+.optPin {
+  width: 8px;
+  height: 18px;
+  justify-self: end;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #4a5560, #8d98a4, #4a5560);
+  transition:
+    background 0.3s,
+    translate 0.4s var(--e-latch);
+}
+@media (hover: hover) {
+  .opt:hover {
+    color: var(--text);
+    border-color: var(--line-2);
+    transform: translateX(-4px);
+  }
+}
+.optOn {
+  color: var(--mirror) !important;
+  border-color: rgb(0 217 255 / 0.55) !important;
+  background: linear-gradient(90deg, rgb(0 217 255 / 0.1), rgb(12 16 22 / 0.6));
+}
+.optOn::before {
+  transform: scaleX(1);
+}
+.optOn .optCode {
+  color: var(--space);
+  background: var(--ice);
+  border-color: var(--ice);
+}
+.optOn .optPin {
+  background: var(--cyan);
+  translate: 0 -4px;
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+/* ---------- console ---------- */
+.console {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid var(--line-2);
+  background: linear-gradient(180deg, rgb(13 18 25 / 0.85), rgb(9 12 17 / 0.85));
+  clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+}
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text-2);
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f0b36a;
+  box-shadow: 0 0 8px rgb(240 179 106 / 0.6);
+}
+.dotOn {
+  background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan);
+}
+.opt2 {
+  color: var(--text-3);
+}
+.console textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 84px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: rgb(5 7 10 / 0.7);
+  border: 1px solid var(--line-2);
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.console textarea:focus {
+  border-color: var(--ice);
+  box-shadow: 0 0 0 3px rgb(121 233 255 / 0.15);
+}
+.console textarea::placeholder {
+  color: var(--text-3);
+}
+.count {
+  justify-self: end;
+  font-size: 0.56rem;
+  color: var(--text-3);
+}
+.ticket {
+  position: relative;
+  padding: 14px 16px 14px 18px;
+  background:
+    linear-gradient(90deg, rgb(121 233 255 / 0.35) 0 2px, transparent 2px),
+    repeating-linear-gradient(0deg, rgb(255 255 255 / 0.02) 0 1px, transparent 1px 22px),
+    rgb(5 7 10 / 0.6);
+  margin-bottom: 8px;
+}
+.ticket :global(.mono) {
+  font-size: 0.56rem;
+  color: var(--text-3);
+}
+.ticket p {
+  margin-top: 6px;
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.go {
+  width: 100%;
+}
+.go > span {
+  width: 100%;
+}
+.goOn {
+  animation: ready 2.4s ease-in-out infinite;
+}
+@keyframes ready {
+  0%,
+  100% {
+    filter: drop-shadow(0 10px 22px rgb(0 0 0 / 0.55)) drop-shadow(0 0 0 rgb(0 217 255 / 0));
+  }
+  50% {
+    filter: drop-shadow(0 10px 22px rgb(0 0 0 / 0.55)) drop-shadow(0 0 16px rgb(0 217 255 / 0.55));
+  }
+}
+
+/* ---------- informações ---------- */
+.slots {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: clamp(40px, 6vw, 80px);
+  border-top: 1px solid var(--line-2);
+}
+.slots li {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 20px 18px;
+  border-left: 1px solid var(--line);
+  color: var(--ice);
+}
+.slots li:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+.slots :global(.mono) {
+  font-size: 0.56rem;
+  color: var(--text-3);
+}
+.slots b,
+.slots a {
+  font-weight: 500;
+  color: var(--text);
+  font-size: 0.98rem;
+}
+.slots a:hover {
+  color: var(--ice);
+}
+.slots em {
+  font-style: normal;
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  color: var(--text-3);
+}
+
+@media (max-width: 1023px) {
+  .head,
+  .panel {
+    grid-template-columns: 1fr;
+  }
+  .dial {
+    width: min(78vw, 380px);
+  }
+  .opt::before {
+    display: none;
+  }
+  .optList {
+    grid-template-columns: 1fr 1fr;
+  }
+  .rings {
+    left: 50%;
+    top: 40%;
+  }
+  .slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .slots li:nth-child(odd) {
+    border-left: 0;
+    padding-left: 0;
+  }
+}
+@media (max-width: 560px) {
+  .optList {
+    grid-template-columns: 1fr;
+  }
+  .opt {
+    font-size: 0.92rem;
+  }
+  .console {
+    padding: 16px 14px;
+  }
+}

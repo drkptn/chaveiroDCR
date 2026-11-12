@@ -1,0 +1,32 @@
+.text {
+  position: relative;
+}
+.line {
+  position: relative;
+  will-change: clip-path, filter;
+}
+.head {
+  position: absolute;
+  top: -8%;
+  bottom: -8%;
+  width: 3px;
+  margin-left: -1.5px;
+  background: linear-gradient(180deg, transparent, #e9fbff 20%, #ffffff 50%, #e9fbff 80%, transparent);
+  box-shadow:
+    0 0 12px 3px rgb(0 217 255 / 0.9),
+    0 0 40px 10px rgb(0 217 255 / 0.35);
+  pointer-events: none;
+}
+.head::after {
+  /* faíscas */
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  translate: 0 -50%;
+  background: radial-gradient(circle, rgb(255 255 255 / 0.9) 0 2px, transparent 3px) 0 0 / 7px 7px;
+  mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+  opacity: 0.6;
+}

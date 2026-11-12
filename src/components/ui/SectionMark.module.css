@@ -1,0 +1,61 @@
+.mark {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  color: var(--text-2);
+}
+.center {
+  justify-content: center;
+}
+.balloon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+.balloon svg {
+  position: absolute;
+  inset: 0;
+  fill: none;
+  stroke: var(--ice);
+  stroke-width: 1;
+  opacity: 0.85;
+}
+.balloon b {
+  position: relative;
+  font-family: var(--f-display);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--mirror);
+}
+.leader {
+  width: clamp(28px, 6vw, 72px);
+  height: 1px;
+  background: linear-gradient(90deg, var(--ice), var(--line-2));
+  margin-right: 12px;
+}
+.label {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.label :global(.mono) {
+  font-size: 0.62rem;
+  color: var(--ice);
+  opacity: 0.85;
+}
+.name {
+  font-family: var(--f-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.sheet {
+  margin-left: auto;
+  color: var(--text-3);
+  font-size: 0.62rem;
+}

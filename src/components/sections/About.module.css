@@ -1,0 +1,231 @@
+.about {
+  position: relative;
+  padding: clamp(100px, 13vw, 190px) 0;
+  background:
+    radial-gradient(40% 60% at 25% 50%, rgb(196 160 98 / 0.09), transparent 70%),
+    radial-gradient(50% 50% at 80% 30%, rgb(57 120 168 / 0.1), transparent 70%),
+    var(--bg);
+  overflow: clip;
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(40px, 7vw, 120px);
+  align-items: center;
+}
+.portraitCol {
+  position: relative;
+  padding: 40px 40px 0 0;
+}
+/* cotas de desenho técnico ao redor da moldura */
+.cotaTop,
+.cotaSide {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ice);
+}
+.cotaTop {
+  left: 0;
+  right: 40px;
+  top: 6px;
+  height: 20px;
+  transform-origin: 50% 50%;
+  border-left: 1px solid rgb(121 233 255 / 0.5);
+  border-right: 1px solid rgb(121 233 255 / 0.5);
+  background: linear-gradient(rgb(121 233 255 / 0.5), rgb(121 233 255 / 0.5)) 0 50% / 100% 1px no-repeat;
+}
+.cotaSide {
+  top: 40px;
+  bottom: 0;
+  right: 6px;
+  width: 20px;
+  border-top: 1px solid rgb(121 233 255 / 0.5);
+  border-bottom: 1px solid rgb(121 233 255 / 0.5);
+  background: linear-gradient(rgb(121 233 255 / 0.5), rgb(121 233 255 / 0.5)) 50% 0 / 1px 100% no-repeat;
+}
+.cotaTop span,
+.cotaSide span {
+  padding: 2px 8px;
+  font-size: 0.56rem;
+  background: var(--bg);
+}
+.cotaSide span {
+  writing-mode: vertical-rl;
+  padding: 8px 2px;
+}
+
+.frame {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  padding: 18px;
+}
+.barT,
+.barB,
+.barL,
+.barR {
+  position: absolute;
+  background: linear-gradient(180deg, #ffffff 0%, #c9d2da 25%, #4a5560 50%, #8d98a4 70%, #e9eef2 100%);
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.55);
+}
+.barT,
+.barB {
+  left: 0;
+  right: 0;
+  height: 18px;
+}
+.barT {
+  top: 0;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 18px) 100%, 18px 100%);
+}
+.barB {
+  bottom: 0;
+  clip-path: polygon(18px 0, calc(100% - 18px) 0, 100% 100%, 0 100%);
+}
+.barL,
+.barR {
+  top: 0;
+  bottom: 0;
+  width: 18px;
+  background: linear-gradient(90deg, #ffffff 0%, #c9d2da 25%, #4a5560 50%, #8d98a4 70%, #e9eef2 100%);
+}
+.barL {
+  left: 0;
+  clip-path: polygon(0 0, 100% 18px, 100% calc(100% - 18px), 0 100%);
+}
+.barR {
+  right: 0;
+  clip-path: polygon(0 18px, 100% 0, 100% 100%, 0 calc(100% - 18px));
+}
+.s1 {
+  left: 2px;
+  top: 2px;
+  z-index: 2;
+}
+.s2 {
+  right: 2px;
+  top: 2px;
+  z-index: 2;
+}
+.s3 {
+  left: 2px;
+  bottom: 2px;
+  z-index: 2;
+}
+.s4 {
+  right: 2px;
+  bottom: 2px;
+  z-index: 2;
+}
+.photo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: radial-gradient(80% 70% at 50% 30%, #1a2532, #0b1017 70%);
+  box-shadow: inset 0 0 40px rgb(0 0 0 / 0.8);
+}
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(260px 260px at var(--lx) var(--ly), rgb(255 255 255 / 0.08), transparent 70%) fixed;
+  pointer-events: none;
+}
+.slot {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 18px;
+  height: 100%;
+  padding: 24px;
+  text-align: center;
+}
+.slot p {
+  max-width: 24ch;
+  font-size: 0.6rem;
+  color: var(--text-3);
+}
+.emblem {
+  width: 70%;
+}
+
+.copy {
+  display: grid;
+  gap: 26px;
+}
+.title {
+  display: grid;
+  line-height: 0.95;
+}
+.title :global(.display) {
+  font-size: clamp(1.9rem, 4.2vw, 4.4rem);
+}
+.title :global(.serif) {
+  font-size: clamp(1.9rem, 3.8vw, 3.9rem);
+  color: var(--mirror);
+  margin-top: 6px;
+}
+.text {
+  max-width: 56ch;
+  font-size: clamp(1rem, 1.2vw, 1.12rem);
+  line-height: 1.75;
+  color: var(--text-2);
+}
+.sign {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.signLine {
+  width: 64px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--brass), transparent);
+}
+.signName {
+  font-family: var(--f-serif);
+  font-style: italic;
+  font-size: 1.6rem;
+  color: var(--brass-hi);
+  line-height: 1;
+}
+.sign :global(.mono) {
+  font-size: 0.6rem;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+.values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.values li {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-2);
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.values :global(.mono) {
+  color: var(--ice);
+  font-size: 0.58rem;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .portraitCol {
+    max-width: 440px;
+    width: 100%;
+    justify-self: center;
+  }
+}

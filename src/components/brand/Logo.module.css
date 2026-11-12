@@ -1,0 +1,37 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+}
+.symbol {
+  flex: none;
+  filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.6));
+  transition: transform 0.6s var(--e-latch);
+}
+.word {
+  display: flex;
+  flex-direction: column;
+  line-height: 0.9;
+}
+.small {
+  font-family: var(--f-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--ice);
+}
+.big {
+  font-family: var(--f-display);
+  font-stretch: 125%;
+  font-weight: 800;
+  font-size: 1.32rem;
+  letter-spacing: 0.02em;
+  background: var(--chrome-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.compact .big {
+  font-size: 1.12rem;
+}

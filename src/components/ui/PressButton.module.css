@@ -1,0 +1,183 @@
+.btn {
+  --c: 12px;
+  position: relative;
+  display: inline-flex;
+  transition:
+    transform 0.25s var(--e-machine),
+    filter 0.3s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  isolation: isolate;
+}
+.frame {
+  display: inline-flex;
+  width: 100%;
+  padding: 1.5px;
+  clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+}
+.cap {
+  position: relative;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 52px;
+  padding: 0 22px 0 26px;
+  clip-path: inherit;
+  font-family: var(--f-mono);
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition:
+    transform 0.18s var(--e-machine),
+    box-shadow 0.2s;
+}
+.lg .cap {
+  min-height: 60px;
+  padding: 0 26px 0 32px;
+  font-size: 0.84rem;
+}
+.label {
+  position: relative;
+  z-index: 1;
+}
+.icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-right: -6px;
+  border-radius: 50%;
+}
+
+/* ---------- cromo (principal) ---------- */
+.chrome .frame {
+  background: linear-gradient(160deg, #ffffff 0%, #8d98a4 40%, #2a3138 60%, #c5cdd5 100%);
+}
+.chrome {
+  filter: drop-shadow(0 10px 22px rgb(0 0 0 / 0.55)) drop-shadow(0 0 0 rgb(0 217 255 / 0));
+}
+.chrome .cap {
+  color: #0b0f14;
+  background:
+    radial-gradient(160px 80px at var(--lx) var(--ly), rgb(255 255 255 / 0.95), transparent 70%) fixed,
+    linear-gradient(180deg, #fbfdff 0%, #dfe6ec 34%, #9aa5b0 50%, #6f7a85 52%, #c2cbd3 78%, #eef2f5 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset 0 -2px 0 rgb(0 0 0 / 0.25);
+}
+.chrome .icon {
+  background: radial-gradient(circle at 40% 35%, #20262d, #07090c);
+  color: var(--ice);
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.8),
+    0 1px 0 rgb(255 255 255 / 0.7);
+}
+
+/* ---------- aço (secundário) ---------- */
+.steel .frame {
+  background: linear-gradient(160deg, rgb(220 227 233 / 0.6), rgb(114 125 137 / 0.25) 45%, rgb(220 227 233 / 0.5));
+}
+.steel .cap {
+  color: var(--text);
+  background:
+    radial-gradient(220px 120px at var(--lx) var(--ly), rgb(121 233 255 / 0.12), transparent 70%) fixed,
+    linear-gradient(180deg, #1a2029, #0e1217);
+}
+.steel .icon {
+  color: var(--chrome);
+  border: 1px solid var(--line-2);
+}
+
+/* ---------- fantasma ---------- */
+.ghost .frame {
+  background: var(--line-2);
+}
+.ghost .cap {
+  color: var(--text);
+  background: rgb(9 12 17 / 0.82);
+  backdrop-filter: blur(10px);
+}
+.ghost .icon {
+  color: var(--ice);
+}
+
+/* ---------- interação ---------- */
+@media (hover: hover) {
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+  .chrome:hover {
+    filter: drop-shadow(0 14px 26px rgb(0 0 0 / 0.6)) drop-shadow(0 0 14px rgb(0 217 255 / 0.35));
+  }
+  .btn:hover :global(.kt-key) {
+    animation: key-insert 0.7s var(--e-machine) forwards;
+  }
+  .btn:hover :global(.kt-hole) {
+    stroke: var(--cyan);
+    filter: drop-shadow(0 0 3px var(--cyan));
+  }
+}
+.btn:focus-visible :global(.kt-key) {
+  animation: key-insert 0.7s var(--e-machine) forwards;
+}
+.btn:active .cap {
+  transform: translateY(2px) scale(0.985);
+  box-shadow:
+    inset 0 2px 6px rgb(0 0 0 / 0.45),
+    inset 0 -1px 0 rgb(255 255 255 / 0.3);
+}
+.btn:focus-visible {
+  outline: none;
+}
+.btn:focus-visible .cap {
+  outline: 2px solid var(--ice);
+  outline-offset: -5px;
+}
+.btn[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+:global(.key-turn) :global(.kt-key) {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+:global(.key-turn) :global(.kt-hole) {
+  transition:
+    stroke 0.3s,
+    filter 0.3s;
+}
+
+@keyframes key-insert {
+  0% {
+    transform: translateY(0) scaleX(1);
+  }
+  45% {
+    transform: translateY(3px) scaleX(1);
+  }
+  70% {
+    transform: translateY(3px) scaleX(0.15);
+  }
+  100% {
+    transform: translateY(3px) scaleX(-1);
+  }
+}
+
+@media (max-width: 480px) {
+  .cap {
+    padding: 0 16px 0 20px;
+    gap: 10px;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+  }
+  .lg .cap {
+    min-height: 56px;
+    padding: 0 18px 0 22px;
+    font-size: 0.74rem;
+  }
+}
