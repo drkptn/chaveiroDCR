@@ -36,7 +36,7 @@ export const site: SiteConfig = {
     "Conheça o Chaveiro DCR. Serviços especializados em cópias de chaves, fechaduras e soluções de segurança. Entre em contato e solicite atendimento.",
 
   /** URL pública do site (usada no SEO/sitemap). Ex.: "https://chaveirodcr.com.br" */
-  url: "https://drkptn.github.io/chaveiroDCR",
+  url: "https://chaveiro-dcr.vercel.app",
 
   contact: {
     /** WhatsApp com DDI + DDD, só números. Ex.: "5511999998888" */
