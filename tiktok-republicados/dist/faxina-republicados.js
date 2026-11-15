@@ -1,5 +1,5 @@
 /*!
- * Faxina de Republicados v1.0.0
+ * Faxina de Republicados v1.1.0
  * Remove os seus republicados (reposts) do TikTok, um por um, clicando nos
  * mesmos botões que você clicaria. Roda só dentro da sua aba do tiktok.com:
  * não pede senha, não guarda nada fora do navegador e não manda dados pra ninguém.
@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   // Já aberto nesta aba? Só mostra o painel de novo.
   var existing = document.getElementById('trr-root');
@@ -746,11 +746,28 @@
 
   function UserError(msg) { this.message = msg; }
 
+  // Celular: pede pro navegador não apagar a tela enquanto a faxina roda.
+  var wakeLock = null;
+  async function keepAwake(on) {
+    try {
+      if (on && !wakeLock && navigator.wakeLock && document.visibilityState === 'visible') {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', function () { wakeLock = null; });
+      } else if (!on && wakeLock) {
+        var wl = wakeLock; wakeLock = null; await wl.release();
+      }
+    } catch (e) { wakeLock = null; }
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (running && document.visibilityState === 'visible') keepAwake(true);
+  });
+
   async function run() {
     if (running) return;
     running = true; paused = false; stopRequested = false;
     runRemoved = 0; consecutiveFails = 0;
     updateButtons();
+    keepAwake(true);
     setStatus('Começando a faxina 🧹', 'run');
     log('— Início (v' + VERSION + ', velocidade ' + speed().label + (Number(settings.limit) ? ', limite ' + settings.limit : '') + ')');
     var zeroPasses = 0;
@@ -787,6 +804,7 @@
 
   function finish(msg, kind) {
     running = false; paused = false; stopRequested = false;
+    keepAwake(false);
     persist({ resume: false });
     log('— Fim: ' + msg);
     setStatus(msg, kind || 'idle');
@@ -938,7 +956,7 @@
           h('button', { class: 'lk', type: 'button', text: 'Zerar contadores', on: { click: resetStats } })
         ),
         ui.log,
-        h('div', { class: 'note', text: 'Deixa essa aba aberta e visível enquanto roda. Pode usar outra janela à vontade.' })
+        h('div', { class: 'note', text: 'Deixa essa aba aberta e visível enquanto roda. No celular, não deixa a tela apagar.' })
       )
     );
 
@@ -951,6 +969,31 @@
     (document.body || document.documentElement).appendChild(host);
     renderSpeed();
     updateButtons();
+    fitToScreen();
+    addEventListener('resize', fitToScreen);
+    addEventListener('orientationchange', function () { setTimeout(fitToScreen, 300); });
+  }
+
+  function isTouch() {
+    try { return matchMedia('(pointer: coarse)').matches; } catch (e) { return false; }
+  }
+
+  // No celular em "site para computador" a página fica larga (~980px) e encolhida.
+  // Aumenta o painel na mesma proporção pra ele continuar do tamanho de um dedo.
+  function fitToScreen() {
+    if (!ui.panel) return;
+    var touch = isTouch();
+    var sw = screen.width || 0;
+    var layoutW = document.documentElement.clientWidth || innerWidth;
+    var z = touch && sw ? Math.max(1, Math.min(3, layoutW / sw)) : 1;
+    var w = touch && sw ? Math.min(340, sw - 24) : 340;
+    [ui.panel, ui.pill].forEach(function (el) { el.style.zoom = z === 1 ? '' : String(Math.round(z * 100) / 100); });
+    ui.panel.style.width = w + 'px';
+    ui.panel.style.maxHeight = z === 1 ? '' : 'calc((100vh - 32px) / ' + z + ')';
+  }
+
+  function mobileLayout() {
+    return isTouch() && (document.documentElement.clientWidth || innerWidth) < 700;
   }
 
   function showPanel(open) {
@@ -1064,6 +1107,10 @@
   } else {
     showPanel(true);
     log('Painel aberto (v' + VERSION + '). Ajusta a velocidade e clica em Começar.');
+    if (mobileLayout()) {
+      setStatus('Tá no celular? Ativa "Site para computador" no menu do navegador e abre a Faxina de novo. A versão de celular do TikTok esconde a aba Republicados.', 'warn');
+      log('Página na versão de celular: ative "Site para computador".');
+    }
     if (stats.removed) log('Contadores desta aba: ' + stats.removed + ' removidos até agora.');
   }
 })();

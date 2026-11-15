@@ -123,6 +123,10 @@
   .bookmarklet:active { cursor: grabbing; }
   .hint { font-size: 0.88rem; color: var(--muted); }
   .hint[data-tone="ok"] { color: var(--fresh); font-weight: 600; }
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1.5px solid var(--line); border-radius: 14px; align-self: flex-start; }
+  .seg-btn { font: 600 0.9rem/1 var(--font-body); color: var(--ink); background: transparent; border: 0; border-radius: 10px; padding: 10px 14px; cursor: pointer; }
+  .seg-btn[aria-pressed="true"] { background: var(--code-bg); color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+  textarea.manual { flex-basis: 100%; height: 120px; white-space: pre-wrap; word-break: break-all; }
   .note { font-size: 0.92rem; color: var(--muted); padding-top: 4px; border-top: 1px dashed var(--line); }
 
   ol.flow { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 8px; max-width: 70ch; }
@@ -179,15 +183,51 @@
 
   <section aria-labelledby="modo-titulo">
     <div class="section-head"><h2 id="modo-titulo">Modo de usar</h2><span>escolha um jeito</span></div>
-    <p class="intro">Os três jeitos fazem a mesma faxina; muda só como o painel abre. Use no computador (Chrome, Edge, Brave ou Firefox), logado na sua conta em tiktok.com.</p>
+    <p class="intro">Todos os jeitos fazem a mesma faxina; muda só como o painel abre. No app do TikTok não dá pra rodar nada, então é pelo navegador, logado na sua conta no site do TikTok.</p>
 
     <div class="tabs" role="tablist" aria-label="Jeito de abrir o painel">
-      <button class="tab" role="tab" id="t-fav" aria-controls="p-fav" aria-selected="true" type="button">Favorito <small>· mais fácil</small></button>
+      <button class="tab" role="tab" id="t-cel" aria-controls="p-cel" aria-selected="true" type="button">Celular</button>
+      <button class="tab" role="tab" id="t-fav" aria-controls="p-fav" aria-selected="false" tabindex="-1" type="button">Computador</button>
       <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1" type="button">Console</button>
       <button class="tab" role="tab" id="t-ext" aria-controls="p-ext" aria-selected="false" tabindex="-1" type="button">Extensão do Chrome</button>
     </div>
 
-    <div class="panel" role="tabpanel" id="p-fav" aria-labelledby="t-fav">
+    <div class="panel" role="tabpanel" id="p-cel" aria-labelledby="t-cel">
+      <div class="seg" role="group" aria-label="Seu celular">
+        <button type="button" class="seg-btn" id="os-android" aria-pressed="true">Android · Chrome</button>
+        <button type="button" class="seg-btn" id="os-iphone" aria-pressed="false">iPhone · Safari</button>
+      </div>
+
+      <ol class="steps" id="cel-android">
+        <li><div>
+          <p>Copie o código do favorito:</p>
+          <div class="row"><button class="btn copy-bm" type="button" data-hint="cel-a-hint">Copiar código do favorito</button><span class="hint" id="cel-a-hint" role="status"></span></div>
+        </div></li>
+        <li><div><p>No <b>Chrome</b>, abra qualquer site e toque em <b>⋮</b> → <b>☆</b> (a estrela). Vai aparecer "Favorito adicionado": toque em <b>Editar</b>.</p>
+          <p class="hint">Se o aviso sumiu: ⋮ → Favoritos → toque e segure o favorito → Editar.</p></div></li>
+        <li><div><p>Troque o nome por <b>faxina</b>. No campo do endereço (URL), apague tudo, cole o código e volte pra salvar.</p></div></li>
+        <li><div><p>Abra <a href="https://www.tiktok.com/" target="_blank" rel="noopener">tiktok.com</a> no Chrome e entre na sua conta. Depois toque em <b>⋮</b> e marque <b>Site para computador</b>.</p></div></li>
+        <li><div><p>Toque na barra de endereço, digite <b>faxina</b> e toque na sugestão que tem a estrela <b>☆</b> (não a de pesquisar).</p>
+          <p class="hint">Abrir pela lista de Favoritos não funciona no Chrome do Android; tem que ser pela barra de endereço.</p></div></li>
+        <li><div><p>O painel aparece no canto. Coloque <b>Parar depois de 3</b>, toque em <b>Começar</b> e confira se os 3 sumiram do seu perfil. Deu certo? Volte pra 0 e toque em Começar de novo.</p></div></li>
+      </ol>
+
+      <ol class="steps" id="cel-iphone" hidden>
+        <li><div>
+          <p>Copie o código do favorito:</p>
+          <div class="row"><button class="btn copy-bm" type="button" data-hint="cel-i-hint">Copiar código do favorito</button><span class="hint" id="cel-i-hint" role="status"></span></div>
+        </div></li>
+        <li><div><p>No <b>Safari</b>, abra qualquer site, toque em <b>Compartilhar</b> (o quadrado com a seta) → <b>Adicionar Favorito</b> → <b>Salvar</b>.</p></div></li>
+        <li><div><p>Toque no ícone do <b>livro</b> (Favoritos) → <b>Editar</b> → toque no favorito que você acabou de criar. Troque o nome por <b>Faxina</b>, apague o endereço, cole o código e toque em <b>OK</b>.</p></div></li>
+        <li><div><p>Abra <a href="https://www.tiktok.com/" target="_blank" rel="noopener">tiktok.com</a> no Safari e entre na sua conta. Toque no ícone à esquerda do endereço (<b>aA</b>) → <b>Solicitar Site para Computador</b>.</p></div></li>
+        <li><div><p>Toque no <b>livro</b> (Favoritos) → <b>Faxina</b>.</p></div></li>
+        <li><div><p>O painel aparece no canto. Coloque <b>Parar depois de 3</b>, toque em <b>Começar</b> e confira se os 3 sumiram do seu perfil. Deu certo? Volte pra 0 e toque em Começar de novo.</p></div></li>
+      </ol>
+
+      <p class="note">Por que "site para computador"? A versão de celular do site do TikTok esconde a aba Republicados e vive mandando abrir o app. No modo computador a página fica miudinha, mas o painel se ajusta pro tamanho do dedo. Deixe o celular <b>com a tela ligada</b> e o navegador aberto enquanto roda: se a tela apagar, a faxina pausa.</p>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-fav" aria-labelledby="t-fav" hidden>
       <ol class="steps">
         <li><div><p>Mostre a barra de favoritos: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> (no Mac, <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>).</p></div></li>
         <li><div>
@@ -250,8 +290,8 @@
     <ul>
       <li>Teste com <b>Parar depois de 3</b> antes de mandar tudo.</li>
       <li>Prefira a velocidade <b>Normal</b> ou <b>Tranquilo</b>. Ritmo muito rápido pode fazer o TikTok pedir captcha ou segurar suas ações por um tempo. Se o captcha aparecer, resolva que o painel continua sozinho.</li>
-      <li>Deixe a aba do TikTok <b>visível</b> enquanto roda. Em segundo plano o navegador deixa ela lenta. Pode ser numa janela separada.</li>
-      <li>Funciona no site pelo navegador do computador. No app do TikTok não dá.</li>
+      <li>Deixe a aba do TikTok <b>visível</b> enquanto roda. Em segundo plano o navegador deixa ela lenta. No celular, mantenha a tela ligada (de preferência carregando).</li>
+      <li>Funciona no navegador, no computador ou no celular. No app do TikTok não dá.</li>
       <li>Não existe desfazer em massa: o que sair, só republicando na mão.</li>
       <li>O TikTok muda o site de vez em quando. Se parar de funcionar, clique em <b>Diagnóstico</b>, depois em <b>Copiar log</b>, e mande o log pro Claude ajustar.</li>
       <li>Automatizar cliques pode ir contra os termos do TikTok. É a sua conta e são os mesmos cliques que você faria, mas use com moderação.</li>
@@ -305,43 +345,81 @@
       }
     });
   });
+  var touch = false;
+  try { touch = matchMedia('(pointer: coarse)').matches; } catch (e) { /* ok */ }
+  var startTab = document.getElementById(touch ? 't-cel' : 't-fav');
   try {
     var saved = localStorage.getItem('faxina:tab');
-    var st = saved && document.getElementById(saved);
-    if (st) select(st);
+    if (saved && document.getElementById(saved)) startTab = document.getElementById(saved);
   } catch (e) { /* ok */ }
+  select(startTab);
+
+  // Android x iPhone
+  var osBtns = { android: document.getElementById('os-android'), iphone: document.getElementById('os-iphone') };
+  function pickOS(os) {
+    Object.keys(osBtns).forEach(function (k) {
+      osBtns[k].setAttribute('aria-pressed', String(k === os));
+      document.getElementById('cel-' + k).hidden = k !== os;
+    });
+  }
+  osBtns.android.addEventListener('click', function () { pickOS('android'); });
+  osBtns.iphone.addEventListener('click', function () { pickOS('iphone'); });
+  pickOS(/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'iphone' : 'android');
 
   var bm = document.getElementById('bookmarklet');
   bm.addEventListener('click', function (e) {
     e.preventDefault();
-    var hint = document.getElementById('bm-hint');
-    hint.textContent = 'É pra arrastar, não clicar 😄 Segure e solte na barra de favoritos.';
+    document.getElementById('bm-hint').textContent = 'É pra arrastar, não clicar 😄 Segure e solte na barra de favoritos.';
   });
 
-  function copy(text, hintId, okMsg, fallbackEl) {
+  function copy(text, hintId, okMsg) {
     var hint = document.getElementById(hintId);
-    function done(ok) {
-      hint.dataset.tone = ok ? 'ok' : '';
-      hint.textContent = ok ? okMsg : 'Não deu pra copiar automático. Selecione o texto e copie com Ctrl + C.';
-      if (!ok && fallbackEl) {
-        var d = fallbackEl.closest('details'); if (d) d.open = true;
-        fallbackEl.focus(); fallbackEl.select();
+    function ok() { hint.dataset.tone = 'ok'; hint.textContent = okMsg; }
+    function manual() {
+      hint.dataset.tone = '';
+      hint.textContent = 'Não deu pra copiar automático. Toque e segure no texto abaixo → Selecionar tudo → Copiar.';
+      var ta = document.getElementById(hintId + '-ta');
+      if (!ta) {
+        ta = document.createElement('textarea');
+        ta.id = hintId + '-ta'; ta.readOnly = true; ta.className = 'manual';
+        ta.setAttribute('aria-label', 'Texto pra copiar');
+        hint.parentNode.appendChild(ta);
       }
+      ta.value = text; ta.hidden = false; ta.focus(); ta.select();
+      try { ta.setSelectionRange(0, text.length); } catch (e) { /* ok */ }
+    }
+    function legacy() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.top = '0'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { ta.setSelectionRange(0, text.length); } catch (e) { /* ok */ }
+      var r = false; try { r = document.execCommand('copy'); } catch (e) { r = false; }
+      ta.remove();
+      return r;
     }
     try {
-      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
-    } catch (e) { done(false); }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, function () { if (legacy()) ok(); else manual(); });
+        return;
+      }
+    } catch (e) { /* cai no legado */ }
+    if (legacy()) ok(); else manual();
   }
 
   var code = document.getElementById('code');
+  var bmCode = bm.getAttribute('href');
+  Array.prototype.forEach.call(document.querySelectorAll('.copy-bm'), function (b) {
+    b.addEventListener('click', function () { copy(bmCode, b.dataset.hint, 'Copiado! Agora vai pro passo 2.'); });
+  });
   document.getElementById('copy-bm').addEventListener('click', function () {
-    copy(bm.getAttribute('href'), 'copy-bm-hint', 'Copiado! Agora: botão direito na barra de favoritos → Adicionar página → nome "Faxina" → cole no campo URL.');
+    copy(bmCode, 'copy-bm-hint', 'Copiado! Agora: botão direito na barra de favoritos → Adicionar página → nome "Faxina" → cole no campo URL.');
   });
   document.getElementById('copy-code').addEventListener('click', function () {
-    copy(code.value, 'copy-code-hint', 'Código copiado.', code);
+    copy(code.value, 'copy-code-hint', 'Código copiado.');
   });
   document.getElementById('copy-code-2').addEventListener('click', function () {
-    copy(code.value, 'copy-code-2-hint', 'Copiado! Agora vai pro passo 3.', code);
+    copy(code.value, 'copy-code-2-hint', 'Copiado! Agora vai pro passo 3.');
   });
   document.getElementById('copy-ext').addEventListener('click', function () {
     copy('chrome://extensions', 'copy-ext-hint', 'Copiado. Cole na barra de endereço de uma aba nova.');

@@ -7,10 +7,11 @@ não usa servidor e não manda dados pra ninguém.
 > Projeto independente do site do Chaveiro DCR. Fica fora do build do Next e do deploy
 > da Vercel (`.vercelignore`).
 
-## Jeitos de usar (no computador, logado no tiktok.com)
+## Jeitos de usar (logado no site do TikTok, não no app)
 
 | Jeito | Como |
 |---|---|
+| **Celular** | Crie um favorito no Chrome (Android) ou Safari (iPhone) e troque o endereço pelo conteúdo de `dist/bookmarklet.txt`. No tiktok.com, ative **Site para computador** e abra o favorito (no Chrome do Android: digite o nome dele na barra de endereço e toque na sugestão com estrela). O painel se ajusta pro tamanho do dedo e pede pra tela não apagar. |
 | **Favorito** (mais fácil) | Crie um favorito com o conteúdo de `dist/bookmarklet.txt` como URL (ou arraste o botão da página de instruções). Abra o TikTok e clique nele. |
 | **Console** | Copie `dist/faxina-republicados.js`, abra o TikTok, `F12` → Console, digite `allow pasting`, cole e Enter. |
 | **Extensão do Chrome** | Descompacte `dist/faxina-republicados-extensao.zip` → `chrome://extensions` → Modo do desenvolvedor → Carregar sem compactação. |
@@ -48,7 +49,7 @@ test/                 TikTok de mentirinha + testes de ponta a ponta (Playwright
 
 ```bash
 node build.mjs            # gera tudo
-node test/run.mjs         # 4 cenários: menu, botão direto, limite, favorito
+node test/run.mjs         # 5 cenários: menu, botão direto, limite, favorito, celular
 node test/extension.mjs   # carrega a extensão de verdade no Chromium
 ```
 

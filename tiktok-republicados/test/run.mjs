@@ -13,8 +13,11 @@ const MOCK = readFileSync(path.join(here, 'mock-tiktok.html'), 'utf8');
 const SCRIPT = readFileSync(path.join(here, '..', 'src', 'remover.js'), 'utf8');
 const BOOKMARKLET_FILE = path.join(here, '..', 'dist', 'bookmarklet.txt');
 
-async function scenario(browser, { name, variant, n = 6, limit = 0, inject = 'script' }) {
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+// mobile = celular com "site para computador": página de 980px numa tela de 390px, toque.
+const PHONE_DESKTOP_MODE = { viewport: { width: 980, height: 2120 }, screen: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 };
+
+async function scenario(browser, { name, variant, n = 6, limit = 0, inject = 'script', mobile = false }) {
+  const ctx = await browser.newContext(mobile ? PHONE_DESKTOP_MODE : { viewport: { width: 1280, height: 800 } });
   await ctx.route('https://www.tiktok.com/**', (route) =>
     route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: MOCK }));
   const page = await ctx.newPage();
@@ -35,7 +38,9 @@ async function scenario(browser, { name, variant, n = 6, limit = 0, inject = 'sc
   }
 
   const root = page.locator('#trr-root');
-  await root.getByRole('button', { name: 'Começar' }).click();
+  const zoom = await page.evaluate(() => getComputedStyle(document.querySelector('#trr-root').shadowRoot.querySelector('.panel')).zoom);
+  const start = root.getByRole('button', { name: 'Começar' });
+  if (mobile) await start.tap(); else await start.click();
   const status = root.locator('.st');
   await page.waitForFunction(() => {
     const st = document.querySelector('#trr-root').shadowRoot.querySelector('.st');
@@ -56,8 +61,9 @@ async function scenario(browser, { name, variant, n = 6, limit = 0, inject = 'sc
   await ctx.close();
 
   const expectRemaining = limit ? n - limit : 0;
-  const ok = remaining === expectRemaining && accidental.length === 0 && errors.length === 0 && removed === n - expectRemaining;
-  return { name, ok, finalStatus, remaining, removed, accidental, errors, stats };
+  const zoomOk = mobile ? Number(zoom) > 2 : Number(zoom || 1) === 1;
+  const ok = zoomOk && remaining === expectRemaining && accidental.length === 0 && errors.length === 0 && removed === n - expectRemaining;
+  return { name, ok, finalStatus, remaining, removed, accidental, errors, stats, zoom };
 }
 
 const browser = await chromium.launch();
@@ -66,13 +72,14 @@ const results = await Promise.all([
   scenario(browser, { name: 'direto', variant: 'direct', n: 6 }),
   scenario(browser, { name: 'limite', variant: 'direct', n: 5, limit: 2 }),
   scenario(browser, { name: 'favorito', variant: 'menu', n: 3, inject: 'bookmarklet' }),
+  scenario(browser, { name: 'celular', variant: 'menu', n: 4, inject: 'bookmarklet', mobile: true }),
 ]);
 await browser.close();
 
 let allOk = true;
 for (const r of results) {
   allOk = allOk && r.ok;
-  console.log(`${r.ok ? 'PASSOU' : 'FALHOU'}  ${r.name.padEnd(9)} removidos=${r.removed} sobraram=${r.remaining} contadores=${r.stats.join('/')} acidentais=${r.accidental.length} erros=${r.errors.length}`);
+  console.log(`${r.ok ? 'PASSOU' : 'FALHOU'}  ${r.name.padEnd(9)} removidos=${r.removed} sobraram=${r.remaining} contadores=${r.stats.join('/')} acidentais=${r.accidental.length} erros=${r.errors.length} zoom=${r.zoom}`);
   console.log(`          status: ${r.finalStatus}`);
   if (r.errors.length) console.log('          ', r.errors);
 }
