@@ -1,0 +1,350 @@
+<title>Faxina de Republicados</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: rótulo de produto de limpeza — faixa do rótulo, depois "Modo de usar", "Precauções" e "Composição" numa coluna só. */
+  :root {
+    --paper: #f5f9ff;
+    --card: #ffffff;
+    --ink: #0c1f3d;
+    --muted: #4a5b76;
+    --line: #cdd9ea;
+    --accent: #1554e0;
+    --accent-ink: #ffffff;
+    --fresh: #0d8f86;
+    --bubble: rgba(21, 84, 224, 0.10);
+    --warn-bg: #fff5cc;
+    --warn-line: #e6c74a;
+    --warn-ink: #4d3a00;
+    --code-bg: #eaf1fb;
+    --font-display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+    --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0a1424; --card: #101d33; --ink: #e8f0ff; --muted: #9db0cc; --line: #233654;
+      --accent: #6fa2ff; --accent-ink: #071122; --fresh: #43d1c4; --bubble: rgba(111, 162, 255, 0.10);
+      --warn-bg: #2a2410; --warn-line: #6e5c1c; --warn-ink: #f2df92; --code-bg: #0c1829;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0a1424; --card: #101d33; --ink: #e8f0ff; --muted: #9db0cc; --line: #233654;
+    --accent: #6fa2ff; --accent-ink: #071122; --fresh: #43d1c4; --bubble: rgba(111, 162, 255, 0.10);
+    --warn-bg: #2a2410; --warn-line: #6e5c1c; --warn-ink: #f2df92; --code-bg: #0c1829;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 16px/1.6 var(--font-body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 56px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+
+  h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+  h1 { font-weight: 800; font-size: clamp(2.3rem, 7vw, 3.6rem); line-height: 1.02; letter-spacing: -0.02em; }
+  h2 { font-weight: 800; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  p { margin: 0; }
+  a { color: var(--accent); }
+  code, kbd {
+    font-family: var(--font-mono); font-size: 0.86em; background: var(--code-bg);
+    border: 1px solid var(--line); border-radius: 6px; padding: 0.05em 0.4em; white-space: nowrap;
+  }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+  /* Faixa do rótulo */
+  .label {
+    position: relative; overflow: hidden;
+    display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: 32px; align-items: center;
+    background: var(--card); border: 2px solid var(--ink); border-radius: 22px; padding: 32px;
+  }
+  .label::before, .label::after {
+    content: ""; position: absolute; border-radius: 50%; pointer-events: none;
+    border: 2px solid var(--bubble); background: var(--bubble);
+  }
+  .label::before { width: 220px; height: 220px; left: -70px; bottom: -110px; }
+  .label::after { width: 90px; height: 90px; left: 150px; bottom: 30px; }
+  .label-text { position: relative; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .eyebrow { font: 500 0.78rem/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .lede { font-size: 1.12rem; color: var(--muted); max-width: 46ch; }
+  .seals { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .seals li {
+    font: 600 0.82rem/1 var(--font-body); padding: 8px 12px; border-radius: 999px;
+    border: 1.5px solid var(--fresh); color: var(--fresh);
+  }
+  .shot { margin: 0; position: relative; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .shot img { width: 100%; max-width: 300px; height: auto; border-radius: 14px; box-shadow: 0 18px 40px rgba(12, 31, 61, 0.22); }
+  .shot figcaption { font-size: 0.82rem; color: var(--muted); text-align: center; }
+
+  section { display: flex; flex-direction: column; gap: 16px; }
+  .section-head { display: flex; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
+  .section-head span { font: 500 0.8rem var(--font-mono); color: var(--muted); }
+  .intro { color: var(--muted); max-width: 65ch; }
+
+  /* Abas do modo de usar */
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tab {
+    font: 600 0.95rem/1 var(--font-body); color: var(--ink); background: transparent; cursor: pointer;
+    border: 1.5px solid var(--line); border-radius: 999px; padding: 11px 16px;
+  }
+  .tab:hover { border-color: var(--accent); }
+  .tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .tab small { font-weight: 500; opacity: 0.8; }
+  .panel { background: var(--card); border: 1.5px solid var(--line); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 14px; }
+  ol.steps > li { counter-increment: s; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start; }
+  ol.steps > li::before {
+    content: counter(s); width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    font: 800 0.9rem/1 var(--font-display); color: var(--accent); border: 2px solid var(--accent);
+  }
+  ol.steps > li > div { display: flex; flex-direction: column; gap: 10px; min-width: 0; padding-top: 2px; }
+
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn {
+    font: 600 0.92rem/1 var(--font-body); cursor: pointer; border-radius: 12px; padding: 12px 16px;
+    border: 1.5px solid var(--ink); background: var(--card); color: var(--ink);
+  }
+  .btn:hover { background: var(--code-bg); }
+  .bookmarklet {
+    display: inline-flex; align-items: center; gap: 10px; text-decoration: none; cursor: grab;
+    font: 800 1.05rem/1 var(--font-display); color: var(--accent-ink); background: var(--accent);
+    padding: 14px 20px; border-radius: 14px; border: 2px dashed var(--accent-ink); outline: 2px solid var(--accent);
+  }
+  .bookmarklet:active { cursor: grabbing; }
+  .hint { font-size: 0.88rem; color: var(--muted); }
+  .hint[data-tone="ok"] { color: var(--fresh); font-weight: 600; }
+  .note { font-size: 0.92rem; color: var(--muted); padding-top: 4px; border-top: 1px dashed var(--line); }
+
+  ol.flow { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 8px; max-width: 70ch; }
+  ol.flow li::marker { font-family: var(--font-display); font-weight: 800; color: var(--accent); }
+
+  .caution { background: var(--warn-bg); border: 2px solid var(--warn-line); border-radius: 18px; padding: 24px; color: var(--warn-ink); }
+  .caution .section-head { border-color: var(--warn-line); }
+  .caution .section-head span { color: var(--warn-ink); }
+  .caution ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; max-width: 72ch; }
+
+  .facts { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); border: 2px solid var(--ink); border-radius: 14px; overflow: hidden; }
+  .facts div { padding: 14px 16px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+  .facts dt { font: 500 0.74rem/1.3 var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  .facts dd { margin: 0; font: 800 1.15rem/1.2 var(--font-display); font-variant-numeric: tabular-nums; }
+
+  details { background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; }
+  summary { cursor: pointer; padding: 14px 16px; font-weight: 600; }
+  .code-box { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; }
+  textarea {
+    width: 100%; height: 320px; resize: vertical; font: 12px/1.5 var(--font-mono); color: var(--ink);
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; white-space: pre; overflow: auto;
+  }
+
+  footer { font-size: 0.9rem; color: var(--muted); border-top: 2px solid var(--ink); padding-top: 14px; display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: space-between; }
+  footer b { color: var(--ink); }
+
+  @media (max-width: 720px) {
+    .label { grid-template-columns: minmax(0, 1fr); padding: 24px 20px; }
+    .shot img { max-width: 260px; }
+    .panel, .caution { padding: 18px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .tab, .btn { transition: background-color .15s, border-color .15s, color .15s; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="label">
+    <div class="label-text">
+      <p class="eyebrow">Removedor de republicados · TikTok · v__VERSION__</p>
+      <h1>Faxina de Republicados</h1>
+      <p class="lede">Tira do seu perfil todos os vídeos que você republicou no TikTok, um por um, sem você ficar clicando até a mão doer.</p>
+      <ul class="seals" aria-label="Garantias">
+        <li>Não pede senha</li>
+        <li>Nenhum servidor no meio</li>
+        <li>Roda na sua aba</li>
+      </ul>
+    </div>
+    <figure class="shot">
+      <img src="__PAINEL_SRC__" width="340" height="524" alt="Painel da Faxina rodando no TikTok: 4 removidos, 0 pulados, 0 falhas, com os botões Começar, Pausar e Parar.">
+      <figcaption>O painel aparece no canto da página do TikTok.</figcaption>
+    </figure>
+  </header>
+
+  <section aria-labelledby="modo-titulo">
+    <div class="section-head"><h2 id="modo-titulo">Modo de usar</h2><span>escolha um jeito</span></div>
+    <p class="intro">Os três jeitos fazem a mesma faxina; muda só como o painel abre. Use no computador (Chrome, Edge, Brave ou Firefox), logado na sua conta em tiktok.com.</p>
+
+    <div class="tabs" role="tablist" aria-label="Jeito de abrir o painel">
+      <button class="tab" role="tab" id="t-fav" aria-controls="p-fav" aria-selected="true" type="button">Favorito <small>· mais fácil</small></button>
+      <button class="tab" role="tab" id="t-console" aria-controls="p-console" aria-selected="false" tabindex="-1" type="button">Console</button>
+      <button class="tab" role="tab" id="t-ext" aria-controls="p-ext" aria-selected="false" tabindex="-1" type="button">Extensão do Chrome</button>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-fav" aria-labelledby="t-fav">
+      <ol class="steps">
+        <li><div><p>Mostre a barra de favoritos: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> (no Mac, <kbd>⌘</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd>).</p></div></li>
+        <li><div>
+          <p>Arraste este botão até a barra de favoritos:</p>
+          <div class="row">
+            <a class="bookmarklet" id="bookmarklet" href="__BOOKMARKLET_HREF__" title="Arraste pra barra de favoritos">🧹 Faxina</a>
+          </div>
+          <p class="hint" id="bm-hint" role="status">Clicar aqui não faz nada: ele só funciona dentro do TikTok.</p>
+        </div></li>
+        <li><div><p>Abra o <a href="https://www.tiktok.com/" target="_blank" rel="noopener">tiktok.com</a> logado e clique no favorito <b>Faxina</b>. O painel aparece no canto.</p></div></li>
+        <li><div><p>Pra testar, coloque <b>Parar depois de 3</b> e clique em <b>Começar</b>. Deu certo? Volte pra 0 e clique em Começar de novo pra limpar tudo.</p></div></li>
+      </ol>
+      <div class="note row">
+        <span>Não deu pra arrastar?</span>
+        <button class="btn" type="button" id="copy-bm">Copiar endereço do favorito</button>
+        <span class="hint" id="copy-bm-hint" role="status">Depois: botão direito na barra de favoritos → Adicionar página → nome "Faxina" → cole no campo URL.</span>
+      </div>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-console" aria-labelledby="t-console" hidden>
+      <ol class="steps">
+        <li><div><p>Abra o <a href="https://www.tiktok.com/" target="_blank" rel="noopener">tiktok.com</a> logado.</p></div></li>
+        <li><div>
+          <p>Copie o código:</p>
+          <div class="row"><button class="btn" type="button" id="copy-code-2">Copiar código</button><span class="hint" id="copy-code-2-hint" role="status"></span></div>
+        </div></li>
+        <li><div><p>Na aba do TikTok, aperte <kbd>F12</kbd> (no Mac, <kbd>⌥</kbd> + <kbd>⌘</kbd> + <kbd>J</kbd>) e vá na aba <b>Console</b>.</p></div></li>
+        <li><div><p>Na primeira vez o navegador bloqueia colar código. Digite <code>allow pasting</code> (no Chrome em português, <code>permitir colar</code>) e aperte Enter.</p></div></li>
+        <li><div><p>Cole com <kbd>Ctrl</kbd> + <kbd>V</kbd> e aperte Enter. Pode fechar o F12: o painel fica no canto da página.</p></div></li>
+      </ol>
+    </div>
+
+    <div class="panel" role="tabpanel" id="p-ext" aria-labelledby="t-ext" hidden>
+      <ol class="steps">
+        <li><div><p>Pegue o arquivo <code>faxina-republicados-extensao.zip</code> (o Claude mandou na conversa, e ele também fica na pasta <code>tiktok-republicados/dist</code> do repositório) e descompacte.</p></div></li>
+        <li><div>
+          <p>Abra <code>chrome://extensions</code> numa aba nova e ligue o <b>Modo do desenvolvedor</b>, no canto de cima.</p>
+          <div class="row"><button class="btn" type="button" id="copy-ext">Copiar chrome://extensions</button><span class="hint" id="copy-ext-hint" role="status"></span></div>
+        </div></li>
+        <li><div><p>Clique em <b>Carregar sem compactação</b> e escolha a pasta que você descompactou.</p></div></li>
+        <li><div><p>Abra o tiktok.com, clique no ícone da extensão (no quebra-cabeça 🧩, se estiver escondido) e depois em <b>Abrir painel</b>.</p></div></li>
+      </ol>
+      <p class="note">Vantagem da extensão: se a página recarregar no meio da faxina, ela continua sozinha de onde parou.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="faz-titulo">
+    <div class="section-head"><h2 id="faz-titulo">O que ele faz</h2><span>em loop até acabar</span></div>
+    <ol class="flow">
+      <li><b>Vai pro seu perfil</b> e abre a aba Republicados.</li>
+      <li><b>Abre o primeiro vídeo</b> da lista.</li>
+      <li><b>Confere se está republicado</b>, pelo botão ou pelo selo "Você republicou". Se não tiver certeza, pula: ele nunca republica nada.</li>
+      <li><b>Desfaz o republicado</b> e confirma, se o TikTok perguntar.</li>
+      <li><b>Passa pro próximo</b> e repete. Quando a aba Republicados some do perfil, a faxina acabou.</li>
+    </ol>
+  </section>
+
+  <section class="caution" aria-labelledby="prec-titulo">
+    <div class="section-head"><h2 id="prec-titulo">Precauções</h2><span>leia antes de usar</span></div>
+    <ul>
+      <li>Teste com <b>Parar depois de 3</b> antes de mandar tudo.</li>
+      <li>Prefira a velocidade <b>Normal</b> ou <b>Tranquilo</b>. Ritmo muito rápido pode fazer o TikTok pedir captcha ou segurar suas ações por um tempo. Se o captcha aparecer, resolva que o painel continua sozinho.</li>
+      <li>Deixe a aba do TikTok <b>visível</b> enquanto roda. Em segundo plano o navegador deixa ela lenta. Pode ser numa janela separada.</li>
+      <li>Funciona no site pelo navegador do computador. No app do TikTok não dá.</li>
+      <li>Não existe desfazer em massa: o que sair, só republicando na mão.</li>
+      <li>O TikTok muda o site de vez em quando. Se parar de funcionar, clique em <b>Diagnóstico</b>, depois em <b>Copiar log</b>, e mande o log pro Claude ajustar.</li>
+      <li>Automatizar cliques pode ir contra os termos do TikTok. É a sua conta e são os mesmos cliques que você faria, mas use com moderação.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="comp-titulo">
+    <div class="section-head"><h2 id="comp-titulo">Composição</h2><span>o que tem dentro</span></div>
+    <dl class="facts">
+      <div><dt>Princípio ativo</dt><dd>Cliques automáticos</dd></div>
+      <div><dt>Código</dt><dd>__LINES__ linhas de JS</dd></div>
+      <div><dt>Senhas pedidas</dt><dd>0</dd></div>
+      <div><dt>Servidores contactados</dt><dd>0</dd></div>
+    </dl>
+    <details>
+      <summary>Ver o código completo</summary>
+      <div class="code-box">
+        <label class="hint" for="code">Este é o mesmo código do favorito, do console e da extensão.</label>
+        <textarea id="code" readonly spellcheck="false">__SCRIPT_TEXT__</textarea>
+        <div class="row"><button class="btn" type="button" id="copy-code">Copiar código</button><span class="hint" id="copy-code-hint" role="status"></span></div>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <span><b>SAC:</b> deu ruim? Diagnóstico → Copiar log → manda pro Claude.</span>
+    <span>v__VERSION__ · uso doméstico, só na sua própria conta</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[role="tab"]'));
+  function select(tab, focus) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+    if (focus) tab.focus();
+    try { localStorage.setItem('faxina:tab', tab.id); } catch (e) { /* ok */ }
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(t); });
+    t.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        var n = (i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+        select(tabs[n], true);
+      }
+    });
+  });
+  try {
+    var saved = localStorage.getItem('faxina:tab');
+    var st = saved && document.getElementById(saved);
+    if (st) select(st);
+  } catch (e) { /* ok */ }
+
+  var bm = document.getElementById('bookmarklet');
+  bm.addEventListener('click', function (e) {
+    e.preventDefault();
+    var hint = document.getElementById('bm-hint');
+    hint.textContent = 'É pra arrastar, não clicar 😄 Segure e solte na barra de favoritos.';
+  });
+
+  function copy(text, hintId, okMsg, fallbackEl) {
+    var hint = document.getElementById(hintId);
+    function done(ok) {
+      hint.dataset.tone = ok ? 'ok' : '';
+      hint.textContent = ok ? okMsg : 'Não deu pra copiar automático. Selecione o texto e copie com Ctrl + C.';
+      if (!ok && fallbackEl) {
+        var d = fallbackEl.closest('details'); if (d) d.open = true;
+        fallbackEl.focus(); fallbackEl.select();
+      }
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+    } catch (e) { done(false); }
+  }
+
+  var code = document.getElementById('code');
+  document.getElementById('copy-bm').addEventListener('click', function () {
+    copy(bm.getAttribute('href'), 'copy-bm-hint', 'Copiado! Agora: botão direito na barra de favoritos → Adicionar página → nome "Faxina" → cole no campo URL.');
+  });
+  document.getElementById('copy-code').addEventListener('click', function () {
+    copy(code.value, 'copy-code-hint', 'Código copiado.', code);
+  });
+  document.getElementById('copy-code-2').addEventListener('click', function () {
+    copy(code.value, 'copy-code-2-hint', 'Copiado! Agora vai pro passo 3.', code);
+  });
+  document.getElementById('copy-ext').addEventListener('click', function () {
+    copy('chrome://extensions', 'copy-ext-hint', 'Copiado. Cole na barra de endereço de uma aba nova.');
+  });
+})();
+</script>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>TikTok (mock de teste)</title>
+<style>
+  body { font-family: sans-serif; margin: 0; background: #fff; color: #111; }
+  nav { padding: 10px; border-bottom: 1px solid #ddd; }
+  .tabs { display: flex; gap: 20px; padding: 10px; }
+  .tabs [role=tab][aria-selected=true] { border-bottom: 2px solid #000; }
+  .grid { display: grid; grid-template-columns: repeat(4, 160px); gap: 8px; padding: 10px; }
+  .item a { display: block; height: 200px; background: #ccc; }
+  .viewer { position: fixed; inset: 0; background: rgba(0,0,0,.9); color: #fff; display: flex; align-items: center; justify-content: center; gap: 30px; }
+  .viewer button, .viewer a { color: #fff; background: #333; border: 0; padding: 10px; margin: 4px; cursor: pointer; }
+  .menu { position: absolute; background: #222; padding: 10px; display: flex; flex-direction: column; }
+  .modal { position: fixed; inset: 30% 30%; background: #fff; color: #000; padding: 20px; }
+</style>
+</head>
+<body>
+<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">{"__DEFAULT_SCOPE__":{"webapp.app-context":{"user":{"uniqueId":"eu_teste"}}}}</script>
+<div id="app"></div>
+<script>
+(function () {
+  var VARIANT = new URLSearchParams(location.search).get('v') || sessionStorage.getItem('mock:variant') || 'menu';
+  sessionStorage.setItem('mock:variant', VARIANT);
+  var N = Number(sessionStorage.getItem('mock:n') || 7);
+
+  // "Servidor": quais vídeos estão republicados
+  function db() {
+    var d = JSON.parse(sessionStorage.getItem('mock:db') || 'null');
+    if (!d) {
+      d = {};
+      for (var i = 1; i <= N; i++) d[String(1000 + i)] = true;
+      sessionStorage.setItem('mock:db', JSON.stringify(d));
+    }
+    return d;
+  }
+  function setRepost(id, val) { var d = db(); d[id] = val; sessionStorage.setItem('mock:db', JSON.stringify(d)); window.__mockEvents.push((val ? 'repost ' : 'unrepost ') + id); }
+  window.__mockEvents = window.__mockEvents || [];
+  window.__mockDb = db;
+
+  // Lista em cache (só atualiza ao trocar de aba, como o TikTok)
+  var cachedList = null;
+  var activeTab = 'videos';
+  function freshList() { var d = db(); return Object.keys(d).filter(function (k) { return d[k]; }); }
+
+  var app = document.getElementById('app');
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    for (var k in attrs || {}) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function render() {
+    app.textContent = '';
+    var nav = el('nav');
+    var a = el('a', { 'data-e2e': 'nav-profile', href: '/@eu_teste' }, 'Perfil');
+    a.addEventListener('click', function (e) { e.preventDefault(); go('/@eu_teste'); });
+    nav.appendChild(a);
+    app.appendChild(nav);
+
+    var path = location.pathname;
+    if (/^\/@eu_teste\/?$/.test(path) || /\/video\//.test(path)) renderProfile();
+    else app.appendChild(el('p', null, 'Para você (feed)'));
+
+    var m = path.match(/\/video\/(\d+)/);
+    if (m) renderViewer(m[1]);
+  }
+
+  function renderProfile() {
+    app.appendChild(el('button', { 'data-e2e': 'edit-profile-entrance' }, 'Editar perfil'));
+    var tabs = el('div', { class: 'tabs' });
+    var vt = el('div', { role: 'tab', 'data-e2e': 'videos-tab', 'aria-selected': String(activeTab === 'videos') }, 'Vídeos');
+    vt.addEventListener('click', function () { activeTab = 'videos'; render(); });
+    tabs.appendChild(vt);
+    if (freshList().length || (activeTab === 'reposts' && cachedList && cachedList.length)) {
+      var rt = el('div', { role: 'tab', 'data-e2e': 'repost-tab', 'aria-selected': String(activeTab === 'reposts') });
+      rt.appendChild(el('p', null, 'Republicados'));
+      rt.addEventListener('click', function () { activeTab = 'reposts'; cachedList = freshList(); render(); });
+      tabs.appendChild(rt);
+    }
+    app.appendChild(tabs);
+    if (activeTab === 'reposts' && cachedList) {
+      var grid = el('div', { class: 'grid', id: 'user-repost-item-list' });
+      cachedList.forEach(function (id) {
+        var it = el('div', { class: 'item', 'data-e2e': 'user-repost-item' });
+        var link = el('a', { href: '/@autor' + id + '/video/' + id }, 'vídeo ' + id);
+        link.addEventListener('click', function (e) { e.preventDefault(); go('/@autor' + id + '/video/' + id); });
+        it.appendChild(link);
+        grid.appendChild(it);
+      });
+      app.appendChild(grid);
+    } else {
+      app.appendChild(el('p', null, 'Seus vídeos'));
+    }
+  }
+
+  function renderViewer(id) {
+    var v = el('div', { class: 'viewer' });
+    var close = el('button', { 'data-e2e': 'browse-close', 'aria-label': 'Fechar' }, 'X');
+    close.addEventListener('click', function () { go('/@eu_teste'); });
+    v.appendChild(close);
+    v.appendChild(el('div', null, 'Vídeo ' + id));
+    var reposted = !!db()[id];
+
+    if (reposted && VARIANT !== 'direct') v.appendChild(el('span', null, 'Você republicou'));
+
+    if (VARIANT === 'direct') {
+      var btn = el('button', { 'data-e2e': 'video-share-repost', 'aria-label': reposted ? 'Remove repost' : 'Repost' }, reposted ? '' : '');
+      btn.appendChild(el('span', null, '12'));
+      btn.addEventListener('click', function () { setRepost(id, !db()[id]); render(); });
+      v.appendChild(btn);
+    }
+
+    var share = el('button', { 'data-e2e': 'browse-share-icon', 'aria-label': 'Compartilhar' }, 'Compartilhar');
+    share.addEventListener('click', function () {
+      if (document.querySelector('.menu')) return;
+      var menu = el('div', { class: 'menu' });
+      var r = el('a', { 'data-e2e': 'share-repost' }, db()[id] ? 'Remover republicação' : 'Republicar');
+      r.addEventListener('click', function () {
+        menu.remove();
+        if (db()[id]) {
+          var modal = el('div', { class: 'modal', role: 'dialog' });
+          modal.appendChild(el('p', null, 'Remover republicação?'));
+          var c = el('button', null, 'Cancelar');
+          c.addEventListener('click', function () { modal.remove(); });
+          var ok = el('button', null, 'Remover');
+          ok.addEventListener('click', function () { modal.remove(); setRepost(id, false); render(); });
+          modal.appendChild(c); modal.appendChild(ok);
+          document.body.appendChild(modal);
+        } else {
+          setRepost(id, true); render();
+        }
+      });
+      menu.appendChild(r);
+      menu.appendChild(el('a', null, 'Copiar link'));
+      share.after(menu);
+    });
+    v.appendChild(share);
+
+    var list = cachedList || [];
+    var idx = list.indexOf(id);
+    var next = el('button', { 'data-e2e': 'arrow-right', 'aria-label': 'Próximo vídeo' }, '>');
+    if (idx === -1 || idx >= list.length - 1) next.disabled = true;
+    next.addEventListener('click', function () {
+      if (next.disabled) return;
+      var n = list[idx + 1];
+      go('/@autor' + n + '/video/' + n);
+    });
+    v.appendChild(next);
+    app.appendChild(v);
+  }
+
+  function go(path) { history.pushState({}, '', path); render(); }
+  window.addEventListener('popstate', render);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && /\/video\//.test(location.pathname)) go('/@eu_teste'); });
+  render();
+})();
+</script>
+</body>
+</html>

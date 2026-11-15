@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; width: 280px; font: 13px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: #14141a; color: #f2f2f5; }
+  main { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  h1 { font-size: 15px; margin: 0; }
+  p { margin: 0; color: #b5b5c3; }
+  button { all: unset; cursor: pointer; text-align: center; padding: 9px; border-radius: 10px; font-weight: 600; background: #c6f432; color: #14141a; }
+  button.sec { background: #23232c; color: #f2f2f5; border: 1px solid #30303b; }
+  #msg { min-height: 18px; color: #f5e5a8; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🧹 Faxina de Republicados</h1>
+  <p>Abra o tiktok.com logado na sua conta e clique abaixo. O painel aparece na própria página.</p>
+  <button id="open" type="button">Abrir painel na aba do TikTok</button>
+  <button id="go" type="button" class="sec">Ir pro tiktok.com</button>
+  <div id="msg" role="status"></div>
+</main>
+<script src="popup.js"></script>
+</body>
+</html>
