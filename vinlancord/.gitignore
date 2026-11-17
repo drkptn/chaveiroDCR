@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-electron
+release
+coverage
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+data/
+uploads/
+mail-outbox/
+apps/server/src/generated
+test-results
+playwright-report
+.DS_Store

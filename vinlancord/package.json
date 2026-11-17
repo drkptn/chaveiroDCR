@@ -1,0 +1,24 @@
+{
+  "name": "vinlancord",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vinlancord — plataforma de comunicação: chat, voz, vídeo e compartilhamento de tela.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev -w @vinlancord/server",
+    "dev:web": "npm run dev -w @vinlancord/web",
+    "dev:desktop": "npm run dev -w @vinlancord/desktop",
+    "build": "npm run build -w @vinlancord/server && npm run build -w @vinlancord/web && npm run build -w @vinlancord/desktop",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "npm run e2e -w @vinlancord/e2e",
+    "db:migrate": "npm run db:migrate -w @vinlancord/server",
+    "dist:win": "npm run dist:win -w @vinlancord/desktop"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

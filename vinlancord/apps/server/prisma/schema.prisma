@@ -1,0 +1,477 @@
+// Vinlancord — esquema do banco de dados (PostgreSQL)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserStatusPref {
+  online
+  idle
+  dnd
+  invisible
+}
+
+enum TokenType {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+enum RelationshipType {
+  FRIEND
+  INCOMING
+  OUTGOING
+  BLOCKED
+}
+
+enum ChannelType {
+  TEXT
+  VOICE
+  VIDEO
+  CATEGORY
+  DM
+  GROUP_DM
+}
+
+enum OverwriteType {
+  ROLE
+  MEMBER
+}
+
+enum MessageType {
+  DEFAULT
+  REPLY
+  MEMBER_JOIN
+  CALL
+  PIN
+  GROUP_ADD
+  GROUP_REMOVE
+  GROUP_NAME
+  EVENT
+}
+
+enum EventStatus {
+  SCHEDULED
+  ACTIVE
+  COMPLETED
+  CANCELED
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWING
+  RESOLVED
+  DISMISSED
+}
+
+model User {
+  id              String         @id @db.VarChar(20)
+  email           String         @unique
+  emailVerified   Boolean        @default(false)
+  username        String         @unique @db.VarChar(32)
+  displayName     String         @db.VarChar(32)
+  passwordHash    String
+  avatarKey       String?
+  bannerKey       String?
+  bannerColor     String?        @db.VarChar(7)
+  accentColor     String?        @db.VarChar(7)
+  bio             String         @default("") @db.VarChar(300)
+  pronouns        String         @default("") @db.VarChar(40)
+  links           Json           @default("[]")
+  status          UserStatusPref @default(online)
+  customStatus    Json?
+  settings        Json           @default("{}")
+  system          Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  usernameChangedAt DateTime?
+
+  sessions        Session[]
+  tokens          EmailToken[]
+  relationships   Relationship[] @relation("RelOwner")
+  relatedTo       Relationship[] @relation("RelTarget")
+  ownedGuilds     Guild[]        @relation("GuildOwner")
+  memberships     Member[]
+  messages        Message[]
+  reactions       Reaction[]
+  recipientOf     ChannelRecipient[]
+  readStates      ReadState[]
+  notificationSettings NotificationSetting[]
+  activityLog     ActivityLog[]
+  eventRsvps      EventRsvp[]
+  reportsFiled    Report[]       @relation("Reporter")
+  attachments     Attachment[]
+}
+
+model Session {
+  id           String    @id @db.VarChar(20)
+  userId       String    @db.VarChar(20)
+  tokenHash    String    @unique
+  deviceName   String    @default("Desconhecido") @db.VarChar(100)
+  platform     String    @default("web") @db.VarChar(40)
+  ip           String?   @db.VarChar(64)
+  userAgent    String?   @db.VarChar(300)
+  createdAt    DateTime  @default(now())
+  lastActiveAt DateTime  @default(now())
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EmailToken {
+  id        String    @id @db.VarChar(20)
+  userId    String    @db.VarChar(20)
+  type      TokenType
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
+
+model Relationship {
+  userId    String           @db.VarChar(20)
+  targetId  String           @db.VarChar(20)
+  type      RelationshipType
+  createdAt DateTime         @default(now())
+  user      User             @relation("RelOwner", fields: [userId], references: [id], onDelete: Cascade)
+  target    User             @relation("RelTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@id([userId, targetId])
+  @@index([targetId])
+}
+
+model Guild {
+  id              String    @id @db.VarChar(20)
+  name            String    @db.VarChar(100)
+  iconKey         String?
+  bannerKey       String?
+  description     String    @default("") @db.VarChar(300)
+  ownerId         String    @db.VarChar(20)
+  isPublic        Boolean   @default(false)
+  systemChannelId String?   @db.VarChar(20)
+  createdAt       DateTime  @default(now())
+  owner           User      @relation("GuildOwner", fields: [ownerId], references: [id])
+  members         Member[]
+  roles           Role[]
+  channels        Channel[]
+  invites         Invite[]
+  bans            Ban[]
+  emojis          Emoji[]
+  stickers        Sticker[]
+  events          ScheduledEvent[]
+  auditLogs       AuditLog[]
+
+  @@index([isPublic])
+}
+
+model Member {
+  guildId      String       @db.VarChar(20)
+  userId       String       @db.VarChar(20)
+  nick         String?      @db.VarChar(32)
+  joinedAt     DateTime     @default(now())
+  timeoutUntil DateTime?
+  mute         Boolean      @default(false)
+  deaf         Boolean      @default(false)
+  guild        Guild        @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roles        MemberRole[]
+
+  @@id([guildId, userId])
+  @@index([userId])
+}
+
+model Role {
+  id          String       @id @db.VarChar(20)
+  guildId     String       @db.VarChar(20)
+  name        String       @db.VarChar(100)
+  color       String?      @db.VarChar(7)
+  position    Int          @default(0)
+  permissions BigInt       @default(0)
+  hoist       Boolean      @default(false)
+  mentionable Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+  guild       Guild        @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  members     MemberRole[]
+
+  @@index([guildId])
+}
+
+model MemberRole {
+  guildId String @db.VarChar(20)
+  userId  String @db.VarChar(20)
+  roleId  String @db.VarChar(20)
+  member  Member @relation(fields: [guildId, userId], references: [guildId, userId], onDelete: Cascade)
+  role    Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([guildId, userId, roleId])
+  @@index([roleId])
+}
+
+model Channel {
+  id            String               @id @db.VarChar(20)
+  type          ChannelType
+  guildId       String?              @db.VarChar(20)
+  name          String               @default("") @db.VarChar(100)
+  topic         String               @default("") @db.VarChar(1024)
+  position      Int                  @default(0)
+  parentId      String?              @db.VarChar(20)
+  slowmode      Int                  @default(0)
+  userLimit     Int                  @default(0)
+  bitrate       Int                  @default(64000)
+  lastMessageId String?              @db.VarChar(20)
+  ownerId       String?              @db.VarChar(20)
+  iconKey       String?
+  dmKey         String?              @unique
+  createdAt     DateTime             @default(now())
+  guild         Guild?               @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  overwrites    PermissionOverwrite[]
+  recipients    ChannelRecipient[]
+  messages      Message[]
+  invites       Invite[]
+  readStates    ReadState[]
+
+  @@index([guildId])
+}
+
+model ChannelRecipient {
+  channelId String   @db.VarChar(20)
+  userId    String   @db.VarChar(20)
+  closed    Boolean  @default(false)
+  addedAt   DateTime @default(now())
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, userId])
+  @@index([userId])
+}
+
+model PermissionOverwrite {
+  channelId String        @db.VarChar(20)
+  targetId  String        @db.VarChar(20)
+  type      OverwriteType
+  allow     BigInt        @default(0)
+  deny      BigInt        @default(0)
+  channel   Channel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, targetId])
+}
+
+model Message {
+  id              String       @id @db.VarChar(20)
+  channelId       String       @db.VarChar(20)
+  authorId        String       @db.VarChar(20)
+  content         String       @default("") @db.VarChar(4000)
+  type            MessageType  @default(DEFAULT)
+  replyToId       String?      @db.VarChar(20)
+  editedAt        DateTime?
+  pinned          Boolean      @default(false)
+  pinnedAt        DateTime?
+  mentionIds      String[]     @default([])
+  mentionRoleIds  String[]     @default([])
+  mentionEveryone Boolean      @default(false)
+  stickerId       String?      @db.VarChar(20)
+  callData        Json?
+  hasAttachments  Boolean      @default(false)
+  hasLink         Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  channel         Channel      @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author          User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  attachments     Attachment[]
+  reactions       Reaction[]
+
+  @@index([channelId, id(sort: Desc)])
+  @@index([authorId])
+  @@index([channelId, pinned])
+}
+
+model Attachment {
+  id          String   @id @db.VarChar(20)
+  messageId   String?  @db.VarChar(20)
+  uploaderId  String   @db.VarChar(20)
+  filename    String   @db.VarChar(255)
+  contentType String   @db.VarChar(127)
+  size        Int
+  storageKey  String
+  width       Int?
+  height      Int?
+  spoiler     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  message     Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([uploaderId, messageId])
+}
+
+model Reaction {
+  messageId String   @db.VarChar(20)
+  userId    String   @db.VarChar(20)
+  emojiKey  String   @db.VarChar(64)
+  emojiName String   @db.VarChar(64)
+  emojiId   String?  @db.VarChar(20)
+  animated  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, userId, emojiKey])
+  @@index([messageId])
+}
+
+model ReadState {
+  userId     String  @db.VarChar(20)
+  channelId  String  @db.VarChar(20)
+  lastReadId String? @db.VarChar(20)
+  mentions   Int     @default(0)
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel    Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@id([userId, channelId])
+}
+
+model NotificationSetting {
+  userId           String    @db.VarChar(20)
+  scopeId          String    @db.VarChar(20)
+  level            String?   @db.VarChar(16)
+  muted            Boolean   @default(false)
+  mutedUntil       DateTime?
+  suppressEveryone Boolean   @default(false)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, scopeId])
+}
+
+model Invite {
+  code      String    @id @db.VarChar(16)
+  guildId   String    @db.VarChar(20)
+  channelId String?   @db.VarChar(20)
+  inviterId String?   @db.VarChar(20)
+  maxUses   Int       @default(0)
+  uses      Int       @default(0)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+  guild     Guild     @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  channel   Channel?  @relation(fields: [channelId], references: [id], onDelete: SetNull)
+
+  @@index([guildId])
+}
+
+model Ban {
+  guildId     String   @db.VarChar(20)
+  userId      String   @db.VarChar(20)
+  reason      String?  @db.VarChar(512)
+  moderatorId String?  @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@id([guildId, userId])
+}
+
+model Emoji {
+  id        String   @id @db.VarChar(20)
+  guildId   String   @db.VarChar(20)
+  name      String   @db.VarChar(32)
+  imageKey  String
+  animated  Boolean  @default(false)
+  creatorId String?  @db.VarChar(20)
+  createdAt DateTime @default(now())
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId])
+}
+
+model Sticker {
+  id          String   @id @db.VarChar(20)
+  guildId     String   @db.VarChar(20)
+  name        String   @db.VarChar(32)
+  description String   @default("") @db.VarChar(100)
+  imageKey    String
+  format      String   @db.VarChar(8)
+  creatorId   String?  @db.VarChar(20)
+  createdAt   DateTime @default(now())
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId])
+}
+
+model ScheduledEvent {
+  id          String      @id @db.VarChar(20)
+  guildId     String      @db.VarChar(20)
+  channelId   String?     @db.VarChar(20)
+  creatorId   String      @db.VarChar(20)
+  name        String      @db.VarChar(100)
+  description String      @default("") @db.VarChar(1000)
+  location    String      @default("") @db.VarChar(100)
+  startAt     DateTime
+  endAt       DateTime?
+  status      EventStatus @default(SCHEDULED)
+  coverKey    String?
+  notifiedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  guild       Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  rsvps       EventRsvp[]
+
+  @@index([guildId, startAt])
+  @@index([status, startAt])
+}
+
+model EventRsvp {
+  eventId   String         @db.VarChar(20)
+  userId    String         @db.VarChar(20)
+  createdAt DateTime       @default(now())
+  event     ScheduledEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, userId])
+}
+
+model AuditLog {
+  id        String   @id @db.VarChar(20)
+  guildId   String   @db.VarChar(20)
+  actorId   String?  @db.VarChar(20)
+  action    String   @db.VarChar(48)
+  targetId  String?  @db.VarChar(20)
+  reason    String?  @db.VarChar(512)
+  changes   Json?
+  createdAt DateTime @default(now())
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, id(sort: Desc)])
+}
+
+model Report {
+  id         String       @id @db.VarChar(20)
+  reporterId String       @db.VarChar(20)
+  targetType String       @db.VarChar(16)
+  targetId   String       @db.VarChar(20)
+  guildId    String?      @db.VarChar(20)
+  reason     String       @db.VarChar(48)
+  details    String       @default("") @db.VarChar(1000)
+  snapshot   Json?
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now())
+  reporter   User         @relation("Reporter", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+model ActivityLog {
+  userId     String   @db.VarChar(20)
+  name       String   @db.VarChar(128)
+  type       String   @db.VarChar(16)
+  lastSeenAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, name])
+  @@index([userId, lastSeenAt])
+}
