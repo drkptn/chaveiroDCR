@@ -17,7 +17,7 @@ Registro do que foi feito em cada etapa, como foi verificado, o que ficou de for
 | 9 | Tela e áudio | ✅ | E2E: transmissão de tela, “Assistir transmissão”, vídeo ≥ 640 px no espectador; áudio do sistema implementado para Windows (validação manual pendente — ver abaixo) |
 | 10 | Notificações e personalização | ✅ | Sons, notificações do sistema, toasts, badge, níveis por servidor/canal, temas e atalhos; testes de unidade de atalhos e temas |
 | 11 | Segurança, otimização e testes | ✅ | 60 testes automatizados; E2E repetido 5× sem falhas após correções de concorrência |
-| 12 | Empacotamento | ✅ | Instalador NSIS gerado (`Vinlancord-Setup-1.0.0.exe`, 122 MB, PE32+ x64 com metadados e ícone); app Electron testado (E2E desktop) |
+| 12 | Empacotamento | ✅ | Instalador NSIS gerado no Linux (Wine) e **no GitHub Actions em `windows-latest`** (artefato *Vinlancord-Windows*, 122 MB); app Electron testado (E2E desktop) |
 
 ### Testes automatizados
 
@@ -27,6 +27,8 @@ apps/server      · 34 testes  (integração com PostgreSQL real, gateway WebSoc
 apps/web         · 15 testes  (Markdown e XSS, atalhos, temas, emojis, formatação)
 e2e              ·  2 testes  (dois usuários com mídia real; app desktop Electron)
 ```
+
+No **GitHub Actions** (máquinas limpas, independentes deste ambiente) o workflow `Vinlancord` passou: tipos, testes unitários e de integração, build, E2E com dois usuários e geração do instalador num Windows real.
 
 O E2E de dois usuários cobre, em sequência: cadastro → pedido de amizade em tempo real → DM com Markdown e indicador de digitação → criação de servidor → convite → entrada do segundo usuário → menção, reação e imagem → canal de voz com áudio real nos dois sentidos → câmera → compartilhamento de tela → **queda de rede e reconexão sem perder a chamada** → chamada privada com toque e atendimento → persistência após recarregar.
 
@@ -40,7 +42,7 @@ O E2E de dois usuários cobre, em sequência: cadastro → pedido de amizade em 
 
 ## Limitações conhecidas (honestas)
 
-- **Instalador não executado em um Windows real neste ambiente.** Ele foi gerado com electron-builder + Wine e inspecionado (executável PE32+ x64, metadados, `app.asar` com 349 arquivos), mas o Wine do container não conseguiu rodar o instalador. O workflow do GitHub Actions gera e valida num `windows-latest`. **Primeiro teste recomendado: instalar no seu PC.**
+- **Instalação em um Windows real ainda não foi feita por mim.** O instalador é gerado com sucesso no `windows-latest` do GitHub Actions e foi inspecionado (executável PE32+ x64, metadados, `app.asar` com 349 arquivos), mas ninguém o executou num PC ainda. **Primeiro teste recomendado: instalar no seu PC** (baixe o artefato *Vinlancord-Windows* da última execução do workflow).
 - **Áudio do sistema (Windows)**: usa o *loopback* do Chromium, que captura todo o som do PC. Pedimos `restrictOwnAudio` para excluir o áudio do próprio app, mas o suporte depende da versão do Chromium — use fones ao transmitir com áudio para evitar eco nos espectadores. Captura de áudio de um único aplicativo não está implementada.
 - **Imagem Docker** não foi construída aqui (o container não tem daemon Docker); o bundle que ela executa (`apps/server/dist/index.js`) foi testado em modo produção.
 - **Assinatura de código**: sem certificado, o SmartScreen avisa na primeira execução.
