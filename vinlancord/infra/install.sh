@@ -33,9 +33,11 @@ die() { printf '\033[1;31m✗ %s\033[0m\n' "$*" >&2; exit 1; }
 # ─── 1. Pacotes, Docker e memória ────────────────────────────────────────────
 if [ "$CI_MODE" != 1 ]; then
   export DEBIAN_FRONTEND=noninteractive
+  # no primeiro boot o apt pode estar ocupado com atualizações automáticas: espera em vez de falhar
+  echo 'DPkg::Lock::Timeout "900";' > /etc/apt/apt.conf.d/99vinlancord-lock
   say "Instalando pacotes base…"
   apt-get update -qq
-  apt-get install -y -qq git curl ca-certificates openssl ufw >/dev/null
+  apt-get install -y -qq git curl ca-certificates openssl >/dev/null
   if ! command -v docker >/dev/null 2>&1; then
     say "Instalando Docker…"
     curl -fsSL https://get.docker.com | sh >/dev/null
@@ -101,16 +103,33 @@ fi
 set -a; . "$ENVF"; set +a
 
 # ─── 4. Firewall ─────────────────────────────────────────────────────────────
+PORTS=("tcp 80" "tcp 443" "udp 443" "tcp 3478" "udp 3478" "tcp 40000:40003" "udp 40000:40003" "udp 49160:49200")
 if [ "$CI_MODE" != 1 ]; then
   say "Liberando portas (web, voz, vídeo e TURN)…"
-  ufw allow OpenSSH >/dev/null
-  ufw allow 80/tcp >/dev/null
-  ufw allow 443 >/dev/null
-  ufw allow 3478 >/dev/null
-  ufw allow 40000:40003/udp >/dev/null
-  ufw allow 40000:40003/tcp >/dev/null
-  ufw allow 49160:49200/udp >/dev/null
-  ufw --force enable >/dev/null
+  if iptables -S INPUT 2>/dev/null | grep -q -- '-j REJECT'; then
+    # Imagens da Oracle Cloud (e similares) já trazem iptables com REJECT no fim:
+    # abre só as portas do Vinlancord antes do REJECT e salva para sobreviver a reinícios.
+    add=""
+    for spec in "${PORTS[@]}"; do
+      read -r proto port <<<"$spec"
+      rule=(-p "$proto" -m state --state NEW -m "$proto" --dport "$port" -m comment --comment vinlancord -j ACCEPT)
+      iptables -C INPUT "${rule[@]}" 2>/dev/null || iptables -I INPUT 1 "${rule[@]}"
+      add+="-A INPUT ${rule[*]}"$'\n'
+    done
+    # grava as mesmas regras no arquivo carregado no boot (antes do REJECT), sem salvar as regras do Docker
+    RULES=/etc/iptables/rules.v4
+    if [ -f "$RULES" ] && ! grep -q 'vinlancord' "$RULES"; then
+      awk -v add="$add" '!done && /^-A INPUT .*-j REJECT/ { printf "%s", add; done = 1 } { print }' "$RULES" > "$RULES.tmp" && mv "$RULES.tmp" "$RULES"
+    fi
+  else
+    apt-get install -y -qq ufw >/dev/null
+    ufw allow OpenSSH >/dev/null
+    for spec in "${PORTS[@]}"; do
+      read -r proto port <<<"$spec"
+      ufw allow "$port/$proto" >/dev/null
+    done
+    ufw --force enable >/dev/null
+  fi
 fi
 
 # ─── 5. Subir tudo ───────────────────────────────────────────────────────────

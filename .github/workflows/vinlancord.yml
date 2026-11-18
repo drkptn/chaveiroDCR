@@ -75,8 +75,15 @@ jobs:
           path: vinlancord/e2e/test-results
 
   docker:
-    name: Servidor em Docker (instalador de 1 comando + chamada real)
-    runs-on: ubuntu-latest
+    name: Servidor em Docker ${{ matrix.arch }} (instalador de 1 comando + chamada real)
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, arch: x64 }
+          # mesma arquitetura das VMs grátis Ampere (ARM) da Oracle Cloud
+          - { os: ubuntu-24.04-arm, arch: arm64 }
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - name: Instalar com infra/install.sh (modo CI, TLS local)
