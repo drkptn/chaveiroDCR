@@ -50,12 +50,12 @@ function MenuList({ x, y, items, root }: { x: number; y: number; items: MenuItem
     <div
       ref={ref}
       data-menu
-      className="fixed z-[90] min-w-[200px] max-w-[280px] animate-pop-in rounded-xl border border-line-strong bg-bg-1 p-1.5 shadow-[var(--vl-shadow)]"
+      className="vl-pop fixed z-[90] min-w-[200px] max-w-[280px] animate-pop-in rounded-xl border border-line-strong bg-bg-1/95 p-1.5 shadow-[var(--vl-shadow)] backdrop-blur-xl"
       style={pos}
       onContextMenu={(e) => e.preventDefault()}
     >
       {items.map((it, i) => {
-        if (it.separator) return <div key={i} className="mx-1 my-1 h-px bg-line" />;
+        if (it.separator) return <div key={i} className="vl-rule mx-1 my-1 h-px bg-line" />;
         if (it.render) return <div key={i} className="px-2 py-1.5">{it.render}</div>;
         return (
           <button
@@ -73,8 +73,8 @@ function MenuList({ x, y, items, root }: { x: number; y: number; items: MenuItem
               it.onClick?.();
             }}
             className={cx(
-              'flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-[13px] font-medium transition-colors disabled:opacity-40',
-              it.danger ? 'text-danger hover:bg-danger hover:text-white' : 'text-fg-1 hover:bg-accent hover:text-accent-fg',
+              'flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-[13px] font-medium transition-all hover:pl-3 disabled:opacity-40',
+              it.danger ? 'text-danger hover:bg-danger hover:text-white' : 'text-fg-1 hover:bg-accent hover:text-accent-fg hover:shadow-[0_0_16px_-6px_var(--vl-glow-color)]',
             )}
           >
             {it.icon && <span className="grid size-4 place-items-center opacity-90">{it.icon}</span>}
@@ -103,8 +103,9 @@ export function Toasts() {
             ui.dismiss(t.id);
           }}
           className={cx(
-            'pointer-events-auto flex animate-slide-in-right items-start gap-3 rounded-xl border bg-bg-1/95 p-3 shadow-[var(--vl-shadow)] backdrop-blur',
-            t.kind === 'error' ? 'border-danger/40' : 'border-line-strong',
+            'vl-cut pointer-events-auto relative flex animate-slide-in-right items-start gap-3 overflow-hidden rounded-xl border bg-bg-1/95 p-3 shadow-[var(--vl-shadow)] backdrop-blur-xl',
+            'before:absolute before:inset-y-0 before:left-0 before:w-[3px]',
+            t.kind === 'error' ? 'border-danger/40 before:bg-danger' : t.kind === 'success' ? 'border-line-strong before:bg-success' : 'border-line-strong before:bg-accent before:shadow-[0_0_12px_var(--vl-accent)]',
             t.onClick && 'cursor-pointer hover:bg-bg-3',
           )}
         >

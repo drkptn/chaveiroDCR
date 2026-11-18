@@ -15,7 +15,7 @@ Registro do que foi feito em cada etapa, como foi verificado, o que ficou de for
 | 7 | Chamadas de voz | ✅ | 4 testes de sinalização (entrar/sair, permissões, moderação, retomada após queda, chamada privada) + E2E com **bytes de áudio reais** nos dois sentidos |
 | 8 | Chamadas de vídeo | ✅ | E2E: câmera de um usuário chega ao outro (`videoWidth > 0`, bytes de vídeo crescendo) |
 | 9 | Tela e áudio | ✅ | E2E: transmissão de tela, “Assistir transmissão”, vídeo ≥ 640 px no espectador; áudio do sistema implementado para Windows (validação manual pendente — ver abaixo) |
-| 10 | Notificações e personalização | ✅ | Sons, notificações do sistema, toasts, badge, níveis por servidor/canal, temas e atalhos; testes de unidade de atalhos e temas |
+| 10 | Notificações e personalização | ✅ | Sons, notificações do sistema, toasts, badge, níveis por servidor/canal e atalhos; **Estúdio de Aparência** (9 estéticas, cores, fontes, formas, fundo animado, transições, CSS) com testes de unidade e E2E de sincronização entre dispositivos |
 | 11 | Segurança, otimização e testes | ✅ | 60 testes automatizados; E2E repetido 5× sem falhas após correções de concorrência |
 | 12 | Empacotamento | ✅ | Instalador NSIS gerado no Linux (Wine) e **no GitHub Actions em `windows-latest`** (artefato *Vinlancord-Windows*, 122 MB); app Electron testado (E2E desktop) |
 
@@ -24,8 +24,8 @@ Registro do que foi feito em cada etapa, como foi verificado, o que ficou de for
 ```
 packages/shared  ·  9 testes  (permissões, snowflake, menções)
 apps/server      · 34 testes  (integração com PostgreSQL real, gateway WebSocket e mediasoup)
-apps/web         · 15 testes  (Markdown e XSS, atalhos, temas, emojis, formatação)
-e2e              ·  2 testes  (dois usuários com mídia real; app desktop Electron)
+apps/web         · 21 testes  (Markdown e XSS, atalhos, estéticas, paletas, CSS seguro, emojis, formatação)
+e2e              ·  3 testes  (dois usuários com mídia real; personalização sincronizada; app desktop Electron)
 ```
 
 No **GitHub Actions** (máquinas limpas, independentes deste ambiente) o workflow `Vinlancord` passou: tipos, testes unitários e de integração, build, E2E com dois usuários e geração do instalador num Windows real.
@@ -39,6 +39,16 @@ O E2E de dois usuários cobre, em sequência: cadastro → pedido de amizade em 
 - Indicador de digitação descartado logo após enviar uma mensagem.
 - Re-renderização infinita causada por seletores que criavam arrays novos a cada chamada (Zustand 5).
 - Menções exibidas como “usuário desconhecido” (faltava o provedor de resolução do Markdown).
+
+## Interface (reformulação visual)
+
+A interface ganhou identidade própria, inspirada em estéticas sombrias de anime (gótico, militar, imperial) **sem usar nomes, símbolos ou artes de nenhuma obra** — todos os sigilos, ornamentos e efeitos são desenhados do zero.
+
+- **Motor de aparência** (`apps/web/src/lib/themes.ts`): cada estética define cores, fontes, formas, atmosfera, transições e estilo de mensagens; aplica via variáveis CSS e atributos no `<html>`, sem recarregar.
+- **Fundo vivo** (`lib/particles.ts`, `components/Ambience.tsx`): canvas 2D com FPS limitado, pausa com a janela oculta e reduz para 15 FPS sem foco.
+- **Governador de desempenho** (`lib/perf.ts`): mede o FPS real; se o PC não der conta, liga o modo leve (sem desfoque de vidro, menos partículas). Pode ser forçado no Estúdio.
+- **Sincronização**: a aparência fica em `settings.appearance` (validada pelo servidor) e chega aos outros dispositivos pelo gateway; a imagem de fundo fica só no dispositivo.
+- **Segurança do CSS personalizado**: `@import`, `url()` externos, `image-set()` e escapes são removidos — um tema importado não consegue carregar nada da internet.
 
 ## Limitações conhecidas (honestas)
 

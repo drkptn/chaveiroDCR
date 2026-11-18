@@ -6,7 +6,6 @@ import {
   Volume2,
   Video,
   ChevronDown,
-  ChevronRight,
   Plus,
   Settings,
   UserPlus,
@@ -36,13 +35,15 @@ import { useVoice } from '../../lib/voice/engine';
 import { joinVoice } from '../../store/actions';
 import { api } from '../../lib/api';
 import { useGuildPerms, useChannelPerms } from '../../lib/perms';
-import { Avatar, Badge, GuildIcon, cx, usePresenceStatus } from '../ui';
+import { Avatar, Badge, cx, usePresenceStatus } from '../ui';
+import { useAppearance } from '../../store/appearance';
+import { roman } from '../../lib/format';
 import { UserPanel } from './UserPanel';
 import { VoicePanel } from './VoicePanel';
 
 function SidebarShell({ header, children }: { header: ReactNode; children: ReactNode }) {
   return (
-    <aside className="flex w-60 shrink-0 flex-col bg-bg-1">
+    <aside className="vl-panel vl-side flex w-60 shrink-0 flex-col">
       {header}
       <div className="scroll-thin min-h-0 flex-1 overflow-y-auto px-2 pb-2">{children}</div>
       <VoicePanel />
@@ -63,7 +64,8 @@ export function GuildSidebar() {
   const perms = useGuildPerms(guildId!);
   const [menuOpen, setMenuOpen] = useState(false);
   const muted = useStore((s) => isMuted(s, guildId!));
-  if (!guild) return <aside className="w-60 shrink-0 bg-bg-1" />;
+  const chapters = useAppearance((s) => s.current.chapterNumbers);
+  if (!guild) return <aside className="vl-panel vl-side w-60 shrink-0" />;
 
   const canManage = has(perms, P.MANAGE_GUILD) || has(perms, P.MANAGE_ROLES) || has(perms, P.BAN_MEMBERS) || has(perms, P.MANAGE_EMOJIS) || has(perms, P.KICK_MEMBERS);
   const header = (
@@ -77,15 +79,15 @@ export function GuildSidebar() {
       <button
         onClick={() => setMenuOpen(!menuOpen)}
         className={cx(
-          'flex h-12 w-full items-center gap-2 px-4 text-left font-display font-semibold text-fg transition hover:bg-bg-3',
-          guild.banner ? 'absolute inset-x-0 top-0 text-white [text-shadow:0_1px_4px_rgba(0,0,0,.7)] hover:bg-black/20' : 'border-b border-line',
+          'flex h-12 w-full items-center gap-2 px-4 text-left font-heading text-[17px] text-fg transition hover:bg-bg-3/60',
+          guild.banner ? 'absolute inset-x-0 top-0 text-white [text-shadow:0_1px_4px_rgba(0,0,0,.7)] hover:bg-black/20' : 'vl-header',
         )}
       >
         <span className="flex-1 truncate">{guild.name}</span>
         {menuOpen ? <X size={18} /> : <ChevronDown size={18} />}
       </button>
       {menuOpen && (
-        <div className="absolute inset-x-2 top-[52px] z-30 animate-pop-in rounded-xl border border-line-strong bg-bg-1 p-1.5 shadow-[var(--vl-shadow)]" onMouseLeave={() => setMenuOpen(false)}>
+        <div className="vl-pop vl-stagger absolute inset-x-2 top-[52px] z-30 animate-pop-in rounded-xl border border-line-strong bg-bg-1/95 p-1.5 shadow-[var(--vl-shadow)] backdrop-blur-xl" onMouseLeave={() => setMenuOpen(false)}>
           {[
             has(perms, P.CREATE_INVITE) && { label: 'Convidar pessoas', icon: <UserPlus size={16} />, accent: true, onClick: () => ui.open({ type: 'invite', guildId: guild.id }) },
             canManage && { label: 'Configurações do servidor', icon: <Settings size={16} />, onClick: () => ui.open({ type: 'serverSettings', guildId: guild.id }) },
@@ -136,14 +138,15 @@ export function GuildSidebar() {
       {tree.uncategorized.map((c) => (
         <ChannelRow key={c.id} channel={c} active={c.id === channelId} />
       ))}
-      {tree.categories.map(({ cat, channels }) => (
+      {tree.categories.map(({ cat, channels }, ci) => (
         <div key={cat.id} className="mt-3">
           <div
-            className="group flex cursor-pointer items-center gap-0.5 px-1 py-1 text-[11px] font-semibold uppercase tracking-wider text-fg-2 hover:text-fg-1"
+            className="group flex cursor-pointer items-center gap-1 px-1 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-fg-2 hover:text-fg-1"
             onClick={() => toggleCat(cat.id)}
             onContextMenu={(e) => channelMenu(e, cat)}
           >
-            {collapsed[cat.id] ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+            <ChevronDown size={12} className={cx('shrink-0 transition-transform', collapsed[cat.id] && '-rotate-90')} />
+            {chapters && <span className="vl-chapter text-[12px] normal-case">{roman(ci + 1)}.</span>}
             <span className="flex-1 truncate">{cat.name}</span>
             {has(perms, P.MANAGE_CHANNELS) && (
               <button
@@ -247,14 +250,18 @@ function ChannelRow({ channel: c, active }: { channel: Channel; active: boolean 
         onKeyDown={(e) => e.key === 'Enter' && open()}
         onContextMenu={(e) => channelMenu(e, c)}
         className={cx(
-          'group relative flex h-8 cursor-pointer items-center gap-1.5 rounded-md px-2 transition-colors',
-          active ? 'bg-bg-4 text-fg' : unread ? 'text-fg hover:bg-bg-3' : 'text-fg-2 hover:bg-bg-3 hover:text-fg-1',
+          'group relative flex h-8 cursor-pointer items-center gap-1.5 overflow-hidden rounded-md px-2 transition-all',
+          active
+            ? 'bg-gradient-to-r from-accent/20 via-bg-4/80 to-bg-4/40 text-fg shadow-[inset_2px_0_0_var(--vl-accent)]'
+            : unread
+              ? 'text-fg hover:translate-x-0.5 hover:bg-bg-3/70'
+              : 'text-fg-2 hover:translate-x-0.5 hover:bg-bg-3/70 hover:text-fg-1',
           muted && !active && 'opacity-50',
         )}
       >
-        {unread && !active && <span className="absolute -left-2 h-2 w-1 rounded-r-full bg-fg" />}
+        {unread && !active && <span className="absolute left-0 h-2 w-1 rounded-r-full bg-accent shadow-[0_0_8px_var(--vl-accent)]" />}
         <span className="relative">
-          <Icon size={18} className="shrink-0 opacity-70" />
+          <Icon size={18} className={cx('shrink-0 transition', active ? 'text-accent opacity-100' : 'opacity-70')} />
           {priv && <Lock size={9} className="absolute -right-1 -top-0.5 rounded-sm bg-bg-1" />}
         </span>
         <span className={cx('flex-1 truncate text-[14.5px]', unread && 'font-semibold')}>{c.name}</span>
@@ -333,8 +340,8 @@ export function HomeSidebar() {
   const dmIds = useStore((s) => s.privateChannelIds);
   const pending = useStore((s) => Object.values(s.relationships).filter((r) => r.type === 'incoming').length);
   const header = (
-    <div className="flex h-12 shrink-0 items-center border-b border-line px-2.5">
-      <button onClick={() => ui.open({ type: 'quickSwitcher' })} className="flex h-8 w-full items-center gap-2 rounded-md bg-bg-0 px-2.5 text-left text-[13px] text-fg-2 transition hover:text-fg-1">
+    <div className="vl-header flex h-12 shrink-0 items-center px-2.5">
+      <button onClick={() => ui.open({ type: 'quickSwitcher' })} className="vl-cut-sm flex h-8 w-full items-center gap-2 rounded-md border border-line bg-bg-0/70 px-2.5 text-left text-[13px] text-fg-2 transition hover:border-accent/50 hover:text-fg-1">
         <Search size={14} className="shrink-0" /> <span className="truncate">Encontre ou comece uma conversa</span>
       </button>
     </div>
@@ -350,8 +357,8 @@ export function HomeSidebar() {
             key={l.to}
             onClick={() => nav(l.to)}
             className={cx(
-              'flex h-10 w-full items-center gap-3 rounded-md px-2.5 text-[14.5px] font-medium transition',
-              loc.pathname === l.to ? 'bg-bg-4 text-fg' : 'text-fg-2 hover:bg-bg-3 hover:text-fg-1',
+              'flex h-10 w-full items-center gap-3 rounded-md px-2.5 text-[14.5px] font-medium transition-all',
+              loc.pathname === l.to ? 'bg-gradient-to-r from-accent/20 via-bg-4/80 to-bg-4/40 text-fg shadow-[inset_2px_0_0_var(--vl-accent)]' : 'text-fg-2 hover:translate-x-0.5 hover:bg-bg-3/70 hover:text-fg-1',
             )}
           >
             {l.icon}
@@ -360,7 +367,7 @@ export function HomeSidebar() {
           </button>
         ))}
       </div>
-      <div className="mt-4 flex items-center justify-between px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-wider text-fg-2">
+      <div className="mt-4 flex items-center justify-between px-2.5 pb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-fg-2">
         Mensagens diretas
         <button onClick={() => ui.open({ type: 'newGroup' })} className="hover:text-fg" aria-label="Criar grupo">
           <Plus size={15} />
@@ -401,12 +408,16 @@ function DMRow({ id, active }: { id: string; active: boolean }) {
         ])
       }
       className={cx(
-        'group mt-px flex h-11 cursor-pointer items-center gap-3 rounded-md px-2 transition-colors',
-        active ? 'bg-bg-4 text-fg' : unread ? 'text-fg hover:bg-bg-3' : 'text-fg-2 hover:bg-bg-3 hover:text-fg-1',
+        'group mt-px flex h-11 cursor-pointer items-center gap-3 rounded-md px-2 transition-all',
+        active
+          ? 'bg-gradient-to-r from-accent/20 via-bg-4/80 to-bg-4/40 text-fg shadow-[inset_2px_0_0_var(--vl-accent)]'
+          : unread
+            ? 'text-fg hover:translate-x-0.5 hover:bg-bg-3/70'
+            : 'text-fg-2 hover:translate-x-0.5 hover:bg-bg-3/70 hover:text-fg-1',
       )}
     >
       {other ? (
-        <Avatar userId={other} size={32} status={status} ring={active ? 'var(--vl-bg-4)' : 'var(--vl-bg-1)'} />
+        <Avatar userId={other} size={32} status={status} ring="var(--vl-bg-2)" />
       ) : (
         <span className="grid size-8 place-items-center rounded-full gradient-accent text-white">
           {ch.icon ? <img src={ch.icon} className="size-8 rounded-full object-cover" alt="" /> : <Users size={16} />}

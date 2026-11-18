@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { HashRouter, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router';
 import { WifiOff, MailWarning, X } from 'lucide-react';
 import { useStore, S, sortedGuildChannels } from './store';
@@ -8,7 +9,9 @@ import { ackChannel } from './store/actions';
 import { api } from './lib/api';
 import { gateway } from './lib/gateway';
 import { setNavigate } from './lib/nav';
-import { applyTheme } from './lib/themes';
+import { applyAppearance } from './lib/themes';
+import { useAppearance, syncAppearance } from './store/appearance';
+import { Ambience } from './components/Ambience';
 import { desktop } from './lib/desktop';
 import { badgeCount } from './lib/notify';
 import { setSoundVolume, setSoundOutput } from './lib/sounds';
@@ -34,17 +37,15 @@ function NavigationBridge() {
 }
 
 function ThemeApplier() {
-  const s = useStore((st) => st.settings);
+  const settings = useStore((st) => st.settings);
+  const booted = useStore((st) => st.booted);
   const custom = useLocal((st) => st.customThemes);
+  const current = useAppearance((s) => s.current);
   useEffect(() => {
-    applyTheme({ theme: s.theme, mode: s.mode, accent: s.accent, fontScale: s.fontScale, reduceMotion: s.reduceMotion, custom });
-    if (s.mode !== 'system') return;
-    const mq = matchMedia('(prefers-color-scheme: dark)');
-    const f = () => applyTheme({ theme: s.theme, mode: s.mode, accent: s.accent, fontScale: s.fontScale, reduceMotion: s.reduceMotion, custom });
-    mq.addEventListener('change', f);
-    return () => mq.removeEventListener('change', f);
-  }, [s.theme, s.mode, s.accent, s.fontScale, s.reduceMotion, custom]);
-  return null;
+    if (booted) syncAppearance(settings, custom);
+  }, [settings, custom, booted]);
+  useEffect(() => applyAppearance(current, { fontScale: settings.fontScale, reduceMotion: settings.reduceMotion }), [current, settings.fontScale, settings.reduceMotion]);
+  return createPortal(<Ambience />, document.body);
 }
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -72,7 +73,7 @@ function GuildRoute() {
     return (
       <>
         <GuildSidebar />
-        <main className="grid flex-1 place-items-center bg-bg-2 text-fg-2">Nenhum canal disponível.</main>
+        <main className="vl-panel grid flex-1 place-items-center text-fg-2">Nenhum canal disponível.</main>
       </>
     );
   }
@@ -287,7 +288,7 @@ function AppShell() {
       <TitleBar />
       <ConnectionBanner />
       <VerifyBanner />
-      <div className="flex min-h-0 flex-1">
+      <div className="vl-stage flex min-h-0 flex-1">
         <ServerRail />
         <Routes>
           <Route path="/channels/@me" element={<><HomeSidebar /><FriendsView /></>} />
@@ -306,7 +307,7 @@ function AppShell() {
 
 function NotFoundGuard() {
   return (
-    <div className="grid h-full place-items-center bg-bg-0 text-fg">
+    <div className="grid h-full place-items-center text-fg">
       <div className="text-center">
         <div className="font-display text-2xl font-bold">Página não encontrada</div>
         <Button className="mt-4" onClick={() => (location.hash = '#/channels/@me')}>Voltar</Button>

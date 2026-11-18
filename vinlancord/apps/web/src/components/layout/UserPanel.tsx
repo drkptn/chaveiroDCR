@@ -39,11 +39,11 @@ export function UserPanel() {
   };
 
   return (
-    <div className="flex h-[54px] shrink-0 items-center gap-1 border-t border-line bg-bg-0/60 px-2">
-      <button onClick={statusMenu} className="flex min-w-0 flex-1 items-center gap-2 rounded-md p-1 text-left transition hover:bg-bg-4">
+    <div className="relative flex h-[56px] shrink-0 items-center gap-1 border-t border-line bg-bg-0/50 px-2 backdrop-blur-sm">
+      <button onClick={statusMenu} className="group flex min-w-0 flex-1 items-center gap-2 rounded-md p-1 text-left transition hover:bg-bg-4/70">
         <Avatar userId={me.id} size={34} status={status} ring="var(--vl-bg-1)" />
         <div className="min-w-0 leading-tight">
-          <div className="truncate text-[13.5px] font-semibold text-fg">{me.displayName}</div>
+          <div className="truncate text-[13.5px] font-semibold text-fg transition group-hover:text-accent">{me.displayName}</div>
           <div className="truncate text-[11.5px] text-fg-2">
             {me.customStatus ? `${me.customStatus.emoji ?? ''} ${me.customStatus.text ?? ''}`.trim() : status === 'offline' && me.status !== 'invisible' ? 'Conectando…' : STATUS_LABEL[me.status === 'invisible' ? 'invisible' : status]}
           </div>

@@ -14,7 +14,10 @@ function Pill({ state }: { state: 'none' | 'unread' | 'hover' | 'active' }) {
   const h = { none: 0, unread: 8, hover: 20, active: 40 }[state];
   return (
     <span
-      className="absolute -left-3 top-1/2 w-1 -translate-y-1/2 rounded-r-full bg-fg transition-all duration-200"
+      className={cx(
+        'absolute left-0 top-1/2 w-1 -translate-y-1/2 rounded-r-full transition-all [transition-duration:calc(.3s*var(--vl-dur-mult))] [transition-timing-function:var(--vl-ease-back)]',
+        state === 'active' ? 'bg-accent shadow-[0_0_12px_var(--vl-accent)]' : 'bg-fg',
+      )}
       style={{ height: h, opacity: h ? 1 : 0 }}
     />
   );
@@ -32,22 +35,21 @@ function RailItem({ active, unread, mentions, label, onClick, onContextMenu, chi
 }) {
   const [hover, setHover] = useState(false);
   return (
-    <div className="relative flex justify-center" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+    <div className="relative flex w-full justify-center" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <Pill state={active ? 'active' : hover ? 'hover' : unread ? 'unread' : 'none'} />
-      <Tooltip label={label} side="right" delay={80}>
-        <button
-          aria-label={typeof label === 'string' ? label : undefined}
-          onClick={onClick}
-          onContextMenu={onContextMenu}
-          className={cx(
-            'focus-ring relative grid size-12 place-items-center overflow-hidden transition-all duration-200',
-            active ? 'rounded-2xl' : 'rounded-[24px] hover:rounded-2xl',
-            className,
-          )}
-        >
-          {children}
-        </button>
-      </Tooltip>
+      <span className="vl-shape-wrap transition-[filter]" data-active={active}>
+        <Tooltip label={label} side="right" delay={80}>
+          <button
+            aria-label={typeof label === 'string' ? label : undefined}
+            onClick={onClick}
+            onContextMenu={onContextMenu}
+            data-active={active}
+            className={cx('vl-shape focus-ring relative grid size-12 place-items-center overflow-hidden', className)}
+          >
+            {children}
+          </button>
+        </Tooltip>
+      </span>
       {!!mentions && (
         <span className="pointer-events-none absolute -bottom-0.5 right-1.5">
           <Badge count={mentions} className="ring-4 ring-bg-0" />
@@ -160,9 +162,9 @@ export function ServerRail() {
   };
 
   return (
-    <nav className="scroll-none flex w-[72px] shrink-0 flex-col items-center gap-2 overflow-y-auto bg-bg-0 py-3" aria-label="Servidores">
-      <RailItem active={home} label="Mensagens diretas" mentions={dmMentions} onClick={() => nav('/channels/@me')} className={home ? 'gradient-accent' : 'bg-bg-3 hover:bg-accent'}>
-        <LogoMark size={home ? 48 : 34} className="transition-all" />
+    <nav className="vl-rail scroll-none flex w-[72px] shrink-0 flex-col items-center gap-2 overflow-y-auto py-3" aria-label="Servidores">
+      <RailItem active={home} label="Mensagens diretas" mentions={dmMentions} onClick={() => nav('/channels/@me')} className={home ? 'bg-accent/15' : 'bg-bg-3/80 hover:bg-accent/20'}>
+        <LogoMark size={home ? 44 : 34} className={cx('transition-all', home && 'vl-glow-pulse')} />
       </RailItem>
 
       {unreadDMs.map((id) => {
@@ -176,7 +178,10 @@ export function ServerRail() {
         );
       })}
 
-      <div className="mx-auto my-1 h-0.5 w-8 rounded-full bg-line-strong" />
+      <div className="relative mx-auto my-1 flex w-10 items-center justify-center">
+        <span className="h-px w-full bg-gradient-to-r from-transparent via-accent/70 to-transparent" />
+        <span className="vl-ornament absolute size-1.5 rotate-45 bg-accent shadow-[0_0_8px_var(--vl-accent)]" />
+      </div>
 
       {guildOrder.map((gid) => {
         const g = guilds[gid];
@@ -189,7 +194,7 @@ export function ServerRail() {
             onDragStart={() => setDrag(gid)}
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => onDrop(gid)}
-            className={cx('w-full', drag === gid && 'opacity-40')}
+            className={cx('w-full animate-pop-in', drag === gid && 'opacity-40')}
           >
             <RailItem
               active={activeGuild === gid}
@@ -201,7 +206,7 @@ export function ServerRail() {
                 nav(`/channels/${gid}${last && S().channels[last] ? '/' + last : ''}`);
               }}
               onContextMenu={(e) => guildMenu(e, gid)}
-              className="bg-bg-3"
+              className="bg-bg-3/80"
             >
               <GuildIcon guild={g} size={48} />
             </RailItem>
@@ -209,10 +214,10 @@ export function ServerRail() {
         );
       })}
 
-      <RailItem active={false} label="Criar ou entrar em um servidor" onClick={() => ui.open({ type: 'createServer' })} className="bg-bg-3 text-success hover:bg-success hover:text-white">
-        <Plus size={24} />
+      <RailItem active={false} label="Criar ou entrar em um servidor" onClick={() => ui.open({ type: 'createServer' })} className="group bg-bg-3/80 text-accent hover:bg-accent hover:text-accent-fg">
+        <Plus size={24} className="transition-transform duration-300 group-hover:rotate-90" />
       </RailItem>
-      <RailItem active={loc.pathname === '/discover'} label="Explorar servidores públicos" onClick={() => nav('/discover')} className={loc.pathname === '/discover' ? 'bg-success text-white' : 'bg-bg-3 text-success hover:bg-success hover:text-white'}>
+      <RailItem active={loc.pathname === '/discover'} label="Explorar servidores públicos" onClick={() => nav('/discover')} className={loc.pathname === '/discover' ? 'bg-accent text-accent-fg' : 'bg-bg-3/80 text-accent hover:bg-accent hover:text-accent-fg'}>
         <Compass size={24} />
       </RailItem>
     </nav>

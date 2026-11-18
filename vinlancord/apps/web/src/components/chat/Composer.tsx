@@ -1,6 +1,6 @@
 /** Caixa de mensagem: texto com Markdown, menções, emojis, GIFs, figurinhas, anexos e respostas. */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { PlusCircle, Smile, ImagePlay, Sticker, X, FileText, EyeOff, Eye, Lock, Ban } from 'lucide-react';
+import { PlusCircle, Smile, ImagePlay, Sticker, X, FileText, EyeOff, Eye, Lock, Ban, Feather } from 'lucide-react';
 import { LIMITS, P, formatBytes, has, type Channel } from '@vinlancord/shared';
 import { useStore, displayName, S } from '../../store';
 import { useUI, ui } from '../../store/ui';
@@ -253,13 +253,13 @@ export function Composer({ channel }: { channel: Channel }) {
       {dragOver && (
         <div className="pointer-events-none absolute inset-x-4 bottom-2 top-[-120px] z-30 grid place-items-center rounded-2xl border-2 border-dashed border-accent bg-accent/10 backdrop-blur-sm animate-fade-in">
           <div className="text-center">
-            <div className="font-display text-xl font-bold text-fg">Solte para enviar</div>
+            <div className="font-display text-3xl text-fg text-glow">Solte para enviar</div>
             <div className="text-sm text-fg-1">Até {LIMITS.ATTACHMENTS_PER_MESSAGE} arquivos de {formatBytes(LIMITS.ATTACHMENT_MAX_SIZE)}</div>
           </div>
         </div>
       )}
       {sugg && (
-        <div className="absolute inset-x-4 bottom-full z-30 mb-1 overflow-hidden rounded-xl border border-line-strong bg-bg-1 p-1 shadow-[var(--vl-shadow)] animate-pop-in">
+        <div className="vl-pop absolute inset-x-4 bottom-full z-30 mb-1 overflow-hidden rounded-xl border border-line-strong bg-bg-1/95 p-1 shadow-[var(--vl-shadow)] backdrop-blur-xl animate-pop-in">
           {sugg.items.map((it, i) => (
             <button
               key={it.key}
@@ -268,7 +268,7 @@ export function Composer({ channel }: { channel: Channel }) {
                 applySuggestion(it);
               }}
               onMouseEnter={() => setSugg({ ...sugg, index: i })}
-              className={cx('flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-sm', i === sugg.index ? 'bg-bg-4 text-fg' : 'text-fg-1')}
+              className={cx('flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left text-sm transition-colors', i === sugg.index ? 'bg-accent/20 text-fg shadow-[inset_2px_0_0_var(--vl-accent)]' : 'text-fg-1')}
             >
               {it.label}
               {it.sub && <span className="text-xs text-fg-2">{it.sub}</span>}
@@ -276,7 +276,7 @@ export function Composer({ channel }: { channel: Channel }) {
           ))}
         </div>
       )}
-      <div className="overflow-hidden rounded-xl border border-line bg-bg-3 transition focus-within:border-line-strong">
+      <div className="vl-cut overflow-hidden rounded-xl border border-line-strong bg-bg-3/85 shadow-[0_10px_30px_-18px_rgba(0,0,0,.8)] backdrop-blur-md transition-all focus-within:border-accent/60 focus-within:shadow-[0_0_0_3px_color-mix(in_oklab,var(--vl-accent)_15%,transparent),0_0_28px_-10px_var(--vl-glow-color)]">
         {replyMsg && (
           <div className="flex items-center gap-2 border-b border-line bg-bg-1 px-4 py-2 text-[13px] text-fg-2 animate-fade-in">
             Respondendo a <b className="text-fg">{displayName(replyMsg.author.id, channel.guildId)}</b>
@@ -372,9 +372,10 @@ export function Composer({ channel }: { channel: Channel }) {
       <div className="flex h-6 items-center gap-1.5 px-1 text-[12px] text-fg-1">
         {typingUsers && (
           <>
+            <Feather size={13} className="vl-quill shrink-0 text-accent" aria-hidden />
             <span className="flex gap-0.5">
               {[0, 1, 2].map((i) => (
-                <span key={i} className="size-1.5 rounded-full bg-fg-1" style={{ animation: `wave 1.2s ${i * 0.15}s infinite` }} />
+                <span key={i} className="size-1 rounded-full bg-accent" style={{ animation: `wave 1.2s ${i * 0.15}s infinite` }} />
               ))}
             </span>
             <span className="truncate">{typingUsers}</span>

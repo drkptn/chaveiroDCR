@@ -1,5 +1,6 @@
 /** Estado global do cliente (entidades sincronizadas pelo gateway). */
 import { create } from 'zustand';
+import { markFresh } from '../lib/fresh';
 import {
   DEFAULT_SETTINGS,
   compareSnowflakes,
@@ -264,6 +265,8 @@ export const reducers: Record<string, Handler> = {
       if (m.author.id === s.me?.id) out.readStates = { ...s.readStates, [m.channelId]: { channelId: m.channelId, lastReadId: m.id, mentions: 0 } };
       const cm = s.messages[m.channelId];
       if (cm && !cm.hasMoreAfter) {
+        const replacesPending = !!m.nonce && cm.items.some((x) => x.pending && x.nonce === m.nonce);
+        if (!replacesPending && !cm.items.some((x) => x.id === m.id)) markFresh(m.id);
         const items = cm.items.filter((x) => x.id !== m.id && !(m.nonce && x.pending && x.nonce === m.nonce));
         items.push(m);
         // mantém a memória sob controle

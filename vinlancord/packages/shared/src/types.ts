@@ -356,7 +356,47 @@ export interface NotificationPrefs {
   dmLevel: 'all' | 'nothing';
 }
 
+export type CornerStyle = 'round' | 'soft' | 'sharp' | 'cut';
+export type IconShape = 'circle' | 'squircle' | 'diamond' | 'hexagon' | 'shield';
+export type AmbientEffect = 'none' | 'feathers' | 'ink' | 'embers' | 'ash' | 'sigils' | 'snow' | 'rain' | 'petals' | 'stars';
+export type TransitionStyle = 'none' | 'fade' | 'rise' | 'slash' | 'ink' | 'shutter';
+export type MessageStyle = 'flat' | 'cards' | 'letter';
+export type AnimationLevel = 'full' | 'reduced' | 'off';
+
+/** Aparência completa (sincronizada com a conta). Imagem de fundo fica só no dispositivo. */
+export interface Appearance {
+  preset: string;
+  mode: 'dark' | 'light';
+  colors: Record<string, string>;
+  displayFont: string;
+  bodyFont: string;
+  corners: CornerStyle;
+  serverShape: IconShape;
+  avatarShape: IconShape;
+  layout: 'floating' | 'classic';
+  panelOpacity: number;
+  blur: number;
+  glow: number;
+  ornaments: boolean;
+  effect: AmbientEffect;
+  effectIntensity: number;
+  fog: boolean;
+  grain: number;
+  vignette: number;
+  scanlines: boolean;
+  transition: TransitionStyle;
+  animations: AnimationLevel;
+  animSpeed: number;
+  messageStyle: MessageStyle;
+  chapterNumbers: boolean;
+  cursorTrail: boolean;
+  bgDim: number;
+  bgBlur: number;
+  customCss: string;
+}
+
 export interface UserSettings {
+  appearance?: Appearance;
   theme: string;
   mode: ThemeMode;
   accent: string;
@@ -373,7 +413,7 @@ export interface UserSettings {
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
-  theme: 'nebula',
+  theme: 'caderno',
   mode: 'dark',
   accent: '#7c5cff',
   fontScale: 1,

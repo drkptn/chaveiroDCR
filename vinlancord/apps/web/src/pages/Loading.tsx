@@ -1,29 +1,30 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw, LogOut } from 'lucide-react';
-import { LogoMark, Wordmark, Button } from '../components/ui';
+import { Button } from '../components/ui';
+import { Sigil, AnimatedWordmark } from '../components/brand';
 import { TitleBar } from '../components/layout/TitleBar';
 import { gateway } from '../lib/gateway';
 import { logout } from '../store/actions';
 import { useStore } from '../store';
 
 const PHRASES = [
+  'Molhando a pena no tinteiro…',
+  'Acendendo as tochas da muralha…',
+  'Movendo as peças no tabuleiro…',
   'Afinando os microfones…',
   'Acordando os servidores…',
-  'Esquentando as caixas de som…',
-  'Separando os emojis favoritos…',
-  'Chamando a galera…',
-  'Ajustando a câmera no melhor ângulo…',
-  'Desembolando os cabos…',
   'Conferindo quem está online…',
+  'Separando os emojis favoritos…',
+  'Desembolando os cabos…',
 ];
 
-/** Tela de carregamento enquanto o gateway conecta e o READY chega. */
+/** Tela de carregamento cinematográfica enquanto o gateway conecta e o READY chega. */
 export function LoadingScreen() {
   const [i, setI] = useState(() => Math.floor(Math.random() * PHRASES.length));
   const [slow, setSlow] = useState(false);
   const conn = useStore((s) => s.conn);
   useEffect(() => {
-    const t = setInterval(() => setI((x) => (x + 1) % PHRASES.length), 2200);
+    const t = setInterval(() => setI((x) => (x + 1) % PHRASES.length), 2400);
     const s = setTimeout(() => setSlow(true), 9000);
     return () => {
       clearInterval(t);
@@ -31,19 +32,17 @@ export function LoadingScreen() {
     };
   }, []);
   return (
-    <div className="flex h-full flex-col bg-bg-0">
+    <div className="flex h-full flex-col">
       <TitleBar />
       <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden">
-        <div className="absolute size-[420px] rounded-full bg-[#7c5cff]/20 blur-[110px]" />
+        {/* barras de cinema que se abrem */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[14vh] origin-top bg-black" style={{ animation: 'vl-letterbox calc(1.1s * var(--vl-dur-mult)) var(--vl-ease) 0.2s both' }} />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[14vh] origin-bottom bg-black" style={{ animation: 'vl-letterbox calc(1.1s * var(--vl-dur-mult)) var(--vl-ease) 0.2s both' }} />
         <div className="relative flex flex-col items-center">
-          <div style={{ animation: 'logo-float 2.6s ease-in-out infinite' }}>
-            <LogoMark size={88} className="drop-shadow-[0_18px_40px_rgba(124,92,255,0.45)]" />
-          </div>
-          <Wordmark className="mt-6 text-3xl text-fg" />
-          <div className="mt-6 h-1 w-48 overflow-hidden rounded-full bg-bg-3">
-            <div className="h-full w-1/2 rounded-full gradient-accent" style={{ animation: 'shimmer 1.2s linear infinite', backgroundSize: '200% 100%' }} />
-          </div>
-          <p key={i} className="mt-4 h-5 text-sm text-fg-2 animate-fade-in">
+          <Sigil size={240} />
+          <AnimatedWordmark className="mt-4 text-5xl text-fg" delay={0.5} />
+          <div className="vl-rule mt-5 h-px w-56 bg-line" />
+          <p key={i} className="mt-4 h-5 font-heading text-[15px] tracking-wide text-fg-1 animate-fade-in">
             {conn === 'reconnecting' || conn === 'offline' ? 'Tentando conectar ao servidor…' : PHRASES[i]}
           </p>
           {slow && (

@@ -99,6 +99,22 @@ describe('autenticação', () => {
     expect(s.body.privacy.dmsFrom).toBe('server_members');
     const bad = await u.api.patch('/users/@me/settings', { accent: 'red' });
     expect(bad.status).toBe(400);
+    // aparência completa do Estúdio: validada e sincronizada
+    const appearance = {
+      preset: 'caderno', mode: 'dark', colors: { accent: '#c1121f', 'bg-0': '#040405', 'border-strong': '#33313a' },
+      displayFont: 'unifraktur', bodyFont: 'garamond', corners: 'cut', serverShape: 'diamond', avatarShape: 'hexagon',
+      layout: 'floating', panelOpacity: 0.8, blur: 10, glow: 0.6, ornaments: true, effect: 'feathers', effectIntensity: 1,
+      fog: true, grain: 0.3, vignette: 0.7, scanlines: false, transition: 'ink', animations: 'full', animSpeed: 1,
+      messageStyle: 'letter', chapterNumbers: true, cursorTrail: false, bgDim: 0.5, bgBlur: 6, customCss: '.x{color:red}',
+    };
+    const ap = await u.api.patch('/users/@me/settings', { appearance });
+    expect(ap.status).toBe(200);
+    expect(ap.body.appearance.serverShape).toBe('diamond');
+    expect(ap.body.theme).toBe('aurora'); // outros campos preservados
+    for (const wrong of [{ blur: 999 }, { effect: 'fireworks' }, { colors: { accent: 'javascript:1' } }, { customCss: 'x'.repeat(20_001) }]) {
+      const r = await u.api.patch('/users/@me/settings', { appearance: { ...appearance, ...wrong } });
+      expect(r.status).toBe(400);
+    }
     const st = await u.api.put('/users/@me/status', { status: 'dnd' });
     expect(st.body.status).toBe('dnd');
     const cs = await u.api.put('/users/@me/custom-status', { text: 'jogando bola', emoji: '⚽', expiresAt: null });

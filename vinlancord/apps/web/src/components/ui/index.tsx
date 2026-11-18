@@ -28,9 +28,9 @@ export function LogoMark({ size = 32, className = '' }: { size?: number; classNa
     <svg width={size} height={size} viewBox="0 0 128 128" className={className} aria-label="Vinlancord">
       <defs>
         <linearGradient id={`${id}a`} x1="10" y1="6" x2="118" y2="122" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#9b6bff" />
-          <stop offset=".5" stopColor="#5b5cf6" />
-          <stop offset="1" stopColor="#1fc8e6" />
+          <stop offset="0" style={{ stopColor: 'color-mix(in oklab, var(--vl-accent) 78%, #fff)' }} />
+          <stop offset=".5" style={{ stopColor: 'var(--vl-accent)' }} />
+          <stop offset="1" style={{ stopColor: 'color-mix(in oklab, var(--vl-accent) 50%, #000)' }} />
         </linearGradient>
         <linearGradient id={`${id}b`} x1="64" y1="4" x2="64" y2="64" gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="#fff" stopOpacity=".22" />
@@ -39,9 +39,9 @@ export function LogoMark({ size = 32, className = '' }: { size?: number; classNa
       </defs>
       <path d="M64 4c38 0 60 4 60 60s-22 60-60 60S4 120 4 64 26 4 64 4z" fill={`url(#${id}a)`} />
       <path d="M64 4c38 0 60 4 60 60H4C4 8 26 4 64 4z" fill={`url(#${id}b)`} />
-      <path d="M33 38 L58 91 Q64 102 70 91 L86 57" fill="none" stroke="#fff" strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="95" cy="38" r="9.5" fill="#fff" />
-      <path d="M106 22a22 22 0 0 1 6 18" fill="none" stroke="#fff" strokeOpacity=".75" strokeWidth="5" strokeLinecap="round" />
+      <path d="M33 38 L58 91 Q64 102 70 91 L86 57" fill="none" style={{ stroke: 'var(--vl-accent-fg)' }} strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="95" cy="38" r="9.5" style={{ fill: 'var(--vl-accent-fg)' }} />
+      <path d="M106 22a22 22 0 0 1 6 18" fill="none" style={{ stroke: 'var(--vl-accent-fg)' }} strokeOpacity=".75" strokeWidth="5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -60,15 +60,15 @@ type BtnVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'li
 
 export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant; size?: 'sm' | 'md' | 'lg'; loading?: boolean; icon?: ReactNode }>(
   function Button({ variant = 'primary', size = 'md', loading, icon, className, children, disabled, ...rest }, ref) {
-    const base = 'focus-ring inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 select-none whitespace-nowrap';
+    const base = 'vl-btn focus-ring inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 select-none whitespace-nowrap';
     const sizes = { sm: 'h-8 px-3 text-[13px]', md: 'h-10 px-4 text-sm', lg: 'h-12 px-6 text-[15px]' };
     const variants: Record<BtnVariant, string> = {
-      primary: 'gradient-accent text-accent-fg shadow-[0_6px_20px_-8px_var(--vl-accent)] hover:brightness-110',
-      secondary: 'bg-bg-4 text-fg hover:bg-bg-5 border border-line',
+      primary: 'vl-btn-primary gradient-accent text-accent-fg shadow-[0_6px_20px_-8px_var(--vl-accent)] hover:brightness-110',
+      secondary: 'bg-bg-4/80 text-fg hover:bg-bg-5 border border-line-strong hover:border-accent/50',
       ghost: 'text-fg-1 hover:bg-bg-4 hover:text-fg',
       danger: 'bg-danger text-white hover:brightness-110',
       success: 'bg-success text-white hover:brightness-110',
-      link: 'text-accent-2 hover:underline h-auto px-0',
+      link: 'vl-btn-link text-accent-2 hover:underline h-auto px-0',
     };
     return (
       <button ref={ref} className={cx(base, sizes[size], variants[variant], className)} disabled={disabled || loading} {...rest}>
@@ -93,8 +93,8 @@ export function IconButton({
       <button
         aria-label={label}
         className={cx(
-          'focus-ring grid size-8 place-items-center rounded-lg transition-colors duration-150',
-          danger ? 'text-danger hover:bg-danger/15' : active ? 'bg-bg-4 text-fg' : 'text-fg-1 hover:bg-bg-4 hover:text-fg',
+          'focus-ring grid size-8 place-items-center rounded-lg transition-all hover:-translate-y-px active:translate-y-0',
+          danger ? 'text-danger hover:bg-danger/15' : active ? 'bg-bg-4 text-accent shadow-[0_0_14px_-6px_var(--vl-glow-color)]' : 'text-fg-1 hover:bg-bg-4 hover:text-fg',
           className,
         )}
         {...rest}
@@ -136,7 +136,7 @@ export function Tooltip({ label, side = 'top', children, delay = 300 }: { label:
         label &&
         createPortal(
           <div
-            className="pointer-events-none fixed z-[100] max-w-xs animate-pop-in rounded-lg border border-line-strong bg-bg-1 px-2.5 py-1.5 text-[13px] font-medium text-fg shadow-[var(--vl-shadow)]"
+            className="vl-pop pointer-events-none fixed z-[100] max-w-xs animate-pop-in rounded-lg border border-line-strong bg-bg-1/95 px-2.5 py-1.5 text-[13px] font-medium text-fg shadow-[var(--vl-shadow)] backdrop-blur-md"
             style={{ left: pos.x, top: pos.y, transform }}
           >
             {label}
@@ -154,7 +154,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
     <input
       ref={ref}
       className={cx(
-        'h-10 w-full rounded-lg border bg-bg-1 px-3 text-sm text-fg outline-none transition placeholder:text-fg-2 focus:border-accent focus:ring-2 focus:ring-accent/25',
+        'vl-input h-10 w-full rounded-lg border bg-bg-1/80 px-3 text-sm text-fg outline-none placeholder:text-fg-2',
         invalid ? 'border-danger' : 'border-line',
         className,
       )}
@@ -167,7 +167,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
   return (
     <textarea
       ref={ref}
-      className={cx('w-full resize-none rounded-lg border border-line bg-bg-1 px-3 py-2 text-sm text-fg outline-none transition placeholder:text-fg-2 focus:border-accent focus:ring-2 focus:ring-accent/25', className)}
+      className={cx('vl-input w-full resize-none rounded-lg border border-line bg-bg-1/80 px-3 py-2 text-sm text-fg outline-none placeholder:text-fg-2', className)}
       {...rest}
     />
   );
@@ -195,9 +195,9 @@ export function Switch({ checked, onChange, disabled, label }: { checked: boolea
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={cx('focus-ring relative h-6 w-10 shrink-0 rounded-full transition-colors duration-200 disabled:opacity-50', checked ? 'bg-accent' : 'bg-bg-5')}
+      className={cx('focus-ring relative h-6 w-10 shrink-0 rounded-full transition-all disabled:opacity-50', checked ? 'bg-accent shadow-[0_0_16px_-4px_var(--vl-glow-color)]' : 'bg-bg-5')}
     >
-      <span className={cx('absolute top-0.5 size-5 rounded-full bg-white shadow transition-all duration-200', checked ? 'left-[18px]' : 'left-0.5')} />
+      <span className={cx('absolute top-0.5 size-5 rounded-full bg-white shadow transition-all [transition-timing-function:var(--vl-ease-back)]', checked ? 'left-[18px] scale-100' : 'left-0.5 scale-90')} />
     </button>
   );
 }
@@ -238,7 +238,7 @@ export function Slider({
     <div className={cx('flex items-center gap-3', className)}>
       <div className="relative h-5 flex-1">
         <div className="absolute top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-bg-5" />
-        <div className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-accent" style={{ width: `${pct}%` }} />
+        <div className="gradient-accent absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full shadow-[0_0_12px_-2px_var(--vl-glow-color)]" style={{ width: `${pct}%` }} />
         {marker !== undefined && <div className="absolute top-0 h-5 w-0.5 bg-warning" style={{ left: `${Math.max(0, Math.min(100, marker * 100))}%` }} />}
         <input
           type="range"
@@ -261,7 +261,7 @@ export function Select<T extends string>({ value, onChange, options, className }
     <select
       value={value}
       onChange={(e) => onChange(e.target.value as T)}
-      className={cx('h-10 w-full cursor-pointer rounded-lg border border-line bg-bg-1 px-3 text-sm text-fg outline-none focus:border-accent', className)}
+      className={cx('vl-input h-10 w-full cursor-pointer rounded-lg border border-line bg-bg-1/80 px-3 text-sm text-fg outline-none', className)}
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
@@ -274,13 +274,13 @@ export function Select<T extends string>({ value, onChange, options, className }
 
 export function Segmented<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { value: T; label: ReactNode }[] }) {
   return (
-    <div className="inline-flex rounded-lg border border-line bg-bg-1 p-0.5">
+    <div className="inline-flex flex-wrap rounded-lg border border-line bg-bg-1/80 p-0.5">
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
-          className={cx('rounded-md px-3 py-1.5 text-[13px] font-medium transition', value === o.value ? 'bg-bg-4 text-fg shadow-sm' : 'text-fg-2 hover:text-fg')}
+          className={cx('rounded-md px-3 py-1.5 text-[13px] font-medium transition-all', value === o.value ? 'bg-accent text-accent-fg shadow-[0_0_14px_-4px_var(--vl-glow-color)]' : 'text-fg-2 hover:bg-bg-4 hover:text-fg')}
         >
           {o.label}
         </button>
@@ -354,7 +354,7 @@ export function Avatar({
   const shown = url && !broken ? (animate || hover ? url : staticImage(url)) : null;
   return (
     <span
-      className={cx('relative inline-block shrink-0', className)}
+      className={cx('relative inline-block shrink-0', speaking && 'vl-speaking', className)}
       style={{ width: size, height: size }}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
@@ -365,12 +365,12 @@ export function Avatar({
           alt=""
           draggable={false}
           onError={() => setBroken(true)}
-          className={cx('size-full rounded-full object-cover transition-shadow', speaking && 'speaking-ring')}
+          className="vl-avatar size-full object-cover transition-shadow"
           style={{ background: 'var(--vl-bg-4)' }}
         />
       ) : (
         <span
-          className={cx('grid size-full place-items-center rounded-full font-semibold text-white transition-shadow', speaking && 'speaking-ring')}
+          className="vl-avatar grid size-full place-items-center font-semibold text-white transition-shadow"
           style={{ background: user?.accentColor ?? colorFromId(userId), fontSize: size * 0.38 }}
         >
           {initials(label)}
@@ -411,7 +411,7 @@ export function GuildIcon({ guild, size = 48, className }: { guild: { id: string
 export function Badge({ count, className }: { count: number; className?: string }) {
   if (!count) return null;
   return (
-    <span className={cx('grid h-4 min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] font-bold leading-none text-white', className)}>
+    <span className={cx('grid h-4 min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] font-bold leading-none text-white shadow-[0_0_10px_-2px_var(--vl-danger)] animate-pop-in', className)}>
       {count > 99 ? '99+' : count}
     </span>
   );
@@ -426,7 +426,7 @@ export function Kbd({ children }: { children: ReactNode }) {
 }
 
 export function Divider({ label }: { label?: string }) {
-  if (!label) return <div className="my-2 h-px bg-line" />;
+  if (!label) return <div className="vl-rule my-2 h-px bg-line" />;
   return (
     <div className="my-3 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-wider text-fg-2">
       <span className="h-px flex-1 bg-line" />
@@ -439,8 +439,8 @@ export function Divider({ label }: { label?: string }) {
 export function EmptyState({ icon, title, body, action }: { icon: ReactNode; title: string; body?: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-12 text-center animate-fade-in">
-      <div className="mb-4 grid size-16 place-items-center rounded-2xl border border-line bg-bg-3 text-fg-2">{icon}</div>
-      <div className="font-display text-lg font-semibold text-fg">{title}</div>
+      <div className="vl-cut mb-4 grid size-16 place-items-center rounded-2xl border border-line-strong bg-bg-3/70 text-accent shadow-[0_0_30px_-10px_var(--vl-glow-color)] animate-pop-in">{icon}</div>
+      <div className="font-heading text-xl text-fg">{title}</div>
       {body && <div className="mt-1 max-w-sm text-sm text-fg-2">{body}</div>}
       {action && <div className="mt-5">{action}</div>}
     </div>
@@ -479,11 +479,11 @@ export function Modal({
     return () => window.removeEventListener('keydown', onKey, true);
   }, [onClose]);
   return createPortal(
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-[2px] animate-fade-in" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="vl-backdrop fixed inset-0 z-50 grid place-items-center p-4 animate-fade-in" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div
         role="dialog"
         aria-modal="true"
-        className={cx('relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-2xl border border-line bg-bg-2 shadow-[var(--vl-shadow)] animate-pop-in', className)}
+        className={cx('vl-dialog relative flex max-h-[90vh] w-full flex-col overflow-hidden rounded-2xl border border-line-strong bg-bg-2', className)}
         style={{ maxWidth: width }}
       >
         {!bare && (
@@ -493,14 +493,14 @@ export function Modal({
             </button>
             {title && (
               <div className="px-6 pb-2 pt-6">
-                <h2 className="font-display text-xl font-bold text-fg">{title}</h2>
+                <h2 className="font-heading text-2xl font-semibold text-fg">{title}</h2>
                 {subtitle && <p className="mt-1 text-sm text-fg-2">{subtitle}</p>}
               </div>
             )}
           </>
         )}
         <div className={cx('scroll-thin min-h-0 flex-1 overflow-y-auto', !bare && 'px-6 py-3')}>{children}</div>
-        {footer && <div className="flex items-center justify-end gap-2 border-t border-line bg-bg-1 px-6 py-4">{footer}</div>}
+        {footer && <div className="flex items-center justify-end gap-2 border-t border-line bg-bg-1/70 px-6 py-4">{footer}</div>}
       </div>
     </div>,
     document.body,
@@ -553,7 +553,7 @@ export function Popover({
     };
   }, [onClose]);
   return createPortal(
-    <div ref={ref} className={cx('fixed z-[60] animate-pop-in', className)} style={pos ? { left: pos.left, top: pos.top } : { left: -9999, top: -9999 }}>
+    <div ref={ref} className={cx('vl-pop fixed z-[60] animate-pop-in', className)} style={pos ? { left: pos.left, top: pos.top } : { left: -9999, top: -9999 }}>
       {children}
     </div>,
     document.body,

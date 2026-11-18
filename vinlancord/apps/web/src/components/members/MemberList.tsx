@@ -47,10 +47,10 @@ export function MemberList({ channel }: { channel: Channel }) {
   }, [memberIds, presences, roles, members, guildId, channel.id, meId, meStatus]);
 
   return (
-    <aside className="scroll-thin w-60 shrink-0 overflow-y-auto bg-bg-1 px-2 pb-4 animate-slide-in-right">
+    <aside className="vl-subpanel scroll-thin w-60 shrink-0 overflow-y-auto border-l border-line px-2 pb-4 animate-slide-in-right">
       {groups.map((g) => (
         <div key={g.title}>
-          <h3 className="px-2 pb-1 pt-5 text-[11px] font-semibold uppercase tracking-wider text-fg-2">
+          <h3 className="px-2 pb-1 pt-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-fg-2">
             {g.title} — {g.ids.length}
           </h3>
           {g.ids.map((id) => (

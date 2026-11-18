@@ -14,8 +14,8 @@ import { Avatar, EmptyState, Select, Spinner } from '../ui';
 
 function PanelShell({ title, icon, children, onClose }: { title: string; icon: React.ReactNode; children: React.ReactNode; onClose: () => void }) {
   return (
-    <aside className="flex w-[380px] shrink-0 flex-col border-l border-line bg-bg-1 animate-slide-in-right">
-      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-line px-4 font-display font-semibold text-fg">
+    <aside className="vl-subpanel flex w-[380px] shrink-0 flex-col border-l border-line animate-slide-in-right">
+      <div className="vl-header flex h-12 shrink-0 items-center gap-2 px-4 font-heading text-[17px] text-fg">
         {icon}
         <span className="flex-1">{title}</span>
         <button onClick={onClose} className="text-fg-2 hover:text-fg" aria-label="Fechar">

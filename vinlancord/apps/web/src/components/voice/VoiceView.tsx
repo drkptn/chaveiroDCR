@@ -90,8 +90,8 @@ function ParticipantTile({ tile, focused, onFocus, small }: { tile: Tile; focuse
       onClick={onFocus}
       onContextMenu={(e) => !isMe && userMenu(e, userId, vs?.guildId ?? null)}
       className={cx(
-        'group relative flex size-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl bg-bg-1 transition-shadow duration-150',
-        talking ? 'ring-[3px] ring-success shadow-[0_0_24px_-4px_var(--vl-success)]' : 'ring-1 ring-line',
+        'vl-cut group relative flex size-full cursor-pointer items-center justify-center overflow-hidden rounded-2xl bg-bg-1 transition-shadow duration-150 animate-pop-in',
+        talking ? 'ring-[3px] ring-success shadow-[0_0_24px_-4px_var(--vl-success)]' : 'ring-1 ring-line-strong',
         focused && 'ring-accent',
       )}
       style={!video ? { background: `radial-gradient(circle at 50% 40%, color-mix(in oklab, ${accent ?? 'var(--vl-accent)'} 28%, var(--vl-bg-1)), var(--vl-bg-1) 70%)` } : undefined}
@@ -116,7 +116,10 @@ function ParticipantTile({ tile, focused, onFocus, small }: { tile: Tile; focuse
           )}
         </div>
       ) : (
-        <Avatar userId={userId} size={small ? 48 : 96} speaking={talking} animate />
+        <span className="relative">
+          {talking && <span className="vl-sigil-ring" />}
+          <Avatar userId={userId} size={small ? 48 : 96} speaking={talking} animate />
+        </span>
       )}
       {/* rótulos */}
       <div className="pointer-events-none absolute bottom-2 left-2 flex max-w-[80%] items-center gap-1.5 rounded-lg bg-black/55 px-2 py-1 text-[13px] font-medium text-white backdrop-blur">
@@ -264,9 +267,9 @@ function Grid({ channelId, compact }: { channelId: string; compact?: boolean }) 
 export function CallControls() {
   const v = useVoice();
   const perms = useChannelPerms(v.channelId);
-  const btn = 'grid size-12 place-items-center rounded-full transition active:scale-95';
+  const btn = 'grid size-12 place-items-center rounded-full transition-all hover:-translate-y-0.5 active:scale-95';
   return (
-    <div className="flex items-center justify-center gap-3 py-4">
+    <div className="mx-auto mb-4 flex w-fit items-center justify-center gap-3 rounded-full border border-line-strong bg-bg-1/70 px-4 py-2.5 shadow-[var(--vl-shadow)] backdrop-blur-xl animate-slide-up">
       <Tooltip label={v.camera ? 'Desligar câmera' : 'Ligar câmera'}>
         <button
           aria-label={v.camera ? 'Desligar câmera' : 'Ligar câmera'}
@@ -328,10 +331,10 @@ export function VoiceView({ channel, joined }: { channel: Channel; joined: boole
   }, [joined, status, channel.type, perms]);
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--vl-accent)_10%,var(--vl-bg-2)),var(--vl-bg-2)_60%)]">
-      <header className="flex h-12 shrink-0 items-center gap-2 px-4">
-        <Icon size={20} className="text-fg-2" />
-        <span className="font-display font-semibold text-fg">{channel.name}</span>
+    <div className="flex min-h-0 flex-1 flex-col bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--vl-accent)_14%,transparent),transparent_60%)]">
+      <header className="vl-header flex h-12 shrink-0 items-center gap-2 px-4">
+        <Icon size={20} className="text-accent" />
+        <span className="font-heading text-[17px] text-fg">{channel.name}</span>
         <span className="ml-2 flex items-center gap-1 text-xs text-fg-2"><Users size={13} /> {count}{channel.userLimit ? `/${channel.userLimit}` : ''}</span>
       </header>
       {joined && status !== 'idle' ? (
@@ -352,7 +355,7 @@ export function VoiceView({ channel, joined }: { channel: Channel; joined: boole
               ))}
           </div>
           <div>
-            <h2 className="font-display text-2xl font-bold text-fg">{channel.name}</h2>
+            <h2 className="font-display text-4xl text-fg text-glow">{channel.name}</h2>
             <p className="mt-1 text-sm text-fg-2">{count ? `${count} pessoa${count > 1 ? 's' : ''} conversando agora.` : 'Ninguém por aqui ainda. Seja o primeiro!'}</p>
           </div>
           <Button size="lg" icon={channel.type === 'video' ? <Video size={18} /> : <Phone size={18} />} disabled={!has(perms, P.CONNECT)} onClick={() => void voice.join(channel.id).catch((e) => ui.error(e, 'Não foi possível entrar'))}>
@@ -373,7 +376,7 @@ export function CallStrip({ channel }: { channel: Channel }) {
   const [expanded, setExpanded] = useState(true);
   if (!call && !inVoice) return null;
   return (
-    <div className={cx('flex shrink-0 flex-col border-b border-line bg-bg-0 transition-all', expanded && inVoice ? 'h-[46vh] min-h-[280px]' : 'h-auto')}>
+    <div className={cx('flex shrink-0 flex-col border-b border-line bg-bg-0/70 transition-all', expanded && inVoice ? 'h-[46vh] min-h-[280px]' : 'h-auto')}>
       {inVoice && expanded ? (
         <>
           <Grid channelId={channel.id} compact />
@@ -421,7 +424,7 @@ export function IncomingCall() {
   const caller = call.startedBy;
   const ch = S().channels[call.channelId];
   return (
-    <div className="fixed left-1/2 top-12 z-[80] w-[320px] -translate-x-1/2 animate-pop-in rounded-2xl border border-line-strong bg-bg-1/95 p-5 text-center shadow-[var(--vl-shadow)] backdrop-blur">
+    <div className="vl-dialog fixed left-1/2 top-12 z-[80] w-[320px] -translate-x-1/2 rounded-2xl border border-line-strong bg-bg-1/95 p-5 text-center backdrop-blur-xl">
       <div className="mx-auto w-fit rounded-full" style={{ animation: 'pulse-ring 1.4s infinite' }}>
         <Avatar userId={caller} size={80} animate />
       </div>

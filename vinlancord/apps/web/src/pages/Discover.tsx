@@ -24,7 +24,7 @@ export function DiscoverPage() {
     return () => clearTimeout(t);
   }, [q]);
   return (
-    <main className="scroll-thin min-w-0 flex-1 overflow-y-auto bg-bg-2">
+    <main className="vl-panel scroll-thin min-w-0 flex-1 overflow-y-auto">
       <div className="relative overflow-hidden px-10 pb-10 pt-12">
         <div className="absolute -right-20 -top-24 size-96 rounded-full bg-accent/25 blur-[100px]" />
         <div className="absolute -left-10 top-10 size-72 rounded-full bg-accent-2/15 blur-[90px]" />
@@ -53,7 +53,7 @@ export function DiscoverPage() {
                   </div>
                 </div>
                 <div className="p-4 pt-9">
-                  <div className="truncate font-display font-semibold text-fg">{g.name}</div>
+                  <div className="truncate font-heading text-[17px] text-fg">{g.name}</div>
                   <p className="mt-1 line-clamp-2 h-10 text-sm text-fg-2">{g.description || 'Sem descrição.'}</p>
                   <div className="mt-3 flex items-center justify-between">
                     <span className="flex items-center gap-1.5 text-xs text-fg-2"><Users size={13} /> {g.memberCount} membros</span>

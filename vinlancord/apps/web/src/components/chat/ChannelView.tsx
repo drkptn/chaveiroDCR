@@ -36,8 +36,10 @@ export function ChannelView({ channel }: { channel: Channel }) {
 
   if (isVoice) {
     return (
-      <main className="flex min-w-0 flex-1 flex-col bg-bg-2">
-        <VoiceView channel={channel} joined={myVoice === channel.id} />
+      <main className="vl-panel flex min-w-0 flex-1 flex-col">
+        <div key={channel.id} className="vl-route flex min-h-0 flex-1 flex-col">
+          <VoiceView channel={channel} joined={myVoice === channel.id} />
+        </div>
       </main>
     );
   }
@@ -45,11 +47,11 @@ export function ChannelView({ channel }: { channel: Channel }) {
   const panel = rightPanel === 'members' ? (channel.guildId && memberListOpen ? 'members' : channel.type === 'group_dm' && memberListOpen ? 'members' : null) : rightPanel;
 
   return (
-    <main className="flex min-w-0 flex-1 flex-col bg-bg-2">
+    <main className="vl-panel flex min-w-0 flex-1 flex-col">
       <ChannelHeader channel={channel} />
       {!channel.guildId && <CallStrip channel={channel} />}
       <div className="flex min-h-0 flex-1">
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div key={channel.id} className="vl-route flex min-w-0 flex-1 flex-col">
           <MessageList channel={channel} />
           <Composer channel={channel} />
         </div>
@@ -85,21 +87,21 @@ function ChannelHeader({ channel }: { channel: Channel }) {
   };
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-2 border-b border-line px-4 shadow-[0_1px_0_rgba(0,0,0,0.15)]">
+    <header className="vl-header z-[5] flex h-12 shrink-0 items-center gap-2 px-4">
       {channel.type === 'dm' && other ? (
         <button className="flex min-w-0 items-center gap-2" onClick={(e) => ui.profile(other, null, e.currentTarget)}>
           <Avatar userId={other} size={26} status={status} ring="var(--vl-bg-2)" />
-          <span className="truncate font-display font-semibold text-fg">{otherUser?.displayName}</span>
+          <span className="truncate font-heading text-[17px] text-fg">{otherUser?.displayName}</span>
         </button>
       ) : channel.type === 'group_dm' ? (
-        <span className="flex items-center gap-2 truncate font-display font-semibold text-fg">
+        <span className="flex items-center gap-2 truncate font-heading text-[17px] text-fg">
           <Users size={20} className="text-fg-2" />
           {channel.name || (channel.recipients ?? []).filter((r) => r !== meId).map((r) => displayName(r, null)).join(', ')}
         </span>
       ) : (
         <>
-          {channel.type === 'text' ? <Hash size={22} className="shrink-0 text-fg-2" /> : <Volume2 size={22} className="shrink-0 text-fg-2" />}
-          <span className="shrink-0 font-display font-semibold text-fg">{channel.name}</span>
+          {channel.type === 'text' ? <Hash size={22} className="shrink-0 text-accent" /> : <Volume2 size={22} className="shrink-0 text-accent" />}
+          <span className="shrink-0 font-heading text-[17px] text-fg">{channel.name}</span>
         </>
       )}
       {channel.topic && (

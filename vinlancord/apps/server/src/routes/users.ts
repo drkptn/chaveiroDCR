@@ -26,8 +26,41 @@ async function broadcastUserUpdate(userId: string) {
   return user;
 }
 
+const zUnit = z.number().min(0).max(1);
+const zAppearance = z.object({
+  preset: z.string().max(40),
+  mode: z.enum(['dark', 'light']),
+  colors: z.record(z.string().regex(/^[a-z0-9-]{1,24}$/), zColor).refine((o) => Object.keys(o).length <= 40, 'Cores demais'),
+  displayFont: z.string().regex(/^[a-z0-9-]{1,32}$/),
+  bodyFont: z.string().regex(/^[a-z0-9-]{1,32}$/),
+  corners: z.enum(['round', 'soft', 'sharp', 'cut']),
+  serverShape: z.enum(['circle', 'squircle', 'diamond', 'hexagon', 'shield']),
+  avatarShape: z.enum(['circle', 'squircle', 'diamond', 'hexagon', 'shield']),
+  layout: z.enum(['floating', 'classic']),
+  panelOpacity: z.number().min(0.3).max(1),
+  blur: z.number().min(0).max(32),
+  glow: zUnit,
+  ornaments: z.boolean(),
+  effect: z.enum(['none', 'feathers', 'ink', 'embers', 'ash', 'sigils', 'snow', 'rain', 'petals', 'stars']),
+  effectIntensity: z.number().min(0).max(2),
+  fog: z.boolean(),
+  grain: zUnit,
+  vignette: zUnit,
+  scanlines: z.boolean(),
+  transition: z.enum(['none', 'fade', 'rise', 'slash', 'ink', 'shutter']),
+  animations: z.enum(['full', 'reduced', 'off']),
+  animSpeed: z.number().min(0.25).max(3),
+  messageStyle: z.enum(['flat', 'cards', 'letter']),
+  chapterNumbers: z.boolean(),
+  cursorTrail: z.boolean(),
+  bgDim: zUnit,
+  bgBlur: z.number().min(0).max(40),
+  customCss: z.string().max(20_000),
+});
+
 const zSettingsPatch = z
   .object({
+    appearance: zAppearance,
     theme: z.string().max(32),
     mode: z.enum(['dark', 'light', 'system']),
     accent: zColor,

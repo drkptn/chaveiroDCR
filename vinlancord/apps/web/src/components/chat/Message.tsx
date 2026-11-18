@@ -33,6 +33,7 @@ import { formatMessageDate, formatTime, formatFull } from '../../lib/format';
 import { Markdown } from '../../lib/markdown';
 import { channelPerms } from '../../lib/perms';
 import { Avatar, Tooltip, cx } from '../ui';
+import { isFresh } from '../../lib/fresh';
 import { EmojiPickerPopover } from './Pickers';
 import { InviteEmbed } from './InviteEmbed';
 import { MessageEditor } from './MessageEditor';
@@ -48,7 +49,7 @@ function Header({ m, guildId }: { m: ClientMessage; guildId: string | null }) {
   return (
     <div className="flex items-baseline gap-2">
       <button
-        className="truncate text-[15px] font-semibold hover:underline"
+        className="vl-msg-author truncate text-[15px] font-semibold hover:underline"
         style={{ color: color ?? 'var(--vl-text-0)' }}
         onClick={(e) => ui.profile(m.author.id, guildId, e.currentTarget)}
       >
@@ -326,7 +327,7 @@ function Toolbar({ m }: { m: ClientMessage }) {
   const canDelete = mine || has(channelPerms(s, m.channelId), P.MANAGE_MESSAGES);
   const btn = 'grid size-8 place-items-center text-fg-2 transition hover:bg-bg-4 hover:text-fg';
   return (
-    <div className={cx('absolute -top-4 right-4 z-10 flex overflow-hidden rounded-lg border border-line-strong bg-bg-2 shadow-md', picker ? 'flex' : 'hidden group-hover:flex')}>
+    <div className={cx('vl-cut-sm absolute -top-4 right-4 z-10 flex overflow-hidden rounded-lg border border-line-strong bg-bg-1/95 shadow-[var(--vl-shadow)] backdrop-blur-md animate-pop-in', picker ? 'flex' : 'hidden group-hover:flex')}>
       {QUICK.slice(0, 3).map((q) => (
         <button key={q} className={btn} onClick={() => void toggleReaction(m.channelId, m.id, { id: null, name: q })} aria-label={`Reagir com ${q}`}>
           <span className="text-[17px]">{q}</span>
@@ -347,6 +348,7 @@ export const MessageItem = memo(function MessageItem({ m, grouped, highlight }: 
   const myRoles = useStore((s) => (m.guildId ? s.myMembers[m.guildId]?.roles : undefined));
   const editing = useUI((s) => s.editing === m.id);
   const compact = useStore((s) => s.settings.compact);
+  const [enter] = useState(() => isFresh(m.id));
   const guildId = m.guildId;
 
   if (m.type !== 'default' && m.type !== 'reply') return <SystemMessage m={m} guildId={guildId} />;
@@ -363,7 +365,8 @@ export const MessageItem = memo(function MessageItem({ m, grouped, highlight }: 
       onContextMenu={(e) => !m.pending && messageMenu(e, m)}
       className={cx(
         'group relative pr-12 transition-colors',
-        showHeader ? (compact ? 'mt-1 pt-0.5' : 'mt-[17px] pt-0.5') : 'py-[1px]',
+        showHeader ? cx('vl-msg-head', compact ? 'mt-1 pt-0.5' : 'mt-[17px] pt-0.5') : 'vl-msg-cont py-[1px]',
+        enter && 'vl-msg-enter',
         mentioned ? 'bg-[var(--vl-mention)] before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-warning' : 'hover:bg-bg-3/50',
         highlight && 'bg-accent/10 before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-accent',
       )}
@@ -384,7 +387,7 @@ export const MessageItem = memo(function MessageItem({ m, grouped, highlight }: 
           {editing ? (
             <MessageEditor m={m} />
           ) : (
-            <div className={cx('text-[15px] leading-[1.375] text-fg', m.pending && 'opacity-50', m.failed && 'text-danger')}>
+            <div className={cx('vl-msg-body text-[15px] leading-[1.375] text-fg', m.pending && 'opacity-50', m.failed && 'text-danger')}>
               {m.content && !isGif && <Markdown content={m.content} />}
               {isGif && <img src={m.content.trim()} alt="GIF" loading="lazy" className="mt-1 max-h-[280px] max-w-[400px] rounded-lg" />}
               {m.editedAt && (

@@ -16,7 +16,7 @@ export function TitleBar() {
   if (!desktop) return null;
   const mac = desktop.platform === 'darwin';
   return (
-    <div className="drag-region flex h-8 shrink-0 items-center justify-between bg-bg-0 pl-3 text-fg-2" onDoubleClick={() => desktop!.window.toggleMaximize()}>
+    <div className="drag-region flex h-8 shrink-0 items-center justify-between bg-bg-0/40 pl-3 text-fg-2" onDoubleClick={() => desktop!.window.toggleMaximize()}>
       <div className={`flex items-center gap-2 ${mac ? 'pl-16' : ''}`}>
         <LogoMark size={16} />
         <Wordmark className="text-[13px] text-fg-1" />

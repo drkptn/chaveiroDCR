@@ -1,6 +1,6 @@
 /** Configurações do usuário: conta, perfil, privacidade, dispositivos, aparência, voz e vídeo, notificações, atalhos, atividades. */
 import { useEffect, useRef, useState } from 'react';
-import { Monitor, Smartphone, Globe, Trash2, Upload, Plus, Download, Mic, Gamepad2, RefreshCw, Check, LogOut, ShieldCheck, Keyboard, X } from 'lucide-react';
+import { Monitor, Smartphone, Globe, Trash2, Upload, Plus, Mic, Gamepad2, RefreshCw, LogOut, ShieldCheck, Keyboard, X } from 'lucide-react';
 import { LIMITS, type SessionInfo, type ProfileLink } from '@vinlancord/shared';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '../../store';
@@ -9,7 +9,8 @@ import { useLocal, local, KEYBIND_LABELS, DEFAULT_KEYBINDS, type KeybindAction }
 import { logout, updateSettings } from '../../store/actions';
 import { api, errorMessage } from '../../lib/api';
 import { desktop, type DesktopSettings, type UpdateStatus } from '../../lib/desktop';
-import { ACCENTS, THEMES, validateCustomTheme, type ThemeDef } from '../../lib/themes';
+import { ACCENTS } from '../../lib/themes';
+import AppearanceStudio from './AppearanceStudio';
 import { voice, useVoice } from '../../lib/voice/engine';
 import { AudioEngine } from '../../lib/voice/audio';
 import { requestNotificationPermission } from '../../lib/notify';
@@ -42,7 +43,7 @@ export default function UserSettings({ onClose, initialTab }: { onClose: () => v
       {tab === 'profile' && <Profile />}
       {tab === 'privacy' && <Privacy />}
       {tab === 'devices' && <Devices />}
-      {tab === 'appearance' && <Appearance />}
+      {tab === 'appearance' && <AppearanceStudio />}
       {tab === 'voice' && <VoiceSettings />}
       {tab === 'notifications' && <Notifications />}
       {tab === 'keybinds' && <Keybinds />}
@@ -361,99 +362,6 @@ function Devices() {
           Desconectar todos os outros
         </Button>
       )}
-    </>
-  );
-}
-
-/* ───────────── aparência ───────────── */
-
-function Appearance() {
-  const s = useStore((st) => st.settings);
-  const custom = useLocal((st) => st.customThemes);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const allThemes: ThemeDef[] = [...THEMES, ...custom];
-  return (
-    <>
-      <SectionTitle sub="Deixe o Vinlancord com a sua cara. As preferências acompanham sua conta em todos os dispositivos.">Aparência</SectionTitle>
-      <Card title="Modo">
-        <Segmented value={s.mode} onChange={(v) => void updateSettings({ mode: v })} options={[{ value: 'dark', label: 'Escuro' }, { value: 'light', label: 'Claro' }, { value: 'system', label: 'Seguir o sistema' }]} />
-      </Card>
-      <Card title="Biblioteca de temas">
-        <div className="grid grid-cols-3 gap-3">
-          {allThemes.map((t) => (
-            <button key={t.id} onClick={() => void updateSettings({ theme: t.id, mode: t.mode })} className={cx('overflow-hidden rounded-xl border-2 text-left transition', s.theme === t.id ? 'border-accent' : 'border-line hover:border-line-strong')}>
-              <div className="flex h-16" style={{ background: t.preview[0] }}>
-                <div className="w-1/4" style={{ background: t.colors['bg-0'] }} />
-                <div className="flex flex-1 flex-col justify-end gap-1 p-2" style={{ background: t.preview[1] }}>
-                  <div className="h-1.5 w-3/4 rounded-full" style={{ background: t.colors['text-2'] }} />
-                  <div className="h-1.5 w-1/2 rounded-full" style={{ background: t.preview[2] }} />
-                </div>
-              </div>
-              <div className="bg-bg-2 px-2.5 py-2">
-                <div className="flex items-center gap-1 text-sm font-semibold text-fg">{s.theme === t.id && <Check size={14} className="text-accent" />}{t.name}</div>
-                <div className="line-clamp-2 text-[11px] text-fg-2">{t.description}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-        <div className="mt-4 flex gap-2">
-          <Button size="sm" variant="secondary" icon={<Upload size={14} />} onClick={() => fileRef.current?.click()}>Importar tema (.json)</Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<Download size={14} />}
-            onClick={() => {
-              const t = allThemes.find((x) => x.id === s.theme) ?? THEMES[0]!;
-              const blob = new Blob([JSON.stringify({ name: `${t.name} (cópia)`, mode: t.mode, colors: t.colors }, null, 2)], { type: 'application/json' });
-              const a = document.createElement('a');
-              a.href = URL.createObjectURL(blob);
-              a.download = `tema-${t.id}.json`;
-              a.click();
-            }}
-          >
-            Exportar tema atual
-          </Button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="application/json"
-            hidden
-            onChange={async (e) => {
-              const f = e.target.files?.[0];
-              if (!f) return;
-              try {
-                const t = validateCustomTheme(JSON.parse(await f.text()));
-                local().set({ customThemes: [...custom.filter((c) => c.id !== t.id), t] });
-                void updateSettings({ theme: t.id, mode: t.mode });
-                ui.success(`Tema "${t.name}" importado!`);
-              } catch (er) {
-                ui.error(er);
-              }
-              e.target.value = '';
-            }}
-          />
-        </div>
-      </Card>
-      <Card title="Cor de destaque">
-        <div className="flex flex-wrap items-center gap-2">
-          {ACCENTS.map((c) => (
-            <button key={c} onClick={() => void updateSettings({ accent: c })} className={cx('grid size-9 place-items-center rounded-full transition hover:scale-110', s.accent === c && 'ring-2 ring-fg ring-offset-2 ring-offset-bg-1')} style={{ background: c }}>
-              {s.accent === c && <Check size={16} className="text-white" />}
-            </button>
-          ))}
-          <label className="relative grid size-9 cursor-pointer place-items-center overflow-hidden rounded-full border-2 border-dashed border-line-strong text-fg-2" title="Cor personalizada">
-            <Plus size={16} />
-            <input type="color" value={s.accent} onChange={(e) => void updateSettings({ accent: e.target.value })} className="absolute inset-0 cursor-pointer opacity-0" />
-          </label>
-        </div>
-      </Card>
-      <Card title="Texto e acessibilidade">
-        <div className="mb-2 text-sm text-fg-1">Tamanho da fonte</div>
-        <Slider value={s.fontScale} min={0.8} max={1.4} step={0.05} onChange={(v) => void updateSettings({ fontScale: v })} format={(v) => `${Math.round(v * 16)}px`} />
-        <SettingRow title="Modo compacto" description="Mensagens mais juntinhas, cabem mais na tela."><Switch checked={s.compact} onChange={(v) => void updateSettings({ compact: v })} /></SettingRow>
-        <SettingRow title="Reduzir animações" description="Desliga transições e efeitos de movimento."><Switch checked={s.reduceMotion} onChange={(v) => void updateSettings({ reduceMotion: v })} /></SettingRow>
-        <SettingRow title="Mostrar segundos no horário"><Switch checked={s.showSeconds} onChange={(v) => void updateSettings({ showSeconds: v })} /></SettingRow>
-      </Card>
     </>
   );
 }

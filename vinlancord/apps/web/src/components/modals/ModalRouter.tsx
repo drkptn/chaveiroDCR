@@ -5,7 +5,6 @@ import {
   Hash,
   Volume2,
   Video,
-  FolderPlus,
   Copy,
   Check,
   Upload,

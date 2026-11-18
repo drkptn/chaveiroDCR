@@ -4,10 +4,11 @@ import './styles/index.css';
 import App from './App';
 import { tokenStore } from './lib/api';
 import { startSession } from './store/actions';
-import { applyTheme } from './lib/themes';
-import { DEFAULT_SETTINGS } from '@vinlancord/shared';
+import { applyAppearance } from './lib/themes';
+import { useAppearance } from './store/appearance';
 
-applyTheme({ ...DEFAULT_SETTINGS, custom: [] });
+// aplica a última aparência usada antes de qualquer coisa (sem "piscar" o tema padrão)
+applyAppearance(useAppearance.getState().current);
 
 async function boot() {
   const token = await tokenStore.load();

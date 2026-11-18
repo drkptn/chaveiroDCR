@@ -41,10 +41,10 @@ export function FriendsView() {
   ];
 
   return (
-    <main className="flex min-w-0 flex-1 flex-col bg-bg-2">
-      <header className="flex h-12 shrink-0 items-center gap-3 border-b border-line px-4">
+    <main className="vl-panel flex min-w-0 flex-1 flex-col">
+      <header className="vl-header flex h-12 shrink-0 items-center gap-3 px-4">
         <Users size={20} className="text-fg-2" />
-        <span className="font-display font-semibold text-fg">Amigos</span>
+        <span className="font-heading text-[17px] text-fg">Amigos</span>
         <span className="mx-1 h-6 w-px bg-line-strong" />
         {tabs.map(([t, label]) => (
           <button key={t} onClick={() => setTab(t)} className={cx('flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[14px] font-medium transition', tab === t ? 'bg-bg-4 text-fg' : 'text-fg-2 hover:bg-bg-3 hover:text-fg-1')}>
@@ -142,7 +142,7 @@ function AddFriend() {
   const me = useStore((s) => s.me);
   return (
     <div className="max-w-2xl">
-      <h2 className="font-display text-lg font-bold uppercase tracking-wide text-fg">Adicionar amigo</h2>
+      <h2 className="font-heading text-xl uppercase tracking-wide text-fg">Adicionar amigo</h2>
       <p className="mt-1 text-sm text-fg-2">Você pode adicionar amigos pelo nome de usuário do Vinlancord ou pelo ID.</p>
       <form
         onSubmit={async (e) => {
@@ -191,8 +191,8 @@ function ActiveNow() {
     .map((r) => ({ id: r.id, p: presences[r.id], v: voiceStates[r.id] }))
     .filter((x) => (x.p && x.p.status !== 'offline' && x.p.activities.length) || x.v);
   return (
-    <aside className="scroll-thin hidden w-[340px] shrink-0 overflow-y-auto border-l border-line p-4 xl:block">
-      <h2 className="mb-4 font-display text-lg font-bold text-fg">Ativos agora</h2>
+    <aside className="vl-subpanel scroll-thin hidden w-[340px] shrink-0 overflow-y-auto border-l border-line p-4 xl:block">
+      <h2 className="mb-4 font-heading text-xl text-fg">Ativos agora</h2>
       {!active.length ? (
         <div className="py-6 text-center">
           <div className="font-semibold text-fg">Está tranquilo por enquanto…</div>

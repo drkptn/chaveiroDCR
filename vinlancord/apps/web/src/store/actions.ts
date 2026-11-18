@@ -1,3 +1,4 @@
+import { markFresh } from '../lib/fresh';
 /** Ações do cliente: autenticação, conexão, mensagens e afins. */
 import {
   LIMITS,
@@ -262,6 +263,7 @@ export async function sendMessage(channelId: string, content: string, opts: { re
     nonce,
     pending: true,
   };
+  markFresh(optimistic.id);
   setS((st) =>
     st.messages[channelId]
       ? { messages: { ...st.messages, [channelId]: { ...st.messages[channelId]!, items: [...st.messages[channelId]!.items, optimistic] } } }

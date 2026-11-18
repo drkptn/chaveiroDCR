@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { formatAccelerator, matches, toElectron } from '../lib/keybinds';
-import { THEMES, contrastText, validateCustomTheme } from '../lib/themes';
+import { THEMES, contrastText, validateCustomTheme, normalizeAppearance, paletteFrom, sanitizeCss, DISPLAY_FONTS, BODY_FONTS } from '../lib/themes';
 import { searchEmojis, type EmojiData } from '../lib/emoji';
-import { elapsed, initials, staticImage } from '../lib/format';
+import { elapsed, initials, roman, staticImage } from '../lib/format';
 
 const key = (k: Partial<KeyboardEvent>) => ({ ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, key: '', code: '', ...k }) as KeyboardEvent;
 
@@ -37,9 +37,55 @@ describe('temas', () => {
     expect(contrastText('#ffffff')).toBe('#111');
     expect(contrastText('#7c5cff')).toBe('#fff');
   });
+  it('toda estética é completa e usa fontes do catálogo', () => {
+    for (const t of THEMES) {
+      expect(new Set(THEMES.map((x) => x.id)).size).toBe(THEMES.length);
+      for (const k of ['bg-0', 'bg-1', 'bg-2', 'bg-3', 'bg-4', 'bg-5', 'border', 'border-strong', 'text-0', 'text-1', 'text-2', 'accent', 'accent-2']) {
+        expect(t.colors[k], `${t.id}.${k}`).toMatch(/^#[0-9a-f]{6}$/i);
+      }
+      expect(DISPLAY_FONTS.some((f) => f.id === t.appearance.displayFont)).toBe(true);
+      expect(BODY_FONTS.some((f) => f.id === t.appearance.bodyFont)).toBe(true);
+      expect(t.appearance.preset).toBe(t.id);
+    }
+  });
+  it('completa aparências parciais com o preset', () => {
+    const a = normalizeAppearance({ preset: 'muralha', colors: { accent: '#123456' } });
+    expect(a.colors.accent).toBe('#123456');
+    expect(a.colors['bg-0']).toBe(THEMES.find((t) => t.id === 'muralha')!.colors['bg-0']);
+    expect(a.serverShape).toBe('shield');
+    expect(normalizeAppearance({ preset: 'nao-existe' }).preset).toBe('nao-existe');
+  });
+  it('gera paletas válidas a partir de uma cor', () => {
+    for (const mode of ['dark', 'light'] as const) {
+      const p = paletteFrom('#c1121f', mode);
+      for (const v of Object.values(p)) expect(v).toMatch(/^#[0-9a-f]{6}$/i);
+      expect(p.accent).toBe('#c1121f');
+    }
+  });
+  it('importa estética completa e ignora valores fora do permitido', () => {
+    const t = validateCustomTheme({
+      name: 'Corvo',
+      appearance: { mode: 'dark', colors: THEMES[0]!.colors, effect: 'feathers', serverShape: 'hexagon', blur: 999, corners: 'zigzag', customCss: 'a{}' },
+    });
+    expect(t.appearance.effect).toBe('feathers');
+    expect(t.appearance.serverShape).toBe('hexagon');
+    expect(t.appearance.blur).toBeLessThanOrEqual(32);
+    expect(['round', 'soft', 'sharp', 'cut']).toContain(t.appearance.corners);
+    expect(t.appearance.customCss).toBe('a{}');
+  });
+  it('CSS personalizado não carrega nada externo', () => {
+    const css = sanitizeCss(`@import url(https://x.y/a.css); body{background:url("https://evil/p.png")} .a{background:u\\72l(http://x)} .b{background:image-set("http://x" 1x)} .c{background:url(data:image/png;base64,AA)}`);
+    expect(css).not.toMatch(/https?:/);
+    expect(css).not.toContain('@import');
+    expect(css).toContain('url(data:image/png;base64,AA)');
+  });
 });
 
 describe('utilitários', () => {
+  it('numerais romanos dos capítulos', () => {
+    expect([1, 4, 9, 14, 40, 90, 400, 1994].map(roman)).toEqual(['I', 'IV', 'IX', 'XIV', 'XL', 'XC', 'CD', 'MCMXCIV']);
+    expect(roman(0)).toBe('0');
+  });
   it('emoji: busca por rótulo e tags, sem acento', () => {
     const list: EmojiData[] = [
       { unicode: '😂', label: 'rosto chorando de rir', tags: ['risada'], group: 0 },

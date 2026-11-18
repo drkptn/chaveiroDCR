@@ -4,7 +4,10 @@ import { Link, useNavigate, useSearchParams } from 'react-router';
 import { ArrowLeft, Eye, EyeOff, MailCheck, Server, ShieldCheck, Sparkles } from 'lucide-react';
 import { api, ApiError, errorMessage } from '../lib/api';
 import { login, register } from '../store/actions';
-import { Button, Field, Input, LogoMark, Wordmark } from '../components/ui';
+import { Button, Field, Input, LogoMark, cx } from '../components/ui';
+import { Sigil, AnimatedWordmark } from '../components/brand';
+import { THEMES } from '../lib/themes';
+import { useAppearance, pickAppearanceLocally } from '../store/appearance';
 import { TitleBar } from '../components/layout/TitleBar';
 
 interface ServerConfig {
@@ -16,9 +19,10 @@ interface ServerConfig {
 
 const TAGLINES = [
   'Sua turma, sua voz, seu lugar.',
+  'Escreva seu nome na história do servidor.',
+  'Toda muralha tem um portão. Este é o seu.',
+  'Mova suas peças. Chame seus aliados.',
   'Chamadas cristalinas. Zero enrolação.',
-  'Compartilhe a tela sem travar o PC.',
-  'Feito para quem gosta de estar junto.',
 ];
 
 function useServerConfig() {
@@ -44,6 +48,37 @@ function useServerConfig() {
   };
 }
 
+/** Escolha rápida de estética antes de entrar (vale para a conta ao fazer login). */
+function AestheticPicker() {
+  const current = useAppearance((s) => s.current.preset);
+  return (
+    <div>
+      <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-fg-2">Escolha sua estética</div>
+      <div className="flex flex-wrap gap-2">
+        {THEMES.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => pickAppearanceLocally(t.appearance)}
+            className={cx(
+              'vl-cut-sm group flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur transition-all hover:-translate-y-0.5',
+              current === t.id ? 'border-accent bg-accent/15 text-fg shadow-[0_0_18px_-6px_var(--vl-glow-color)]' : 'border-line-strong bg-bg-2/50 text-fg-1 hover:border-accent/50 hover:text-fg',
+            )}
+            title={t.description}
+          >
+            <span className="flex -space-x-1">
+              {t.preview.map((c, i) => (
+                <span key={i} className="size-3 rounded-full ring-1 ring-black/40" style={{ background: c }} />
+              ))}
+            </span>
+            {t.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AuthLayout({ children }: { children: ReactNode }) {
   const [tag, setTag] = useState(0);
   useEffect(() => {
@@ -51,30 +86,32 @@ function AuthLayout({ children }: { children: ReactNode }) {
     return () => clearInterval(t);
   }, []);
   return (
-    <div className="flex h-full flex-col bg-bg-0">
+    <div className="flex h-full flex-col">
       <TitleBar />
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {/* lado artístico */}
         <div className="relative hidden flex-1 overflow-hidden lg:block">
-          <div className="absolute -left-32 -top-32 size-[520px] rounded-full bg-[#7c5cff]/30 blur-[120px]" />
-          <div className="absolute -bottom-40 right-0 size-[520px] rounded-full bg-[#1fc8e6]/20 blur-[120px]" />
-          <div
-            className="absolute inset-0 opacity-[0.07]"
-            style={{ backgroundImage: 'linear-gradient(var(--vl-text-0) 1px, transparent 1px), linear-gradient(90deg, var(--vl-text-0) 1px, transparent 1px)', backgroundSize: '48px 48px' }}
-          />
+          <div className="pointer-events-none absolute -right-48 top-1/2 -translate-y-1/2 opacity-35">
+            <Sigil size={620}>
+              <span />
+            </Sigil>
+          </div>
           <div className="relative flex h-full flex-col justify-between p-12">
-            <div className="flex items-center gap-3">
-              <LogoMark size={40} />
-              <Wordmark className="text-2xl text-fg" />
+            <div className="flex items-center gap-3 animate-fade-in">
+              <LogoMark size={40} className="vl-glow-pulse" />
+              <AnimatedWordmark className="text-3xl text-fg" />
             </div>
-            <div className="max-w-lg">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-line-strong bg-bg-2/60 px-3 py-1 text-xs text-fg-1 backdrop-blur">
-                <Sparkles size={14} className="text-accent-2" /> Voz, vídeo, tela e chat em tempo real
+            <div className="max-w-xl">
+              <div className="vl-cut-sm mb-5 inline-flex items-center gap-2 rounded-full border border-line-strong bg-bg-2/60 px-3 py-1 text-xs text-fg-1 backdrop-blur">
+                <Sparkles size={14} className="text-accent" /> Voz, vídeo, tela e chat em tempo real
               </div>
-              <h1 key={tag} className="font-display text-5xl font-bold leading-[1.05] tracking-tight text-fg animate-slide-up">
+              <h1 key={tag} className="font-display text-6xl leading-[1.05] text-fg text-glow animate-slide-up">
                 {TAGLINES[tag]}
               </h1>
-              <p className="mt-5 text-lg text-fg-1">Crie servidores, chame os amigos e fale como se estivessem na mesma sala.</p>
+              <p className="mt-5 max-w-md text-lg text-fg-1">Crie servidores, chame os amigos e deixe tudo com a sua cara — cores, fontes, formas e animações.</p>
+              <div className="mt-8">
+                <AestheticPicker />
+              </div>
             </div>
             <div className="flex items-center gap-2 text-xs text-fg-2">
               <ShieldCheck size={14} /> Senhas protegidas com Argon2id e conexões criptografadas.
@@ -82,8 +119,13 @@ function AuthLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
         {/* formulário */}
-        <div className="flex w-full items-center justify-center overflow-y-auto p-6 lg:w-[520px] lg:border-l lg:border-line lg:bg-bg-1">
-          <div className="w-full max-w-[400px] animate-slide-up">{children}</div>
+        <div className="flex w-full items-center justify-center overflow-y-auto p-6 lg:w-[540px] lg:pr-10">
+          <div className="vl-panel vl-dialog w-full max-w-[420px] rounded-2xl border border-line-strong p-8">
+            <div className="mb-6 lg:hidden">
+              <AestheticPicker />
+            </div>
+            {children}
+          </div>
         </div>
       </div>
     </div>
