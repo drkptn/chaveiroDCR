@@ -1,0 +1,58 @@
+# Empacotamento do Vinlancord (instalador NSIS para Windows; AppImage/deb e dmg preparados).
+appId: com.vinlancord.app
+productName: Vinlancord
+copyright: Copyright © 2026 Vinlancord
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist-electron/**
+  - renderer/**
+  - build/splash.html
+  - build/icon.ico
+  - build/icon.png
+  - build/tray.png
+  - build/badge.png
+  - package.json
+asar: true
+protocols:
+  - name: Vinlancord
+    schemes: [vinlancord]
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+  artifactName: Vinlancord-Setup-${version}.${ext}
+  # Assinatura de código (opcional, recomendada): defina CSC_LINK e CSC_KEY_PASSWORD no ambiente de build.
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Vinlancord
+  runAfterFinish: true
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  installerHeaderIcon: build/icon.ico
+  deleteAppDataOnUninstall: false
+  language: 1046
+linux:
+  target: [AppImage, deb]
+  category: Network
+  icon: build/icons
+  maintainer: Vinlancord
+mac:
+  target: dmg
+  category: public.app-category.social-networking
+  icon: build/icon.png
+  extendInfo:
+    NSMicrophoneUsageDescription: O Vinlancord usa o microfone nas chamadas de voz.
+    NSCameraUsageDescription: O Vinlancord usa a câmera nas chamadas de vídeo.
+# Atualização automática: troque `publish: null` por um provedor e aponte para onde você publica os instaladores (HTTPS).
+# O app só procura atualizações quando este bloco estiver configurado (gera o app-update.yml).
+#   publish:
+#     provider: generic
+#     url: https://downloads.seudominio.com/vinlancord/
+publish: null

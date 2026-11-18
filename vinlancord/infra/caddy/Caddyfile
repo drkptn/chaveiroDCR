@@ -1,0 +1,13 @@
+# HTTPS automático (Let's Encrypt) + proxy para a API, o gateway WebSocket e o cliente web.
+{$DOMAIN} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+	request_body {
+		max_size 60MB
+	}
+	reverse_proxy server:8787
+}

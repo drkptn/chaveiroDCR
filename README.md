@@ -107,3 +107,9 @@ tools/capture-renders.mjs
 - Navegação por teclado (gavetas, seletor de chaves, dial de contato em `radiogroup`, menu com foco preso, galeria com setas/Esc).
 - three.js só é baixado quando uma cena 3D é montada; cenas pausam fora da tela; fallback sem WebGL.
 - JSON-LD `Locksmith` só com campos preenchidos.
+
+---
+
+## Vinlancord (app de comunicação)
+
+Este repositório também contém o **Vinlancord** — plataforma de chat, voz, vídeo e compartilhamento de tela com app desktop para Windows — na pasta [`vinlancord/`](vinlancord/README.md). Ele é independente da landing page (está excluído do `tsconfig` e do deploy da Vercel).

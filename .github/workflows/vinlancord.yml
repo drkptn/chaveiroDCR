@@ -1,0 +1,96 @@
+# Vinlancord: testes automáticos e geração do instalador para Windows.
+name: Vinlancord
+
+on:
+  push:
+    paths: ['vinlancord/**', '.github/workflows/vinlancord.yml']
+  pull_request:
+    paths: ['vinlancord/**']
+  workflow_dispatch:
+    inputs:
+      server_url:
+        description: 'Endereço padrão do servidor embutido no app (ex.: https://vinlancord.seudominio.com)'
+        required: false
+
+defaults:
+  run:
+    working-directory: vinlancord
+
+jobs:
+  test:
+    name: Testes (unitários, integração e ponta a ponta)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: vinlancord
+          POSTGRES_PASSWORD: vinlancord_dev
+          POSTGRES_DB: vinlancord_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U vinlancord" --health-interval 5s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vinlancord/package-lock.json
+      - run: npm ci
+      - name: Banco do E2E
+        run: PGPASSWORD=vinlancord_dev psql -h localhost -U vinlancord -d vinlancord_test -c 'CREATE DATABASE vinlancord_e2e;'
+      - name: Tipos
+        run: |
+          npx tsc -p packages/shared/tsconfig.json
+          (cd apps/server && npx prisma generate && npx tsc -p tsconfig.json)
+          npx tsc -p apps/web/tsconfig.json
+          npx tsc -p apps/desktop/tsconfig.json
+      - name: Testes do pacote compartilhado
+        run: npm test -w @vinlancord/shared
+      - name: Testes de integração do servidor
+        run: npm test -w @vinlancord/server
+      - name: Testes do cliente web
+        run: npm test -w @vinlancord/web
+      - name: Build do cliente web
+        run: npm run build -w @vinlancord/web
+      - name: Navegador para o E2E
+        run: npx playwright install --with-deps chromium
+      - name: E2E com dois usuários (chat, voz, vídeo, tela, reconexão)
+        run: npm run e2e -w @vinlancord/e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-falhas
+          path: vinlancord/e2e/test-results
+
+  windows-installer:
+    name: Instalador para Windows
+    runs-on: windows-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vinlancord/package-lock.json
+      - run: npm ci
+      - name: Gerar instalador (NSIS)
+        env:
+          VINLANCORD_SERVER_URL: ${{ inputs.server_url || vars.VINLANCORD_SERVER_URL }}
+          # Assinatura opcional: configure os segredos CSC_LINK e CSC_KEY_PASSWORD
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: npm run dist:win -w @vinlancord/desktop
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vinlancord-Windows
+          path: |
+            vinlancord/apps/desktop/release/*.exe
+            vinlancord/apps/desktop/release/*.blockmap
+            vinlancord/apps/desktop/release/latest.yml
+          if-no-files-found: error
