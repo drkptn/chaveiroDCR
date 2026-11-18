@@ -1,5 +1,5 @@
 # Vinlancord em produção: docker compose --env-file ../.env up -d   (rodar dentro de vinlancord/infra)
-# Requisitos: um servidor Linux com IP público, um domínio apontando para ele e as portas liberadas
+# Mais fácil: infra/install.sh faz tudo. Requisitos: Linux com IP público (domínio opcional) e as portas liberadas
 # (80/443 TCP, 40000-40003 UDP/TCP para mídia, 3478 UDP/TCP e 49160-49200 UDP para o TURN).
 name: vinlancord
 
@@ -89,12 +89,15 @@ services:
     depends_on: [server]
     environment:
       DOMAIN: ${DOMAIN}
+      # modo IP: "tls /certs/vinlancord.crt /certs/vinlancord.key" (definido pelo install.sh); vazio = Let's Encrypt
+      TLS_LINE: ${TLS_LINE:-}
     ports:
       - '80:80'
       - '443:443'
       - '443:443/udp'
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
       - caddydata:/data
       - caddyconfig:/config
 

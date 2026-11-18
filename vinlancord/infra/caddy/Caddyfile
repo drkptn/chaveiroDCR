@@ -1,5 +1,12 @@
-# HTTPS automático (Let's Encrypt) + proxy para a API, o gateway WebSocket e o cliente web.
+# HTTPS + proxy para a API, o gateway WebSocket e o cliente web.
+# Domínio próprio: certificado Let's Encrypt automático. Só IP: certificado próprio (TLS_LINE).
+{
+	# conexões por IP não enviam SNI: usa o certificado do site
+	default_sni {$DOMAIN}
+}
+
 {$DOMAIN} {
+	{$TLS_LINE}
 	encode zstd gzip
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"

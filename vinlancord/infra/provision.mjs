@@ -6,7 +6,7 @@
  *   node infra/provision.mjs hetzner   # Ashburn/EUA (mais barato)         — token em HCLOUD_TOKEN
  *
  * Opções: --region <id> --plan <id> --name <nome>
- * Ao final mostra o IP e o endereço HTTPS (https://<ip>.sslip.io) e espera o servidor responder.
+ * Ao final mostra o IP e o endereço (https://<ip>, certificado próprio fixado no app) e espera o servidor responder.
  * Nenhuma senha do Vinlancord passa por aqui: os segredos são gerados dentro da própria VPS.
  */
 const REPO_RAW = 'https://raw.githubusercontent.com/drkptn/chaveiroDCR/refs/heads/claude/vinlancord-communication-app-vkiccq/vinlancord/infra/install.sh';
@@ -24,6 +24,8 @@ runcmd:
   - [bash, -c, "curl -fsSL ${REPO_RAW} -o /root/vinlancord-install.sh && bash /root/vinlancord-install.sh > /var/log/vinlancord-install.log 2>&1"]
 `;
 
+// eslint-disable-next-line
+const insecureAgent = await import('undici').then((u) => new u.Agent({ connect: { rejectUnauthorized: false } })).catch(() => undefined);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const log = (...a) => console.log('▸', ...a);
 
@@ -96,7 +98,8 @@ async function waitHealthy(url) {
   const t0 = Date.now();
   while (Date.now() - t0 < 30 * 60_000) {
     try {
-      const r = await fetch(`${url}/api/v1/health`, { signal: AbortSignal.timeout(8000) });
+      // certificado próprio (modo IP): aqui só checamos se responde; o app valida pela impressão digital
+      const r = await fetch(`${url}/api/v1/health`, { signal: AbortSignal.timeout(8000), dispatcher: insecureAgent });
       if (r.ok) return true;
     } catch {
       /* ainda subindo */
@@ -113,7 +116,7 @@ if (!run) {
   process.exit(1);
 }
 const { id, ip } = await run();
-const url = `https://${ip.replace(/\./g, '-')}.sslip.io`;
+const url = `https://${ip}`;
 log(`VPS ${id} com IP ${ip}. Endereço do Vinlancord: ${url}`);
 if (args.includes('--no-wait')) process.exit(0);
 const ok = await waitHealthy(url);

@@ -14,3 +14,7 @@ apps/server/src/generated
 test-results
 playwright-report
 .DS_Store
+infra/certs/*
+!infra/certs/.gitkeep
+infra/backups/
+/default-server.txt

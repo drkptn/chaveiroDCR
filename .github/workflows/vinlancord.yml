@@ -11,6 +11,9 @@ on:
       server_url:
         description: 'Endereço padrão do servidor embutido no app (vazio = apps/desktop/default-server.txt)'
         required: false
+      server_pin:
+        description: 'SHA-256 do certificado próprio do servidor (modo só IP)'
+        required: false
       publish:
         description: 'Publicar o instalador como Release (download + atualização automática)'
         type: boolean
@@ -90,8 +93,12 @@ jobs:
         run: sudo VINLANCORD_CI=1 bash infra/install.sh
       - name: Interface e API pela instalação de produção
         run: |
-          curl -fsSk https://localhost/ | grep -q 'id="root"'
-          curl -fsSk https://localhost/api/v1/health
+          curl -fsSk https://127.0.0.1/ | grep -q 'id="root"'
+          curl -fsSk https://127.0.0.1/api/v1/health
+          # o certificado servido é exatamente o gerado pelo instalador (o mesmo que o app fixa)
+          served=$(echo | openssl s_client -connect 127.0.0.1:443 2>/dev/null | openssl x509 -noout -fingerprint -sha256)
+          mine=$(sudo openssl x509 -in infra/certs/vinlancord.crt -noout -fingerprint -sha256)
+          echo "$served"; test "$served" = "$mine"
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -104,7 +111,7 @@ jobs:
         run: npx playwright test two-users appearance
         working-directory: vinlancord/e2e
         env:
-          E2E_BASE_URL: https://localhost
+          E2E_BASE_URL: https://127.0.0.1
       - name: Logs dos serviços
         if: failure()
         run: cd infra && sudo docker compose --env-file ../.env ps && sudo docker compose --env-file ../.env logs --tail 200
@@ -127,6 +134,7 @@ jobs:
       - name: Gerar instalador (NSIS)
         env:
           VINLANCORD_SERVER_URL: ${{ inputs.server_url || vars.VINLANCORD_SERVER_URL }}
+          VINLANCORD_SERVER_PIN: ${{ inputs.server_pin || vars.VINLANCORD_SERVER_PIN }}
           # Assinatura opcional: configure os segredos CSC_LINK e CSC_KEY_PASSWORD
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}

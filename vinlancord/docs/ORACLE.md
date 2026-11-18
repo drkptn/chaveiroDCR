@@ -44,8 +44,10 @@ Isso só abre a rede da Oracle; o firewall dentro da máquina continua deixando 
 
 ## 4. Pronto
 
-Em **10–20 minutos** o servidor estará em `https://SEU-IP-COM-TRACOS.sslip.io` (ex.: IP `150.230.10.20` → `https://150-230-10-20.sslip.io`).
+Em **10–20 minutos** o servidor estará em `https://SEU-IP` (ex.: `https://150.230.10.20`).
 Me mande o IP e eu gero o instalador do app já conectado a ele.
+
+Como não há domínio, o servidor usa um **certificado próprio** (10 anos) e o app confia **só nele** (*pinning*): a conexão é criptografada e um impostor não consegue se passar pelo seu servidor. Abrindo pelo navegador aparece um aviso de certificado — é esperado; use o app. Se um dia quiser um domínio próprio (ex.: `chat.seudominio.com`, com certificado público), dá para migrar depois sem perder dados.
 
 ## Bom saber
 

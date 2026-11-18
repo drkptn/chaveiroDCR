@@ -8,9 +8,10 @@
 # O que ele faz sozinho:
 #   • instala Docker, git e firewall; cria swap se a memória for pouca
 #   • baixa o código, gera senhas/chaves aleatórias (ficam só neste servidor)
-#   • descobre o IP público e usa um endereço HTTPS automático (<ip>.sslip.io)
-#     — ou o seu domínio, se você passar DOMAIN=chat.seudominio.com
-#   • sobe banco, Redis, servidor de chat/voz/vídeo, HTTPS (Let's Encrypt), TURN e backups
+#   • descobre o IP público e serve HTTPS direto nele (https://<ip>) com certificado
+#     próprio de 10 anos que o app fixa (pinning) — ou usa o seu domínio com
+#     Let's Encrypt automático, se você passar DOMAIN=chat.seudominio.com
+#   • sobe banco, Redis, servidor de chat/voz/vídeo, HTTPS, TURN e backups
 #   • tudo reinicia sozinho se o servidor reiniciar
 #   • (opcional, ligado por padrão) atualização automática diária às 05:00 (horário de Brasília)
 #
@@ -75,12 +76,13 @@ ENVF="$APP/.env"
 if [ ! -f "$ENVF" ]; then
   if [ "$CI_MODE" = 1 ]; then
     PUBLIC_IP="${PUBLIC_IP:-127.0.0.1}"
-    DOMAIN="${DOMAIN:-localhost}"
   else
     PUBLIC_IP="${PUBLIC_IP:-$(curl -fsS4 --max-time 10 https://api.ipify.org || curl -fsS4 --max-time 10 https://ifconfig.me)}"
     [[ "$PUBLIC_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "Não consegui descobrir o IP público. Rode com PUBLIC_IP=x.x.x.x"
-    DOMAIN="${DOMAIN:-$(echo "$PUBLIC_IP" | tr . -).sslip.io}"
   fi
+  # Com domínio próprio: certificado Let's Encrypt automático.
+  # Sem domínio: o endereço é o próprio IP, com certificado próprio de 10 anos fixado no app (pinning).
+  if [ -n "${DOMAIN:-}" ]; then TLS_MODE=domain; else TLS_MODE=ip; DOMAIN="$PUBLIC_IP"; fi
   rnd() { openssl rand -hex "$1"; }
   cores=$(nproc)
   say "Gerando configuração e segredos (ficam só neste servidor)…"
@@ -89,6 +91,7 @@ if [ ! -f "$ENVF" ]; then
 # Gerado por install.sh em $(date -u +%FT%TZ). Guarde este arquivo: ele contém as chaves do servidor.
 DOMAIN=$DOMAIN
 PUBLIC_IP=$PUBLIC_IP
+TLS_MODE=$TLS_MODE
 POSTGRES_PASSWORD=$(rnd 24)
 SECRET_KEY=$(rnd 32)
 TURN_SECRET=$(rnd 24)
@@ -101,6 +104,23 @@ EOF
 fi
 # shellcheck disable=SC1090
 set -a; . "$ENVF"; set +a
+TLS_MODE="${TLS_MODE:-domain}"
+
+# Certificado próprio (modo IP): gerado uma vez, válido por 10 anos
+CERTS="$INFRA/certs"
+TLS_LINE=""
+if [ "$TLS_MODE" = ip ]; then
+  mkdir -p "$CERTS"
+  if [ ! -s "$CERTS/vinlancord.crt" ]; then
+    say "Gerando certificado próprio para $DOMAIN (10 anos)…"
+    openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -days 3650 \
+      -subj "/CN=Vinlancord $DOMAIN" -addext "subjectAltName=IP:$DOMAIN" \
+      -keyout "$CERTS/vinlancord.key" -out "$CERTS/vinlancord.crt" 2>/dev/null
+    chmod 600 "$CERTS/vinlancord.key"
+  fi
+  TLS_LINE="tls /certs/vinlancord.crt /certs/vinlancord.key"
+fi
+export TLS_LINE
 
 # ─── 4. Firewall ─────────────────────────────────────────────────────────────
 PORTS=("tcp 80" "tcp 443" "udp 443" "tcp 3478" "udp 3478" "tcp 40000:40003" "udp 40000:40003" "udp 49160:49200")
@@ -143,12 +163,12 @@ docker image prune -f >/dev/null 2>&1 || true
 say "Aguardando o servidor responder em https://$DOMAIN …"
 ok=0
 for _ in $(seq 1 120); do
-  if curl -fsSk --max-time 5 --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN/api/v1/health" >/dev/null 2>&1; then ok=1; break; fi
+  if curl -fsSk --max-time 5 --connect-to "$DOMAIN:443:127.0.0.1:443" "https://$DOMAIN/api/v1/health" >/dev/null 2>&1; then ok=1; break; fi
   sleep 5
 done
 [ "$ok" = 1 ] || { docker compose --env-file "$ENVF" ps; docker compose --env-file "$ENVF" logs --tail 80 server caddy; die "O servidor não respondeu a tempo."; }
 
-if [ "$CI_MODE" != 1 ]; then
+if [ "$CI_MODE" != 1 ] && [ "$TLS_MODE" = domain ]; then
   # certificado válido (Let's Encrypt) — pode levar alguns segundos a mais
   for _ in $(seq 1 36); do curl -fsS --max-time 5 "https://$DOMAIN/api/v1/health" >/dev/null 2>&1 && break; sleep 5; done
 fi
@@ -191,7 +211,13 @@ fi
 
 printf '\n\033[1;32m✔ Vinlancord no ar!\033[0m\n'
 printf '  Endereço do servidor:  \033[1mhttps://%s\033[0m\n' "$DOMAIN"
-printf '  Navegador:             https://%s\n' "$DOMAIN"
+if [ "$TLS_MODE" = ip ]; then
+  FP=$(openssl x509 -in "$CERTS/vinlancord.crt" -noout -fingerprint -sha256 | cut -d= -f2 | tr -d : | tr 'A-F' 'a-f')
+  printf '  Certificado (pinning): sha256=%s\n' "$FP"
+  printf 'https://%s\nsha256=%s\n' "$DOMAIN" "$FP" > "$APP/default-server.txt"
+  printf '  Para o app:            %s (cole em apps/desktop/default-server.txt)\n' "$APP/default-server.txt"
+  printf '  No navegador aparece um aviso de certificado (é o certificado próprio); o app confia nele.\n'
+fi
 printf '  Configuração/segredos: %s (guarde uma cópia)\n' "$ENVF"
 printf '  Backups do banco:      %s/backups (diários)\n' "$INFRA"
 [ "$CI_MODE" = 1 ] || printf '  Atualização automática: diária (systemctl status vinlancord-update.timer)\n'

@@ -24,6 +24,10 @@ import {
   shell,
   screen,
 } from 'electron';
+import { isPinned } from './pinning';
+
+declare const __VL_PINS__: Record<string, string> | undefined;
+const PINS: Record<string, string> = typeof __VL_PINS__ === 'undefined' ? {} : __VL_PINS__;
 import { execFile } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, normalize, resolve, sep } from 'node:path';
@@ -254,6 +258,10 @@ let screenSelection: { id: string; audio: boolean } | null = null;
 function setupMedia() {
   const allowed = new Set(['media', 'display-capture', 'notifications', 'fullscreen', 'clipboard-sanitized-write', 'speaker-selection']);
   const fromApp = (origin: string) => origin.startsWith(APP_ORIGIN) || (isDev && !!process.env.VINLANCORD_DEV_URL && origin.startsWith(process.env.VINLANCORD_DEV_URL));
+  // servidor só com IP e certificado próprio: confia apenas no certificado fixado no build
+  if (Object.keys(PINS).length) {
+    session.defaultSession.setCertificateVerifyProc((req, cb) => cb(req.errorCode !== 0 && isPinned(req.hostname, req.certificate.data, PINS) ? 0 : -3));
+  }
   session.defaultSession.setPermissionRequestHandler((wc, permission, cb) => cb(allowed.has(permission) && fromApp(wc.getURL())));
   session.defaultSession.setPermissionCheckHandler((_wc, permission, origin) => allowed.has(permission) && fromApp(origin));
 
