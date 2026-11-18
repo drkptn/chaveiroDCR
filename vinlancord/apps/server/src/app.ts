@@ -104,7 +104,17 @@ export async function buildApp() {
   // Cliente web (opcional): o mesmo servidor entrega a interface no navegador.
   const webDir = resolve(config.SERVE_WEB || '../web/dist');
   if (existsSync(resolve(webDir, 'index.html'))) {
-    await app.register(fastifyStatic, { root: webDir, prefix: '/', wildcard: false, index: ['index.html'] });
+    await app.register(fastifyStatic, {
+      root: webDir,
+      prefix: '/',
+      wildcard: true,
+      index: ['index.html'],
+      // index.html nunca em cache (aponta para os arquivos com hash da versão atual)
+      setHeaders: (res, path) => {
+        if (path.endsWith('.html')) res.header('Cache-Control', 'no-cache');
+        else if (/\.(js|css|woff2?|svg|png|webp)$/.test(path)) res.header('Cache-Control', 'public, max-age=31536000, immutable');
+      },
+    });
     app.log.info(`Servindo cliente web de ${webDir}`);
   }
 

@@ -31,12 +31,12 @@ export function SettingsLayout({ tabs, active, onTab, onClose, children }: { tab
         <div className="w-[200px]">
           {tabs
             .filter((t) => !t.hidden)
-            .map((t) => {
+            .map((t, i) => {
               const header = t.section && t.section !== lastSection ? t.section : null;
               lastSection = t.section ?? lastSection;
               return (
                 <div key={t.id}>
-                  {header && <div className="mb-1 mt-4 px-2.5 text-[11px] font-bold uppercase tracking-wider text-fg-2 first:mt-0">{header}</div>}
+                  {header && <div className={cx('mb-1 px-2.5 text-[11px] font-bold uppercase tracking-wider text-fg-2', i > 0 && 'mt-5 border-t border-line pt-4')}>{header.trim()}</div>}
                   <button
                     onClick={() => (t.onClick ? t.onClick() : onTab(t.id))}
                     className={cx(
