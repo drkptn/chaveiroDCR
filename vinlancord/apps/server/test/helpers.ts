@@ -49,7 +49,7 @@ export function client(token?: string) {
   const call = async <T = any>(method: string, path: string, body?: unknown): Promise<Res<T>> => {
     const headers: Record<string, string> = {};
     if (token) headers.authorization = `Bearer ${token}`;
-    let payload: BodyInit | undefined;
+    let payload: FormData | string | undefined;
     if (body instanceof FormData) payload = body;
     else if (body !== undefined) {
       headers['content-type'] = 'application/json';

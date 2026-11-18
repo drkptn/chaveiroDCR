@@ -3,9 +3,8 @@ import { z, type ZodType } from 'zod';
 import { P, type RpcMethod } from '@vinlancord/shared';
 import { prisma, Prisma } from '../lib/db';
 import { ApiError } from '../lib/errors';
-import { kv } from '../lib/kv';
+import { startTyping } from '../services/typing';
 import { parse, zId } from '../lib/validate';
-import { bus } from '../services/bus';
 import { requireChannelPerm } from '../services/perms';
 import { refreshUserPresence, updateConnPresence } from '../services/presence';
 import * as voice from '../voice/service';
@@ -61,10 +60,7 @@ export const rpcHandlers: Record<RpcMethod, Handler> = {
 
   'typing.start': h(z.object({ channelId: zId }), async (ctx, d) => {
     await requireChannelPerm(d.channelId, ctx.userId, P.SEND_MESSAGES);
-    // no máximo um evento a cada 3s por usuário/canal
-    if (await kv.setnx(`typing:${d.channelId}:${ctx.userId}`, '1', 3)) {
-      await bus.toChannel(d.channelId, 'TYPING_START', { channelId: d.channelId, userId: ctx.userId, at: Date.now() });
-    }
+    await startTyping(d.channelId, ctx.userId);
     return { ok: true };
   }),
 

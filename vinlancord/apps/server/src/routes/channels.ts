@@ -38,6 +38,7 @@ import { hydrateMessages, loadMessage, messageInclude, type MessageRow } from '.
 import { assertCanDM, createGroupDM, dmInclude, openDM, reopenForRecipients } from '../services/dm';
 import { createSystemMessage } from '../services/systemMessages';
 import { audit } from '../services/guilds';
+import { cancelTyping } from '../services/typing';
 import { voiceHooks } from '../services/voiceHooks';
 import { areFriends } from '../services/users';
 
@@ -430,6 +431,7 @@ export default async function channelRoutes(app: FastifyInstance) {
     }
 
     const msgId = newId();
+    cancelTyping(id, me);
     await prisma.$transaction([
       prisma.message.create({
         data: {

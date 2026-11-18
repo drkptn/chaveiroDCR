@@ -2,10 +2,11 @@
   "name": "vinlancord",
   "version": "1.0.0",
   "private": true,
-  "description": "Vinlancord — plataforma de comunicação: chat, voz, vídeo e compartilhamento de tela.",
+  "description": "Vinlancord \u2014 plataforma de comunica\u00e7\u00e3o: chat, voz, v\u00eddeo e compartilhamento de tela.",
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "e2e"
   ],
   "scripts": {
     "dev:server": "npm run dev -w @vinlancord/server",

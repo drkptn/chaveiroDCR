@@ -1,0 +1,238 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource/jetbrains-mono/400.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tokens de design: cada tema redefine estas variáveis (ver lib/themes.ts) */
+:root {
+  --vl-bg-0: #08080c;
+  --vl-bg-1: #0e0e14;
+  --vl-bg-2: #13131a;
+  --vl-bg-3: #1a1a23;
+  --vl-bg-4: #22222d;
+  --vl-bg-5: #2b2b38;
+  --vl-border: #23232e;
+  --vl-border-strong: #33333f;
+  --vl-text-0: #f2f2f7;
+  --vl-text-1: #b9b9c8;
+  --vl-text-2: #7d7d90;
+  --vl-accent: #7c5cff;
+  --vl-accent-2: #22d3ee;
+  --vl-accent-fg: #ffffff;
+  --vl-success: #23c55e;
+  --vl-warning: #f5a524;
+  --vl-danger: #f04459;
+  --vl-online: #23c55e;
+  --vl-idle: #f5a524;
+  --vl-dnd: #f04459;
+  --vl-offline: #6b6b7d;
+  --vl-mention: color-mix(in oklab, var(--vl-warning) 12%, transparent);
+  --vl-shadow: 0 12px 40px -8px rgb(0 0 0 / 0.55);
+  --vl-font-scale: 1;
+}
+
+@theme inline {
+  --color-bg-0: var(--vl-bg-0);
+  --color-bg-1: var(--vl-bg-1);
+  --color-bg-2: var(--vl-bg-2);
+  --color-bg-3: var(--vl-bg-3);
+  --color-bg-4: var(--vl-bg-4);
+  --color-bg-5: var(--vl-bg-5);
+  --color-line: var(--vl-border);
+  --color-line-strong: var(--vl-border-strong);
+  --color-fg: var(--vl-text-0);
+  --color-fg-1: var(--vl-text-1);
+  --color-fg-2: var(--vl-text-2);
+  --color-accent: var(--vl-accent);
+  --color-accent-2: var(--vl-accent-2);
+  --color-accent-fg: var(--vl-accent-fg);
+  --color-success: var(--vl-success);
+  --color-warning: var(--vl-warning);
+  --color-danger: var(--vl-danger);
+  --color-online: var(--vl-online);
+  --color-idle: var(--vl-idle);
+  --color-dnd: var(--vl-dnd);
+  --color-offline: var(--vl-offline);
+  --font-sans: 'Inter Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Space Grotesk Variable', 'Inter Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+  --animate-fade-in: fade-in 0.18s ease-out;
+  --animate-pop-in: pop-in 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  --animate-slide-up: slide-up 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-slide-in-right: slide-in-right 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.94) translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--vl-success) 70%, transparent); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-6px) rotate(-2deg); }
+}
+@keyframes wave {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-3px); opacity: 1; }
+}
+@keyframes ring-shake {
+  0%, 100% { transform: rotate(0); }
+  10%, 30% { transform: rotate(-12deg); }
+  20%, 40% { transform: rotate(12deg); }
+  50% { transform: rotate(0); }
+}
+
+html {
+  font-size: calc(16px * var(--vl-font-scale));
+  background: var(--vl-bg-0);
+  color: var(--vl-text-0);
+  color-scheme: dark;
+}
+html.light {
+  color-scheme: light;
+}
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+}
+#root {
+  height: 100vh;
+}
+::selection {
+  background: color-mix(in oklab, var(--vl-accent) 40%, transparent);
+}
+input, textarea, [contenteditable], .selectable {
+  user-select: text;
+}
+
+/* Rolagem fina e discreta */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--vl-bg-5) transparent;
+}
+.scroll-none {
+  scrollbar-width: none;
+}
+.scroll-none::-webkit-scrollbar {
+  display: none;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--vl-bg-5); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.drag-region { -webkit-app-region: drag; }
+.no-drag { -webkit-app-region: no-drag; }
+
+.gradient-text {
+  background: linear-gradient(120deg, var(--vl-accent), var(--vl-accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.gradient-accent {
+  background: linear-gradient(135deg, var(--vl-accent), color-mix(in oklab, var(--vl-accent) 50%, var(--vl-accent-2)));
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--vl-bg-3) 25%, var(--vl-bg-4) 50%, var(--vl-bg-3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+.speaking-ring {
+  box-shadow: 0 0 0 2px var(--vl-success), 0 0 18px -2px color-mix(in oklab, var(--vl-success) 60%, transparent);
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--vl-accent);
+  outline-offset: 2px;
+}
+
+/* Markdown das mensagens */
+.md p { margin: 0; }
+.md code.inline {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+  background: var(--vl-bg-4);
+  border: 1px solid var(--vl-border);
+}
+.md pre {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  background: var(--vl-bg-1);
+  border: 1px solid var(--vl-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 4px 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.md blockquote {
+  margin: 2px 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--vl-border-strong);
+  color: var(--vl-text-1);
+}
+.md ul, .md ol { margin: 2px 0; padding-left: 1.4em; }
+.md ul { list-style: disc; }
+.md ol { list-style: decimal; }
+.md a { color: var(--vl-accent-2); text-decoration: none; }
+.md a:hover { text-decoration: underline; }
+.md h1 { font-size: 1.4em; font-weight: 700; margin: 4px 0; }
+.md h2 { font-size: 1.2em; font-weight: 700; margin: 4px 0; }
+.md h3 { font-size: 1.05em; font-weight: 700; margin: 4px 0; }
+.md .spoiler {
+  background: var(--vl-bg-5);
+  color: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.md .spoiler.revealed { color: inherit; background: var(--vl-bg-4); }
+.md .mention {
+  background: color-mix(in oklab, var(--vl-accent) 22%, transparent);
+  color: color-mix(in oklab, var(--vl-accent) 55%, var(--vl-text-0));
+  border-radius: 4px;
+  padding: 0 3px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.md .mention:hover { background: var(--vl-accent); color: var(--vl-accent-fg); }
+.md .emoji { width: 1.375em; height: 1.375em; vertical-align: -0.3em; display: inline-block; object-fit: contain; }
+.md.jumbo .emoji { width: 3rem; height: 3rem; }
+.md.jumbo .uemoji { font-size: 2.6rem; line-height: 1.15; }
+
+/* Reduzir movimento */
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

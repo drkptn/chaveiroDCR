@@ -1,0 +1,12 @@
+{
+  "name": "@vinlancord/e2e",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "e2e": "playwright test --trace off",
+    "e2e:headed": "playwright test --headed --trace off"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}
