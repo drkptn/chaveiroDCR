@@ -50,9 +50,10 @@ mac:
   extendInfo:
     NSMicrophoneUsageDescription: O Vinlancord usa o microfone nas chamadas de voz.
     NSCameraUsageDescription: O Vinlancord usa a câmera nas chamadas de vídeo.
-# Atualização automática: troque `publish: null` por um provedor e aponte para onde você publica os instaladores (HTTPS).
-# O app só procura atualizações quando este bloco estiver configurado (gera o app-update.yml).
-#   publish:
-#     provider: generic
-#     url: https://downloads.seudominio.com/vinlancord/
-publish: null
+# Atualização automática pelas Releases do GitHub (repositório público: não precisa de token no app).
+# O workflow publica cada versão nova (v1.0.N) com o instalador e o latest.yml.
+publish:
+  provider: github
+  owner: drkptn
+  repo: chaveiroDCR
+  releaseType: release

@@ -9,8 +9,15 @@ on:
   workflow_dispatch:
     inputs:
       server_url:
-        description: 'Endereço padrão do servidor embutido no app (ex.: https://vinlancord.seudominio.com)'
+        description: 'Endereço padrão do servidor embutido no app (vazio = apps/desktop/default-server.txt)'
         required: false
+      publish:
+        description: 'Publicar o instalador como Release (download + atualização automática)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
 
 defaults:
   run:
@@ -67,6 +74,34 @@ jobs:
           name: e2e-falhas
           path: vinlancord/e2e/test-results
 
+  docker:
+    name: Servidor em Docker (instalador de 1 comando + chamada real)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar com infra/install.sh (modo CI, TLS local)
+        run: sudo VINLANCORD_CI=1 bash infra/install.sh
+      - name: Interface e API pela instalação de produção
+        run: |
+          curl -fsSk https://localhost/ | grep -q 'id="root"'
+          curl -fsSk https://localhost/api/v1/health
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: vinlancord/package-lock.json
+      - run: npm ci
+      - name: Navegador para o E2E
+        run: npx playwright install --with-deps chromium
+      - name: E2E contra a instalação Docker (voz, vídeo, tela e personalização)
+        run: npx playwright test two-users appearance
+        working-directory: vinlancord/e2e
+        env:
+          E2E_BASE_URL: https://localhost
+      - name: Logs dos serviços
+        if: failure()
+        run: cd infra && sudo docker compose --env-file ../.env ps && sudo docker compose --env-file ../.env logs --tail 200
+
   windows-installer:
     name: Instalador para Windows
     runs-on: windows-latest
@@ -79,6 +114,9 @@ jobs:
           cache: npm
           cache-dependency-path: vinlancord/package-lock.json
       - run: npm ci
+      - name: Versão (1.0.<número da execução>)
+        shell: bash
+        run: npm version "1.0.${{ github.run_number }}" --no-git-tag-version -w @vinlancord/desktop
       - name: Gerar instalador (NSIS)
         env:
           VINLANCORD_SERVER_URL: ${{ inputs.server_url || vars.VINLANCORD_SERVER_URL }}
@@ -94,3 +132,33 @@ jobs:
             vinlancord/apps/desktop/release/*.blockmap
             vinlancord/apps/desktop/release/latest.yml
           if-no-files-found: error
+
+  release:
+    name: Publicar Release (download e atualização automática)
+    runs-on: ubuntu-latest
+    needs: [test, docker, windows-installer]
+    if: (github.event_name == 'workflow_dispatch' && inputs.publish) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[release]'))
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Vinlancord-Windows
+          path: dist
+      - name: Criar a Release v1.0.${{ github.run_number }}
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: 1.0.${{ github.run_number }}
+        run: |
+          ls -la dist
+          cp "dist/Vinlancord-Setup-$VERSION.exe" dist/Vinlancord-Setup.exe
+          cat > notes.md <<EOF
+          **Baixe e instale:** [Vinlancord-Setup.exe](https://github.com/${{ github.repository }}/releases/latest/download/Vinlancord-Setup.exe)
+
+          O app já vem conectado ao servidor e se atualiza sozinho quando sair uma versão nova.
+          Na primeira execução o Windows pode mostrar "O Windows protegeu o computador" (o instalador ainda não tem assinatura digital): clique em **Mais informações → Executar assim mesmo**.
+          EOF
+          gh release create "v$VERSION" --repo "${{ github.repository }}" --target "${{ github.sha }}" \
+            --title "Vinlancord $VERSION" --notes-file notes.md --latest \
+            dist/Vinlancord-Setup-$VERSION.exe dist/Vinlancord-Setup-$VERSION.exe.blockmap dist/latest.yml dist/Vinlancord-Setup.exe

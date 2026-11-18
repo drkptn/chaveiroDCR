@@ -2,6 +2,8 @@ import { defineConfig } from '@playwright/test';
 
 const PORT = Number(process.env.E2E_PORT ?? 8790);
 const DB = process.env.E2E_DATABASE_URL ?? 'postgresql://vinlancord:vinlancord_dev@localhost:5432/vinlancord_e2e';
+/** Testa um servidor já em execução (ex.: a instalação Docker de produção) em vez de subir um. */
+const EXTERNAL = process.env.E2E_BASE_URL;
 
 /**
  * Testes ponta a ponta com DOIS usuários independentes (contextos de navegador
@@ -16,7 +18,8 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   use: {
-    baseURL: `http://127.0.0.1:${PORT}`,
+    baseURL: EXTERNAL ?? `http://127.0.0.1:${PORT}`,
+    ignoreHTTPSErrors: !!EXTERNAL,
     viewport: { width: 1400, height: 860 },
     trace: 'off',
     launchOptions: {
@@ -28,31 +31,33 @@ export default defineConfig({
       ],
     },
   },
-  webServer: {
-    command: 'npx prisma migrate reset --force --skip-seed >/dev/null 2>&1 || npx prisma migrate deploy; npx tsx src/index.ts',
-    cwd: '../apps/server',
-    url: `http://127.0.0.1:${PORT}/api/v1/health`,
-    timeout: 120_000,
-    reuseExistingServer: false,
-    stdout: 'ignore',
-    stderr: 'pipe',
-    env: {
-      VINLANCORD_SKIP_DOTENV: '1',
-      NODE_ENV: 'development',
-      PORT: String(PORT),
-      HOST: '127.0.0.1',
-      PUBLIC_URL: `http://127.0.0.1:${PORT}`,
-      DATABASE_URL: DB,
-      REDIS_URL: process.env.E2E_REDIS_URL ?? '',
-      SECRET_KEY: 'e2e-secret-key-e2e-secret-key-e2e-secret-key',
-      STORAGE_LOCAL_DIR: './data/e2e-uploads',
-      MAIL_OUTBOX_DIR: './data/e2e-mail',
-      MEDIASOUP_WORKERS: '1',
-      MEDIASOUP_PORT: '42000',
-      MEDIASOUP_LISTEN_IP: '127.0.0.1',
-      MEDIASOUP_ANNOUNCED_IP: '127.0.0.1',
-      LOG_LEVEL: 'warn',
-      SERVE_WEB: '../web/dist',
-    },
-  },
+  webServer: EXTERNAL
+    ? undefined
+    : {
+        command: 'npx prisma migrate reset --force --skip-seed >/dev/null 2>&1 || npx prisma migrate deploy; npx tsx src/index.ts',
+        cwd: '../apps/server',
+        url: `http://127.0.0.1:${PORT}/api/v1/health`,
+        timeout: 120_000,
+        reuseExistingServer: false,
+        stdout: 'ignore',
+        stderr: 'pipe',
+        env: {
+          VINLANCORD_SKIP_DOTENV: '1',
+          NODE_ENV: 'development',
+          PORT: String(PORT),
+          HOST: '127.0.0.1',
+          PUBLIC_URL: `http://127.0.0.1:${PORT}`,
+          DATABASE_URL: DB,
+          REDIS_URL: process.env.E2E_REDIS_URL ?? '',
+          SECRET_KEY: 'e2e-secret-key-e2e-secret-key-e2e-secret-key',
+          STORAGE_LOCAL_DIR: './data/e2e-uploads',
+          MAIL_OUTBOX_DIR: './data/e2e-mail',
+          MEDIASOUP_WORKERS: '1',
+          MEDIASOUP_PORT: '42000',
+          MEDIASOUP_LISTEN_IP: '127.0.0.1',
+          MEDIASOUP_ANNOUNCED_IP: '127.0.0.1',
+          LOG_LEVEL: 'warn',
+          SERVE_WEB: '../web/dist',
+        },
+      },
 });
