@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import Fastify, { type FastifyError } from 'fastify';
 import helmet from '@fastify/helmet';
@@ -23,7 +23,10 @@ import miscRoutes, { gauges } from './routes/misc';
 import { registerGateway } from './gateway';
 
 export async function buildApp() {
+  const https = config.TLS_CERT_FILE && config.TLS_KEY_FILE ? { cert: readFileSync(config.TLS_CERT_FILE), key: readFileSync(config.TLS_KEY_FILE) } : null;
   const app = Fastify({
+    // HTTPS direto (modo anfitrião); em produção normal o Caddy faz o TLS na frente
+    ...((https ? { https } : {}) as object),
     logger: config.isTest
       ? false
       : {

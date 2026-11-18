@@ -18,3 +18,4 @@ infra/certs/*
 !infra/certs/.gitkeep
 infra/backups/
 /default-server.txt
+apps/host/.testdata/

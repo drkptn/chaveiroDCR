@@ -58,6 +58,12 @@ async function spawnWorker(index: number): Promise<WorkerEntry> {
     listenInfos: [
       { protocol: 'udp', ip: config.MEDIASOUP_LISTEN_IP, announcedAddress, port },
       { protocol: 'tcp', ip: config.MEDIASOUP_LISTEN_IP, announcedAddress, port },
+      ...(config.MEDIASOUP_LAN_ANNOUNCED_IP && config.MEDIASOUP_LAN_ANNOUNCED_IP !== announcedAddress
+        ? [
+            { protocol: 'udp' as const, ip: config.MEDIASOUP_LISTEN_IP, announcedAddress: config.MEDIASOUP_LAN_ANNOUNCED_IP, port: port + 50 },
+            { protocol: 'tcp' as const, ip: config.MEDIASOUP_LISTEN_IP, announcedAddress: config.MEDIASOUP_LAN_ANNOUNCED_IP, port: port + 50 },
+          ]
+        : []),
     ],
   });
   const entry: WorkerEntry = { worker, server, routers: 0, index };

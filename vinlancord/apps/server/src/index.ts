@@ -36,6 +36,8 @@ async function main() {
     await closeWorkers();
     await prisma.$disconnect();
     await kv.close();
+    // modo anfitrião: o runtime desliga o banco embutido antes de sair
+    await (globalThis as { __vlBeforeExit?: () => Promise<void> }).__vlBeforeExit?.().catch(() => {});
     process.exit(0);
   };
   process.on('SIGINT', () => void shutdown('SIGINT'));

@@ -32,6 +32,9 @@ const schema = z.object({
   SECRET_KEY: z.string().optional(),
   CORS_ORIGINS: list,
   TRUST_PROXY: bool(false),
+  /** HTTPS direto no servidor (modo anfitrião, sem proxy na frente) */
+  TLS_CERT_FILE: z.string().optional().default(''),
+  TLS_KEY_FILE: z.string().optional().default(''),
   LOG_LEVEL: z.string().default('info'),
   SERVE_WEB: z.string().optional(),
 
@@ -60,6 +63,8 @@ const schema = z.object({
 
   MEDIASOUP_LISTEN_IP: z.string().default('0.0.0.0'),
   MEDIASOUP_ANNOUNCED_IP: z.string().optional().default(''),
+  /** Endereço extra na rede local (porta = MEDIASOUP_PORT + 50): permite chamadas no próprio PC/LAN sem depender do roteador */
+  MEDIASOUP_LAN_ANNOUNCED_IP: z.string().optional().default(''),
   MEDIASOUP_PORT: z.coerce.number().int().default(40000),
   MEDIASOUP_WORKERS: z.coerce.number().int().min(1).optional(),
   MEDIASOUP_LOG_LEVEL: z.enum(['debug', 'warn', 'error', 'none']).default('warn'),

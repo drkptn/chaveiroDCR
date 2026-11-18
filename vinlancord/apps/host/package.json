@@ -1,0 +1,22 @@
+{
+  "name": "@vinlancord/host",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Modo anfitrião: o servidor Vinlancord completo rodando dentro do app desktop (banco embutido, HTTPS próprio, UPnP).",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "esbuild": "^0.28.2"
+  },
+  "dependencies": {
+    "@achingbrain/nat-port-mapper": "4.0.5",
+    "embedded-postgres": "17.11.0-beta.19",
+    "pg": "8.23.1",
+    "selfsigned": "5.5.0"
+  }
+}
