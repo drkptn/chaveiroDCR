@@ -25,6 +25,7 @@ import {
   screen,
 } from 'electron';
 import { isPinned } from './pinning';
+import { currentPins, hostAvailable, hostStatus, loadPins, onHostStatus, startHost, stopHost, trustServer } from './host';
 
 declare const __VL_PINS__: Record<string, string> | undefined;
 const PINS: Record<string, string> = typeof __VL_PINS__ === 'undefined' ? {} : __VL_PINS__;
@@ -259,9 +260,9 @@ function setupMedia() {
   const allowed = new Set(['media', 'display-capture', 'notifications', 'fullscreen', 'clipboard-sanitized-write', 'speaker-selection']);
   const fromApp = (origin: string) => origin.startsWith(APP_ORIGIN) || (isDev && !!process.env.VINLANCORD_DEV_URL && origin.startsWith(process.env.VINLANCORD_DEV_URL));
   // servidor só com IP e certificado próprio: confia apenas no certificado fixado no build
-  if (Object.keys(PINS).length) {
-    session.defaultSession.setCertificateVerifyProc((req, cb) => cb(req.errorCode !== 0 && isPinned(req.hostname, req.certificate.data, PINS) ? 0 : -3));
-  }
+  // (+ servidores de amigos que você aceitou pelo link de convite, e o seu próprio no modo anfitrião)
+  loadPins(PINS);
+  session.defaultSession.setCertificateVerifyProc((req, cb) => cb(req.errorCode !== 0 && isPinned(req.hostname, req.certificate.data, currentPins()) ? 0 : -3));
   session.defaultSession.setPermissionRequestHandler((wc, permission, cb) => cb(allowed.has(permission) && fromApp(wc.getURL())));
   session.defaultSession.setPermissionCheckHandler((_wc, permission, origin) => allowed.has(permission) && fromApp(origin));
 
@@ -453,6 +454,16 @@ function setupIpc() {
     return found;
   });
 
+  // modo anfitrião
+  onHostStatus((st) => win?.webContents.send('host-status', st));
+  ipcMain.handle('host:available', () => hostAvailable());
+  ipcMain.handle('host:status', () => hostStatus());
+  ipcMain.handle('host:start', (_e, opts: { network?: string; upnp?: boolean }) => startHost(opts ?? {}));
+  ipcMain.handle('host:stop', () => stopHost());
+  ipcMain.handle('servers:trust', (_e, url: string, pin: string) => {
+    if (typeof url !== 'string' || !/^https:\/\//.test(url)) throw new Error('Endereço inválido.');
+    trustServer(url, String(pin));
+  });
   ipcMain.handle('idle:get', () => powerMonitor.getSystemIdleTime());
 
   ipcMain.handle('settings:get', () => ({ ...settings, openAtLogin: app.getLoginItemSettings().openAtLogin }));
@@ -497,8 +508,15 @@ app.whenReady().then(() => {
   if (link) handleDeepLink(link);
 });
 
-app.on('before-quit', () => {
+let hostStopped = false;
+app.on('before-quit', (e) => {
   quitting = true;
+  // desliga o servidor do anfitrião (e o banco) antes de sair
+  if (!hostStopped && hostStatus().state !== 'stopped' && hostStatus().state !== 'error') {
+    e.preventDefault();
+    hostStopped = true;
+    void stopHost().finally(() => app.quit());
+  }
 });
 app.on('will-quit', () => globalShortcut.unregisterAll());
 app.on('window-all-closed', () => {

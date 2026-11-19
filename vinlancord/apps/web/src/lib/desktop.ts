@@ -65,6 +65,33 @@ export interface DesktopAPI {
   };
   openExternal(url: string): void;
   onDeepLink(cb: (url: string) => void): () => void;
+  host: {
+    available(): Promise<boolean>;
+    status(): Promise<HostStatus>;
+    start(opts: { network?: string; upnp?: boolean }): Promise<HostStatus>;
+    stop(): Promise<void>;
+    onStatus(cb: (s: HostStatus) => void): () => void;
+  };
+  servers: {
+    trust(url: string, pin: string): Promise<void>;
+  };
+}
+
+export interface HostStatus {
+  state: 'stopped' | 'starting' | 'running' | 'stopping' | 'error';
+  step?: string;
+  message?: string;
+  url?: string;
+  localUrl?: string;
+  publicIp?: string | null;
+  lanIp?: string;
+  port?: number;
+  mediaPort?: number;
+  upnp?: 'ok' | 'failed' | 'cgnat' | 'off';
+  upnpError?: string;
+  fingerprint?: string;
+  network?: string;
+  invite?: string;
 }
 
 declare global {

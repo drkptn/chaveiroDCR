@@ -22,7 +22,7 @@ if (!existsSync(join(server, 'src', 'generated', 'prisma'))) execSync('npx prism
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 
-const native = ['mediasoup', 'sharp', '@node-rs/argon2', '@prisma/client'];
+const native = ['mediasoup', 'sharp', '@node-rs/argon2', '@prisma/client', '@achingbrain/nat-port-mapper'];
 await build({
   entryPoints: [join(root, 'src', 'runtime.ts')],
   outfile: join(dist, 'runtime.mjs'),

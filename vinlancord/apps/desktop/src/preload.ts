@@ -55,6 +55,16 @@ const api = {
   },
   openExternal: (url: string) => ipcRenderer.send('open-external', url),
   onDeepLink: (cb: (url: string) => void) => on('deep-link', cb),
+  host: {
+    available: () => ipcRenderer.invoke('host:available') as Promise<boolean>,
+    status: () => ipcRenderer.invoke('host:status'),
+    start: (opts: { network?: string; upnp?: boolean }) => ipcRenderer.invoke('host:start', opts),
+    stop: () => ipcRenderer.invoke('host:stop') as Promise<void>,
+    onStatus: (cb: (s: unknown) => void) => on('host-status', cb),
+  },
+  servers: {
+    trust: (url: string, pin: string) => ipcRenderer.invoke('servers:trust', url, pin) as Promise<void>,
+  },
 };
 
 contextBridge.exposeInMainWorld('vinlancord', api);
