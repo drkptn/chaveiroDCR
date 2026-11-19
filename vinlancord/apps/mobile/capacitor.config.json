@@ -1,0 +1,12 @@
+{
+  "appId": "com.vinlancord.app",
+  "appName": "Vinlancord",
+  "webDir": "../web/dist",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#040405"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

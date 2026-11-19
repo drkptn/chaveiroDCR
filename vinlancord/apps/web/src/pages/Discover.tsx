@@ -1,5 +1,6 @@
 /** Explorar servidores públicos. */
 import { useEffect, useState } from 'react';
+import { MobileNavButton } from '../components/layout/MobileNav';
 import { useNavigate } from 'react-router';
 import { Compass, Search, Users } from 'lucide-react';
 import type { Guild } from '@vinlancord/shared';
@@ -24,7 +25,8 @@ export function DiscoverPage() {
     return () => clearTimeout(t);
   }, [q]);
   return (
-    <main className="vl-panel scroll-thin min-w-0 flex-1 overflow-y-auto">
+    <main className="vl-content vl-panel scroll-thin min-w-0 flex-1 overflow-y-auto">
+      <div className="p-2 md:hidden"><MobileNavButton /></div>
       <div className="relative overflow-hidden px-10 pb-10 pt-12">
         <div className="absolute -right-20 -top-24 size-96 rounded-full bg-accent/25 blur-[100px]" />
         <div className="absolute -left-10 top-10 size-72 rounded-full bg-accent-2/15 blur-[90px]" />

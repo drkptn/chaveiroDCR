@@ -19,6 +19,8 @@ import { useKeybinds, type KeybindHandlers } from './lib/keybinds';
 import { voice, useVoice } from './lib/voice/engine';
 import { LoginPage, RegisterPage, ForgotPage, ResetPage, VerifyPage, HostPage } from './pages/Auth';
 import { connectToServer, parseServerLink } from './lib/serverLink';
+import { onRouteChange } from './lib/mobile';
+import { initNative } from './lib/native';
 import { LoadingScreen } from './pages/Loading';
 import { DiscoverPage } from './pages/Discover';
 import { Overlays } from './components/overlays';
@@ -33,16 +35,21 @@ import { MarkdownProvider } from './components/MarkdownProvider';
 
 function NavigationBridge() {
   const navigate = useNavigate();
+  const location = useLocation();
+  // celular: abrir um canal/conversa mostra o conteúdo
+  useEffect(() => onRouteChange(), [location.pathname]);
   useEffect(() => setNavigate((to) => navigate(to)), [navigate]);
   // convite de servidor (vinlancord://servidor?...) funciona até na tela de login
-  useEffect(
-    () =>
-      desktop?.onDeepLink((url) => {
-        const link = parseServerLink(url);
-        if (link) void connectToServer(link);
-      }),
-    [],
-  );
+  useEffect(() => {
+    const onLink = (url: string) => {
+      const link = parseServerLink(url);
+      if (link) void connectToServer(link);
+      const invite = /invite\/([a-zA-Z0-9]{4,16})/.exec(url);
+      if (invite && api.token) ui.open({ type: 'joinServer', code: invite[1] });
+    };
+    initNative(onLink);
+    return desktop?.onDeepLink(onLink);
+  }, []);
   return null;
 }
 
@@ -83,7 +90,7 @@ function GuildRoute() {
     return (
       <>
         <GuildSidebar />
-        <main className="vl-panel grid flex-1 place-items-center text-fg-2">Nenhum canal disponível.</main>
+        <main className="vl-content vl-panel grid flex-1 place-items-center text-fg-2">Nenhum canal disponível.</main>
       </>
     );
   }
@@ -223,11 +230,7 @@ function GlobalEffects() {
   // badge do app (menções)
   useEffect(() => useStore.subscribe(() => desktop?.notify.setBadge(badgeCount())), []);
 
-  // links vinlancord://invite/CODE
-  useEffect(() => desktop?.onDeepLink((url) => {
-    const m = /invite\/([a-zA-Z0-9]{4,16})/.exec(url);
-    if (m) ui.open({ type: 'joinServer', code: m[1] });
-  }), []);
+  // links vinlancord://invite/CODE e vinlancord://servidor: tratados no NavigationBridge (desktop e celular)
 
   // avisos do motor de voz
   useEffect(() => {

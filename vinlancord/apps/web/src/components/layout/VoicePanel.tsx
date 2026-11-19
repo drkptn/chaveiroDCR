@@ -1,5 +1,6 @@
 /** Painel "Voz conectada": qualidade, canal atual e controles rápidos da chamada. */
 import { useNavigate } from 'react-router';
+import { canShareScreen } from '../../lib/mobile';
 import { PhoneOff, Video, VideoOff, MonitorUp, MonitorX, Signal, SignalLow, SignalMedium, Loader2 } from 'lucide-react';
 import { useStore } from '../../store';
 import { ui } from '../../store/ui';
@@ -39,19 +40,19 @@ export function VoicePanel() {
           <PhoneOff size={18} />
         </IconButton>
       </div>
-      <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+      <div className={cx('mt-1.5 grid gap-1.5', v.screen || canShareScreen() ? 'grid-cols-2' : 'grid-cols-1')}>
         <button
           onClick={() => void voice.setCamera(!v.camera).catch((e) => ui.error(e, 'Não foi possível abrir a câmera'))}
           className={cx('flex h-8 items-center justify-center gap-1.5 rounded-md text-[12.5px] font-medium transition', v.camera ? 'bg-accent text-accent-fg' : 'bg-bg-3 text-fg-1 hover:bg-bg-4 hover:text-fg')}
         >
           {v.camera ? <VideoOff size={15} /> : <Video size={15} />} {v.camera ? 'Câmera' : 'Câmera'}
         </button>
-        <button
-          onClick={() => (v.screen ? void voice.stopScreen() : ui.open({ type: 'screenShare' }))}
+        {(v.screen || canShareScreen()) && <button
+          onClick={() => (v.screen ? void voice.stopScreen() : canShareScreen() ? ui.open({ type: 'screenShare' }) : ui.error('Compartilhar a tela ainda não funciona no celular.'))}
           className={cx('flex h-8 items-center justify-center gap-1.5 rounded-md text-[12.5px] font-medium transition', v.screen ? 'bg-accent text-accent-fg' : 'bg-bg-3 text-fg-1 hover:bg-bg-4 hover:text-fg')}
         >
           {v.screen ? <MonitorX size={15} /> : <MonitorUp size={15} />} {v.screen ? 'Parar tela' : 'Tela'}
-        </button>
+        </button>}
       </div>
     </div>
   );

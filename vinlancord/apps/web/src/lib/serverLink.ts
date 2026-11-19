@@ -2,6 +2,7 @@
 import { api, tokenStore } from './api';
 import { desktop } from './desktop';
 import { ui } from '../store/ui';
+import { isNative, trustServerNative } from './native';
 
 const PIN_KEY = 'vl:server-pin';
 
@@ -22,8 +23,9 @@ export function parseServerLink(text: string): { url: string; pin: string } | nu
 /** Troca o app para o servidor do convite (com confirmação). */
 export async function connectToServer(link: { url: string; pin: string }, opts: { confirm?: boolean } = {}) {
   const go = async () => {
-    if (!desktop) throw new Error('Convites de servidor funcionam no app desktop.');
-    await desktop.servers.trust(link.url, link.pin);
+    if (desktop) await desktop.servers.trust(link.url, link.pin);
+    else if (isNative()) await trustServerNative(link.url, link.pin);
+    else throw new Error('Convites de servidor funcionam no app (Windows ou Android).');
     // mesmo servidor (só mudou o IP): mantém o login; outro servidor: precisa entrar de novo
     if (localStorage.getItem(PIN_KEY) !== link.pin) await tokenStore.clear();
     localStorage.setItem(PIN_KEY, link.pin);

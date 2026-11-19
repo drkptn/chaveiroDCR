@@ -18,6 +18,8 @@ const TOKEN_KEY = 'vl:token';
 function defaultServer() {
   const env = import.meta.env.VITE_DEFAULT_SERVER as string | undefined;
   if (env) return env;
+  // app de celular: a interface vem de dentro do app (https://localhost); o servidor vem do convite
+  if ((window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.()) return 'https://servidor-nao-configurado.invalid';
   if (location.protocol.startsWith('http') && location.port !== '5173') return location.origin;
   return 'http://localhost:8787';
 }

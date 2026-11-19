@@ -1,6 +1,7 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
+import { useMobile } from '../../lib/mobile';
 import { cx } from '../ui';
 
 export interface SettingsTab {
@@ -24,11 +25,19 @@ export function SettingsLayout({ tabs, active, onTab, onClose, children }: { tab
     window.addEventListener('keydown', k, true);
     return () => window.removeEventListener('keydown', k, true);
   }, [onClose]);
+  const mobile = useMobile((s) => s.mobile);
+  // celular: primeiro a lista de abas, depois a aba escolhida (com voltar)
+  const [showContent, setShowContent] = useState(false);
   let lastSection: string | undefined;
   return createPortal(
     <div className="fixed inset-0 z-50 flex bg-bg-0/75 backdrop-blur-2xl animate-fade-in" style={{ top: window.vinlancord ? 32 : 0 }}>
-      <nav className="vl-subpanel scroll-thin flex w-[34%] min-w-[220px] justify-end overflow-y-auto border-r border-line py-14 pr-2">
-        <div className="vl-stagger w-[210px]">
+      <nav
+        className={cx(
+          'vl-subpanel scroll-thin flex justify-end overflow-y-auto border-r border-line py-14 pr-2',
+          mobile ? (showContent ? 'hidden' : 'w-full justify-start px-4 py-6') : 'w-[34%] min-w-[220px]',
+        )}
+      >
+        <div className={cx('vl-stagger', mobile ? 'w-full' : 'w-[210px]')}>
           {tabs
             .filter((t) => !t.hidden)
             .map((t, i) => {
@@ -38,7 +47,11 @@ export function SettingsLayout({ tabs, active, onTab, onClose, children }: { tab
                 <div key={t.id}>
                   {header && <div className={cx('mb-1 px-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-accent/80', i > 0 && 'mt-5 border-t border-line pt-4')}>{header.trim()}</div>}
                   <button
-                    onClick={() => (t.onClick ? t.onClick() : onTab(t.id))}
+                    onClick={() => {
+                      if (t.onClick) return t.onClick();
+                      onTab(t.id);
+                      setShowContent(true);
+                    }}
                     className={cx(
                       'mb-0.5 flex h-8 w-full items-center rounded-md px-2.5 text-left text-[14.5px] font-medium transition-all',
                       active === t.id
@@ -55,11 +68,16 @@ export function SettingsLayout({ tabs, active, onTab, onClose, children }: { tab
             })}
         </div>
       </nav>
-      <div className="scroll-thin relative flex-1 overflow-y-auto">
-        <div className="vl-route max-w-[820px] px-10 py-14" key={active}>
+      <div className={cx('scroll-thin relative flex-1 overflow-y-auto', mobile && !showContent && 'hidden')}>
+        {mobile && (
+          <button onClick={() => setShowContent(false)} className="sticky top-0 z-10 flex w-full items-center gap-2 bg-bg-1/90 px-4 py-3 text-sm font-medium text-fg-1 backdrop-blur" aria-label="Voltar para as configurações">
+            <ArrowLeft size={18} /> Configurações
+          </button>
+        )}
+        <div className={cx('vl-route max-w-[820px]', mobile ? 'px-4 py-5' : 'px-10 py-14')} key={active}>
           {children}
         </div>
-        <button onClick={onClose} className="group fixed right-10 top-14 flex flex-col items-center gap-1 text-[11px] font-semibold text-fg-2 hover:text-accent" aria-label="Fechar">
+        <button onClick={onClose} className="group fixed right-4 top-[calc(12px+env(safe-area-inset-top))] z-20 flex md:right-10 md:top-14 flex-col items-center gap-1 text-[11px] font-semibold text-fg-2 hover:text-accent" aria-label="Fechar">
           <span className="grid size-9 place-items-center rounded-full border-2 border-current transition-transform duration-300 group-hover:rotate-90"><X size={18} /></span>
           ESC
         </button>

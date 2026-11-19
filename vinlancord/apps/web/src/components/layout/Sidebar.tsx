@@ -38,12 +38,13 @@ import { useGuildPerms, useChannelPerms } from '../../lib/perms';
 import { Avatar, Badge, cx, usePresenceStatus } from '../ui';
 import { useAppearance } from '../../store/appearance';
 import { roman } from '../../lib/format';
+import { showContent } from '../../lib/mobile';
 import { UserPanel } from './UserPanel';
 import { VoicePanel } from './VoicePanel';
 
 function SidebarShell({ header, children }: { header: ReactNode; children: ReactNode }) {
   return (
-    <aside className="vl-panel vl-side flex w-60 shrink-0 flex-col">
+    <aside className="vl-nav vl-panel vl-side flex w-60 shrink-0 flex-col">
       {header}
       <div className="scroll-thin min-h-0 flex-1 overflow-y-auto px-2 pb-2">{children}</div>
       <VoicePanel />
@@ -65,7 +66,7 @@ export function GuildSidebar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const muted = useStore((s) => isMuted(s, guildId!));
   const chapters = useAppearance((s) => s.current.chapterNumbers);
-  if (!guild) return <aside className="vl-panel vl-side w-60 shrink-0" />;
+  if (!guild) return <aside className="vl-nav vl-panel vl-side w-60 shrink-0" />;
 
   const canManage = has(perms, P.MANAGE_GUILD) || has(perms, P.MANAGE_ROLES) || has(perms, P.BAN_MEMBERS) || has(perms, P.MANAGE_EMOJIS) || has(perms, P.KICK_MEMBERS);
   const header = (
@@ -240,6 +241,7 @@ function ChannelRow({ channel: c, active }: { channel: Channel; active: boolean 
     }
     localStorage.setItem(`vl:last:${c.guildId}`, c.id);
     nav(`/channels/${c.guildId}/${c.id}`);
+    showContent();
   };
   return (
     <div className="mt-px">
@@ -355,7 +357,7 @@ export function HomeSidebar() {
         ].map((l) => (
           <button
             key={l.to}
-            onClick={() => nav(l.to)}
+            onClick={() => (nav(l.to), showContent())}
             className={cx(
               'flex h-10 w-full items-center gap-3 rounded-md px-2.5 text-[14.5px] font-medium transition-all',
               loc.pathname === l.to ? 'bg-gradient-to-r from-accent/20 via-bg-4/80 to-bg-4/40 text-fg shadow-[inset_2px_0_0_var(--vl-accent)]' : 'text-fg-2 hover:translate-x-0.5 hover:bg-bg-3/70 hover:text-fg-1',
@@ -397,7 +399,7 @@ function DMRow({ id, active }: { id: string; active: boolean }) {
   const names = ch.type === 'group_dm' ? ch.name || (ch.recipients ?? []).filter((r) => r !== meId).map((r) => S().users[r]?.displayName ?? '…').join(', ') : user?.displayName ?? '…';
   return (
     <div
-      onClick={() => nav(`/channels/@me/${id}`)}
+      onClick={() => (nav(`/channels/@me/${id}`), showContent())}
       onContextMenu={(e) =>
         ui.menu(e, [
           ...(other ? [{ label: 'Perfil', icon: <Users size={15} />, onClick: () => ui.open({ type: 'profile', userId: other }) }] : []),

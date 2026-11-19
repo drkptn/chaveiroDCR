@@ -108,6 +108,9 @@ export const config = {
   MEDIASOUP_WORKERS: env.MEDIASOUP_WORKERS ?? Math.max(1, Math.min(cpus().length, 4)),
   corsOrigins: [
     'app://vinlancord',
+    // app de celular (Capacitor): Android e iOS
+    'https://localhost',
+    'capacitor://localhost',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     env.PUBLIC_URL.replace(/\/$/, ''),

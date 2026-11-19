@@ -94,7 +94,7 @@ function MenuList({ x, y, items, root }: { x: number; y: number; items: MenuItem
 export function Toasts() {
   const toasts = useUI((s) => s.toasts);
   return createPortal(
-    <div className="pointer-events-none fixed bottom-4 right-4 z-[95] flex w-[340px] flex-col gap-2">
+    <div className="vl-toasts pointer-events-none fixed bottom-4 right-4 z-[95] flex w-[340px] flex-col gap-2">
       {toasts.map((t) => (
         <div
           key={t.id}

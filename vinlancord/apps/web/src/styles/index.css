@@ -663,3 +663,28 @@ input, textarea, [contenteditable], .selectable { user-select: text; }
 [data-perf='low'] *, [data-perf='low'] *::before, [data-perf='low'] *::after { backdrop-filter: none !important; }
 [data-perf='low'] .vl-fog, [data-perf='low'] .vl-scanlines::after { animation: none !important; }
 [data-perf='low'] .vl-grain { display: none; }
+
+/* ═══════════════════════════════ CELULAR ═══════════════════════════════ */
+#root { height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); box-sizing: border-box; }
+@media (max-width: 767px) {
+  html[data-mview='content'] .vl-nav { display: none !important; }
+  html[data-mview='nav'] .vl-content { display: none !important; }
+  .vl-nav.vl-side { flex: 1 1 auto; width: auto; min-width: 0; }
+  .vl-stage { gap: 0 !important; padding: 0 !important; }
+  .vl-panel { border-radius: 0 !important; border-left: 0 !important; border-right: 0 !important; clip-path: none !important; }
+  .vl-mobile-sheet {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: min(88vw, 380px) !important;
+    z-index: 45;
+    background: var(--vl-bg-1);
+    box-shadow: var(--vl-shadow);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .vl-toasts { left: 12px !important; right: 12px !important; width: auto !important; bottom: calc(12px + env(safe-area-inset-bottom)) !important; }
+  /* alvos de toque maiores */
+  .vl-header button, .vl-header [role='button'] { min-height: 36px; min-width: 36px; }
+}

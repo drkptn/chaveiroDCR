@@ -1,5 +1,7 @@
 /** Interface de chamadas: grade dinâmica, destaque, transmissões de tela, controles e chamada recebida. */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { MobileNavButton } from '../layout/MobileNav';
+import { canShareScreen } from '../../lib/mobile';
 import {
   Mic,
   MicOff,
@@ -280,16 +282,16 @@ export function CallControls() {
           {v.camera ? <Video size={22} /> : <VideoOff size={22} />}
         </button>
       </Tooltip>
-      <Tooltip label={v.screen ? 'Parar compartilhamento' : 'Compartilhar tela'}>
+      {(v.screen || canShareScreen()) && <Tooltip label={v.screen ? 'Parar compartilhamento' : 'Compartilhar tela'}>
         <button
           aria-label={v.screen ? 'Parar compartilhamento' : 'Compartilhar tela'}
           disabled={!has(perms, P.STREAM)}
-          onClick={() => (v.screen ? void voice.stopScreen() : ui.open({ type: 'screenShare' }))}
+          onClick={() => (v.screen ? void voice.stopScreen() : canShareScreen() ? ui.open({ type: 'screenShare' }) : ui.error('Compartilhar a tela ainda não funciona no celular.'))}
           className={cx(btn, v.screen ? 'bg-accent text-accent-fg' : 'bg-bg-4 text-fg hover:bg-bg-5', 'disabled:opacity-40')}
         >
           {v.screen ? <MonitorX size={22} /> : <MonitorUp size={22} />}
         </button>
-      </Tooltip>
+      </Tooltip>}
       <Tooltip label={v.selfMute ? 'Ativar microfone' : 'Silenciar'}>
         <button aria-label={v.selfMute ? 'Ativar microfone' : 'Silenciar'} onClick={() => void voice.setMute(!v.selfMute)} className={cx(btn, v.selfMute ? 'bg-danger/20 text-danger' : 'bg-bg-4 text-fg hover:bg-bg-5')}>
           {v.selfMute ? <MicOff size={22} /> : <Mic size={22} />}
@@ -333,6 +335,7 @@ export function VoiceView({ channel, joined }: { channel: Channel; joined: boole
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-[radial-gradient(ellipse_at_top,color-mix(in_oklab,var(--vl-accent)_14%,transparent),transparent_60%)]">
       <header className="vl-header flex h-12 shrink-0 items-center gap-2 px-4">
+        <MobileNavButton />
         <Icon size={20} className="text-accent" />
         <span className="font-heading text-[17px] text-fg">{channel.name}</span>
         <span className="ml-2 flex items-center gap-1 text-xs text-fg-2"><Users size={13} /> {count}{channel.userLimit ? `/${channel.userLimit}` : ''}</span>

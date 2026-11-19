@@ -5,6 +5,7 @@ import { Compass, Plus, Bell, BellOff, Check, Copy, LogOut, Settings, UserPlus, 
 import { P, has, computeBasePermissions } from '@vinlancord/shared';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore, isUnread, isMuted, S, type State } from '../../store';
+import { markRailNav } from '../../lib/mobile';
 import { ui } from '../../store/ui';
 import { api } from '../../lib/api';
 import { updateSettings } from '../../store/actions';
@@ -162,8 +163,8 @@ export function ServerRail() {
   };
 
   return (
-    <nav className="vl-rail scroll-none flex w-[72px] shrink-0 flex-col items-center gap-2 overflow-y-auto py-3" aria-label="Servidores">
-      <RailItem active={home} label="Mensagens diretas" mentions={dmMentions} onClick={() => nav('/channels/@me')} className={home ? 'bg-accent/15' : 'bg-bg-3/80 hover:bg-accent/20'}>
+    <nav className="vl-nav vl-rail scroll-none flex w-[72px] shrink-0 flex-col items-center gap-2 overflow-y-auto py-3" aria-label="Servidores">
+      <RailItem active={home} label="Mensagens diretas" mentions={dmMentions} onClick={() => (markRailNav(), nav('/channels/@me'))} className={home ? 'bg-accent/15' : 'bg-bg-3/80 hover:bg-accent/20'}>
         <LogoMark size={home ? 44 : 34} className={cx('transition-all', home && 'vl-glow-pulse')} />
       </RailItem>
 
@@ -203,6 +204,7 @@ export function ServerRail() {
               label={g.name}
               onClick={() => {
                 const last = localStorage.getItem(`vl:last:${gid}`);
+                markRailNav();
                 nav(`/channels/${gid}${last && S().channels[last] ? '/' + last : ''}`);
               }}
               onContextMenu={(e) => guildMenu(e, gid)}

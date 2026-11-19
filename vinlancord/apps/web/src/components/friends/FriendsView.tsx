@@ -1,5 +1,6 @@
 /** Tela inicial de amigos: online, todos, pendentes, bloqueados, adicionar + "Ativos agora". */
 import { useEffect, useMemo, useState } from 'react';
+import { MobileNavButton } from '../layout/MobileNav';
 import { useSearchParams } from 'react-router';
 import { Users, MessageSquare, MoreVertical, Check, X, UserPlus, Search, Gamepad2, Volume2, Ban, Phone } from 'lucide-react';
 import { useStore, S } from '../../store';
@@ -41,8 +42,9 @@ export function FriendsView() {
   ];
 
   return (
-    <main className="vl-panel flex min-w-0 flex-1 flex-col">
-      <header className="vl-header flex h-12 shrink-0 items-center gap-3 px-4">
+    <main className="vl-content vl-panel flex min-w-0 flex-1 flex-col">
+      <header className="vl-header flex h-12 shrink-0 items-center gap-3 overflow-x-auto px-4 scroll-none [&>*]:shrink-0 [&_button]:whitespace-nowrap">
+        <MobileNavButton />
         <Users size={20} className="text-fg-2" />
         <span className="font-heading text-[17px] text-fg">Amigos</span>
         <span className="mx-1 h-6 w-px bg-line-strong" />
