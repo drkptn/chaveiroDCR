@@ -157,6 +157,20 @@ jobs:
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
         run: npm run dist:win -w @vinlancord/desktop
+      - name: Servidor de dentro do app empacotado (exatamente o que vai no instalador)
+        shell: bash
+        run: |
+          R=apps/desktop/release/win-unpacked
+          test -f "$R/resources/host/dist/node_modules/mediasoup/worker/out/Release/mediasoup-worker.exe"
+          test -d "$R/resources/host/dist/node_modules/@embedded-postgres/windows-x64"
+          mkdir -p "$RUNNER_TEMP/anfitriao-pkg"
+          ELECTRON_RUN_AS_NODE=1 VL_DATA_DIR="$RUNNER_TEMP/anfitriao-pkg" VL_UPNP=1 "$R/Vinlancord.exe" "$R/resources/host/dist/runtime.mjs" > "$RUNNER_TEMP/anfitriao-pkg.log" 2>&1 &
+          ok=0
+          for i in $(seq 1 90); do curl -sfk https://127.0.0.1:47800/api/v1/health && ok=1 && break; sleep 2; done
+          cat "$RUNNER_TEMP/anfitriao-pkg.log"
+          "$R/resources/host/dist/node_modules/@embedded-postgres/windows-x64/native/bin/pg_ctl.exe" stop -D "$RUNNER_TEMP/anfitriao-pkg/banco/data" -m fast -w || true
+          taskkill //F //IM Vinlancord.exe || true
+          test "$ok" = 1
       - uses: actions/upload-artifact@v4
         with:
           name: Vinlancord-Windows

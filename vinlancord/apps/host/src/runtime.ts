@@ -216,10 +216,23 @@ parentPort?.on('message', (e) => {
 if (!parentPort) {
   process.once('SIGINT', () => void stop());
 }
-process.on('uncaughtException', (e) => emit({ state: 'error', message: e.message }));
-
-main().catch(async (e: Error) => {
-  emit({ state: 'error', message: e.message });
-  await cleanup();
-  process.exit(1);
+async function fatal(e: unknown) {
+  const msg = e instanceof Error ? e.message : String(e);
+  console.error('[anfitrião] erro fatal:', e);
+  emit({ state: 'error', message: msg });
+  await cleanup().catch(() => {});
+  // dá tempo da mensagem chegar ao app antes de sair
+  setTimeout(() => process.exit(1), 500);
+}
+(globalThis as { __vlOnFatal?: (e: unknown) => void }).__vlOnFatal = (e) => void fatal(e);
+process.on('uncaughtException', (e) => {
+  console.error('[anfitrião] exceção não tratada:', e);
+  if (last.state !== 'running') void fatal(e);
 });
+process.on('unhandledRejection', (e) => {
+  // ex.: UPnP/roteador respondendo errado depois do servidor no ar — registra e segue
+  console.error('[anfitrião] promessa rejeitada:', e);
+  if (last.state === 'starting') void fatal(e);
+});
+
+main().catch((e: Error) => void fatal(e));

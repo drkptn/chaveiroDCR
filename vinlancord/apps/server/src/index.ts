@@ -46,5 +46,8 @@ async function main() {
 
 main().catch((e) => {
   console.error('❌ Falha ao iniciar o servidor:', e);
+  // modo anfitrião: o runtime avisa o app e desliga o banco antes de sair
+  const onFatal = (globalThis as { __vlOnFatal?: (e: unknown) => void }).__vlOnFatal;
+  if (onFatal) return onFatal(e);
   process.exit(1);
 });

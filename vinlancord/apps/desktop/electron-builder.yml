@@ -17,9 +17,11 @@ files:
 asar: true
 # modo anfitrião: servidor completo (fora do asar: tem executáveis nativos)
 extraResources:
-  - from: ../host/dist
+  # copia a partir de ../host (e não de ../host/dist): o electron-builder SEMPRE descarta um
+  # node_modules que esteja na raiz da origem, e o servidor precisa dos módulos nativos dele
+  - from: ../host
     to: host
-    filter: ['**/*']
+    filter: ['dist/**/*']
 protocols:
   - name: Vinlancord
     schemes: [vinlancord]

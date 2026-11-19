@@ -92,6 +92,7 @@ export interface HostStatus {
   fingerprint?: string;
   network?: string;
   invite?: string;
+  details?: string;
 }
 
 declare global {

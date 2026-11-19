@@ -83,6 +83,17 @@ export default function HostSettings() {
             </Button>
           )}
         </div>
+        {st.state === 'error' && st.details && (
+          <div className="mt-4">
+            <div className="mb-1.5 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-fg-1">
+              Detalhes do erro
+              <button className="normal-case tracking-normal text-accent hover:underline" onClick={() => void navigator.clipboard.writeText(`${st.message}\n\n${st.details}`).then(() => ui.success('Detalhes copiados!'))}>
+                Copiar detalhes
+              </button>
+            </div>
+            <pre className="selectable max-h-48 overflow-auto whitespace-pre-wrap rounded-lg border border-line bg-bg-0/70 p-3 font-mono text-[11px] text-fg-2">{st.details}</pre>
+          </div>
+        )}
         {!running && !busy && (
           <div className="mt-4">
             <div className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-fg-1">Como os amigos chegam até você</div>

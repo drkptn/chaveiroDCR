@@ -5,6 +5,14 @@
  */
 import { app, session, utilityProcess, type UtilityProcess } from 'electron';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+
+function logTail(file: string, lines = 25) {
+  try {
+    return readFileSync(file, 'utf8').trim().split(/\r?\n/).slice(-lines).join('\n');
+  } catch {
+    return '';
+  }
+}
 import { join } from 'node:path';
 
 export interface HostStatus {
@@ -22,6 +30,8 @@ export interface HostStatus {
   fingerprint?: string;
   network?: string;
   invite?: string;
+  /** últimas linhas do log quando dá erro */
+  details?: string;
 }
 
 /* ───────────── certificados confiáveis (servidores só com IP) ───────────── */
@@ -64,7 +74,7 @@ let listener: (s: HostStatus) => void = () => {};
 let redirectInstalled = '';
 
 export const hostAvailable = () => existsSync(runtimePath());
-const runtimePath = () => (app.isPackaged ? join(process.resourcesPath, 'host', 'runtime.mjs') : join(__dirname, '..', '..', 'host', 'dist', 'runtime.mjs'));
+const runtimePath = () => (app.isPackaged ? join(process.resourcesPath, 'host', 'dist', 'runtime.mjs') : join(__dirname, '..', '..', 'host', 'dist', 'runtime.mjs'));
 
 export function onHostStatus(fn: (s: HostStatus) => void) {
   listener = fn;
@@ -112,6 +122,11 @@ export function startHost(opts: { network?: string; upnp?: boolean } = {}) {
     },
   });
   const logFile = join(data, 'anfitriao.log');
+  try {
+    writeFileSync(logFile, `\n===== ${new Date().toISOString()} · Vinlancord ${app.getVersion()} =====\n`, { flag: 'a' });
+  } catch {
+    /* sem log */
+  }
   const log = (b: Buffer) => {
     try {
       writeFileSync(logFile, b, { flag: 'a' });
@@ -126,7 +141,9 @@ export function startHost(opts: { network?: string; upnp?: boolean } = {}) {
   });
   proc.on('exit', (code) => {
     proc = null;
-    set(status.state === 'error' ? status : code === 0 || status.state === 'stopping' ? { state: 'stopped' } : { state: 'error', message: `O servidor parou inesperadamente (código ${code}). Veja ${logFile}` });
+    if (status.state === 'error') return set({ ...status, details: logTail(logFile) });
+    if (code === 0 || status.state === 'stopping') return set({ state: 'stopped' });
+    set({ state: 'error', message: `O servidor parou inesperadamente (código ${code}).`, details: logTail(logFile) });
   });
   return status;
 }
