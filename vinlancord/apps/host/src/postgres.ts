@@ -40,7 +40,9 @@ function run(bin: string, args: string[], opts: { allowFail?: boolean } = {}) {
     p.stdout.on('data', (d) => (out += d));
     p.stderr.on('data', (d) => (out += d));
     p.on('error', reject);
-    p.on('close', (code) => {
+    // 'exit' e não 'close': no Windows o postgres iniciado pelo pg_ctl herda os pipes de saída,
+    // então eles nunca fecham enquanto o banco estiver rodando
+    p.on('exit', (code) => {
       if (code !== 0 && !opts.allowFail) reject(new Error(`${bin.split(/[\\/]/).pop()} falhou (${code}): ${out.trim().slice(-600)}`));
       else resolve({ code: code ?? 1, out });
     });
