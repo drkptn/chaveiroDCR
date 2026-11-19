@@ -135,10 +135,17 @@ jobs:
           npm run build -w @vinlancord/host
           npx playwright install chromium
           mkdir -p "$RUNNER_TEMP/anfitriao"
-          (VL_DATA_DIR="$RUNNER_TEMP/anfitriao" VL_UPNP=0 VL_PUBLIC_IP=127.0.0.1 node apps/host/dist/runtime.mjs > "$RUNNER_TEMP/anfitriao.log" 2>&1 &)
+          VL_DATA_DIR="$RUNNER_TEMP/anfitriao" VL_UPNP=0 VL_PUBLIC_IP=127.0.0.1 node apps/host/dist/runtime.mjs > "$RUNNER_TEMP/anfitriao.log" 2>&1 &
+          HOST_PID=$!
           for i in $(seq 1 90); do curl -sfk https://127.0.0.1:47800/api/v1/health && break; sleep 2; done
           cat "$RUNNER_TEMP/anfitriao.log"
-          cd e2e && E2E_BASE_URL=https://127.0.0.1:47800 npx playwright test two-users appearance --trace off
+          fail=0
+          (cd e2e && E2E_BASE_URL=https://127.0.0.1:47800 npx playwright test two-users appearance --trace off) || fail=1
+          # desliga servidor e banco: senão o Windows trava os arquivos e o empacotamento falha
+          kill $HOST_PID || true
+          apps/host/dist/node_modules/@embedded-postgres/windows-x64/native/bin/pg_ctl.exe stop -D "$RUNNER_TEMP/anfitriao/banco/data" -m fast -w || true
+          sleep 3
+          exit $fail
       - name: Versão (1.0.<número da execução>)
         shell: bash
         run: npm version "1.0.${{ github.run_number }}" --no-git-tag-version -w @vinlancord/desktop
