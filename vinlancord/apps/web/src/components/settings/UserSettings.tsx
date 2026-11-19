@@ -11,6 +11,7 @@ import { api, errorMessage } from '../../lib/api';
 import { desktop, type DesktopSettings, type UpdateStatus } from '../../lib/desktop';
 import { ACCENTS } from '../../lib/themes';
 import AppearanceStudio from './AppearanceStudio';
+import HostSettings from './HostSettings';
 import { voice, useVoice } from '../../lib/voice/engine';
 import { AudioEngine } from '../../lib/voice/audio';
 import { requestNotificationPermission } from '../../lib/notify';
@@ -33,6 +34,7 @@ export default function UserSettings({ onClose, initialTab }: { onClose: () => v
     { id: 'notifications', label: 'Notificações' },
     { id: 'keybinds', label: 'Atalhos de teclado' },
     { id: 'activity', label: 'Atividade de jogo' },
+    { id: 'host', label: 'Servidor no meu PC', hidden: !desktop },
     { id: 'desktop', label: 'Windows e desktop', hidden: !desktop },
     { id: 'about', label: 'Sobre o Vinlancord', section: 'Outros' },
     { id: 'logout', label: 'Sair', danger: true, onClick: () => ui.confirm({ title: 'Sair da conta?', body: 'Você precisará entrar de novo neste dispositivo.', confirmLabel: 'Sair', danger: true, onConfirm: () => logout() }) },
@@ -48,6 +50,7 @@ export default function UserSettings({ onClose, initialTab }: { onClose: () => v
       {tab === 'notifications' && <Notifications />}
       {tab === 'keybinds' && <Keybinds />}
       {tab === 'activity' && <Activity />}
+      {tab === 'host' && <HostSettings />}
       {tab === 'desktop' && <DesktopTab />}
       {tab === 'about' && <About />}
     </SettingsLayout>

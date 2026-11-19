@@ -15,6 +15,11 @@ files:
   - build/badge.png
   - package.json
 asar: true
+# modo anfitrião: servidor completo (fora do asar: tem executáveis nativos)
+extraResources:
+  - from: ../host/dist
+    to: host
+    filter: ['**/*']
 protocols:
   - name: Vinlancord
     schemes: [vinlancord]

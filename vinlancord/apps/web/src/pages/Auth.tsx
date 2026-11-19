@@ -1,7 +1,7 @@
 /** Telas de entrada: login, cadastro, recuperação/redefinição de senha e verificação de e-mail. */
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { ArrowLeft, Eye, EyeOff, MailCheck, Server, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, MailCheck, Power, Server, ShieldCheck, Sparkles } from 'lucide-react';
 import { api, ApiError, errorMessage } from '../lib/api';
 import { login, register } from '../store/actions';
 import { Button, Field, Input, LogoMark, cx } from '../components/ui';
@@ -9,6 +9,9 @@ import { Sigil, AnimatedWordmark } from '../components/brand';
 import { THEMES } from '../lib/themes';
 import { useAppearance, pickAppearanceLocally } from '../store/appearance';
 import { TitleBar } from '../components/layout/TitleBar';
+import HostSettings from '../components/settings/HostSettings';
+import { connectToServer, parseServerLink } from '../lib/serverLink';
+import { desktop } from '../lib/desktop';
 
 interface ServerConfig {
   registrationEnabled: boolean;
@@ -141,11 +144,14 @@ function ServerPicker({ server, setServer, error }: { server: string; setServer:
         className="mt-6 flex gap-2"
         onSubmit={(e) => {
           e.preventDefault();
+          // convite de servidor de um amigo (vinlancord://servidor?...)
+          const link = parseServerLink(value);
+          if (link) return void connectToServer(link);
           setServer(value);
           setEditing(false);
         }}
       >
-        <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder="https://vinlancord.seudominio.com" autoFocus />
+        <Input value={value} onChange={(e) => setValue(e.target.value)} placeholder="Endereço ou link de convite do servidor" autoFocus />
         <Button type="submit" variant="secondary">Usar</Button>
       </form>
     );
@@ -156,6 +162,34 @@ function ServerPicker({ server, setServer, error }: { server: string; setServer:
       {error ? <span className="text-danger">• indisponível</span> : <span className="text-success">•</span>}
       <span className="underline">alterar</span>
     </button>
+  );
+}
+
+/** Botão na tela de login: hospedar o servidor neste PC (app desktop). */
+function HostShortcut() {
+  const nav = useNavigate();
+  if (!desktop) return null;
+  return (
+    <button onClick={() => nav('/host')} className="mt-2 flex w-full items-center justify-center gap-2 text-xs text-fg-2 transition hover:text-accent">
+      <Power size={13} /> <span className="underline">Abrir um servidor no meu PC</span>
+    </button>
+  );
+}
+
+export function HostPage() {
+  const nav = useNavigate();
+  return (
+    <div className="flex h-full flex-col">
+      <TitleBar />
+      <div className="scroll-thin flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-[760px] px-6 py-10">
+          <Button variant="ghost" size="sm" icon={<ArrowLeft size={14} />} onClick={() => nav('/login')} className="mb-4">
+            Voltar
+          </Button>
+          <HostSettings />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -214,6 +248,7 @@ export function LoginPage() {
         Primeira vez por aqui? <Link to="/register" className="font-medium text-accent-2 hover:underline">Criar conta</Link>
       </p>
       <ServerPicker server={server} setServer={setServer} error={serverError} />
+      <HostShortcut />
     </AuthLayout>
   );
 }
@@ -298,6 +333,7 @@ export function RegisterPage() {
         Já tem conta? <Link to="/login" className="font-medium text-accent-2 hover:underline">Entrar</Link>
       </p>
       <ServerPicker server={server} setServer={setServer} error={serverError} />
+      <HostShortcut />
     </AuthLayout>
   );
 }

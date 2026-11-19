@@ -17,7 +17,8 @@ import { badgeCount } from './lib/notify';
 import { setSoundVolume, setSoundOutput } from './lib/sounds';
 import { useKeybinds, type KeybindHandlers } from './lib/keybinds';
 import { voice, useVoice } from './lib/voice/engine';
-import { LoginPage, RegisterPage, ForgotPage, ResetPage, VerifyPage } from './pages/Auth';
+import { LoginPage, RegisterPage, ForgotPage, ResetPage, VerifyPage, HostPage } from './pages/Auth';
+import { connectToServer, parseServerLink } from './lib/serverLink';
 import { LoadingScreen } from './pages/Loading';
 import { DiscoverPage } from './pages/Discover';
 import { Overlays } from './components/overlays';
@@ -33,6 +34,15 @@ import { MarkdownProvider } from './components/MarkdownProvider';
 function NavigationBridge() {
   const navigate = useNavigate();
   useEffect(() => setNavigate((to) => navigate(to)), [navigate]);
+  // convite de servidor (vinlancord://servidor?...) funciona até na tela de login
+  useEffect(
+    () =>
+      desktop?.onDeepLink((url) => {
+        const link = parseServerLink(url);
+        if (link) void connectToServer(link);
+      }),
+    [],
+  );
   return null;
 }
 
@@ -328,6 +338,7 @@ export default function App() {
         <Route path="/forgot" element={<ForgotPage />} />
         <Route path="/reset" element={<ResetPage />} />
         <Route path="/verify" element={<VerifyPage />} />
+        <Route path="/host" element={<HostPage />} />
         <Route path="/404" element={<NotFoundGuard />} />
         <Route path="/*" element={<RequireAuth><AppShell /></RequireAuth>} />
       </Routes>
