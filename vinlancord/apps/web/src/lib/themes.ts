@@ -261,12 +261,31 @@ export const THEMES: ThemeDef[] = [
   ),
 ];
 
+/** Estética exclusiva da conta criadora (não aparece na galeria para os outros). */
+export const CREATOR_THEME: ThemeDef = preset(
+  'lord',
+  'Lord of Freedom',
+  'Exclusiva do criador',
+  'Preto absoluto e ouro vivo, brasas douradas subindo. Só a conta criadora tem.',
+  'dark',
+  {
+    'bg-0': '#050403', 'bg-1': '#0b0906', 'bg-2': '#100d08', 'bg-3': '#18130c', 'bg-4': '#221b10', 'bg-5': '#302616',
+    border: '#211a0f', 'border-strong': '#4a3a1c', 'text-0': '#fff6dc', 'text-1': '#e2cfa0', 'text-2': '#a08c62',
+    accent: '#e8b931', 'accent-2': '#fff1b8', success: '#3fb37f', warning: '#f0a020', danger: '#ff3b4e',
+  },
+  {
+    displayFont: 'cinzel', bodyFont: 'garamond', corners: 'cut', serverShape: 'shield', avatarShape: 'hexagon',
+    panelOpacity: 0.8, blur: 12, glow: 1, ornaments: true, effect: 'embers', effectIntensity: 1.2, fog: true,
+    grain: 0.25, vignette: 0.7, transition: 'slash', messageStyle: 'letter', chapterNumbers: true,
+  },
+);
+
 export const DEFAULT_PRESET = 'caderno';
 
 export const ACCENTS = ['#c1121f', '#ff2d55', '#e07a2e', '#d9b44a', '#8fa36b', '#22d3ee', '#3b82f6', '#7c5cff', '#a855f7', '#ec4899', '#e9dcc0'];
 
 export function findTheme(id: string, custom: ThemeDef[] = []): ThemeDef {
-  return [...THEMES, ...custom].find((t) => t.id === id) ?? THEMES.find((t) => t.id === DEFAULT_PRESET)!;
+  return [...THEMES, CREATOR_THEME, ...custom].find((t) => t.id === id) ?? THEMES.find((t) => t.id === DEFAULT_PRESET)!;
 }
 
 /** Garante uma aparência completa (preenche campos que faltam com o preset). */

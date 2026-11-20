@@ -180,6 +180,9 @@ export async function registerGateway(app: FastifyInstance) {
   });
 }
 
+/** Usuários com o app aberto agora (nesta instância). */
+export const connectedUserIds = () => [...byUser.keys()];
+
 export function closeAllConnections() {
   for (const set of byUser.values()) for (const c of set) c.ws.close(GatewayCloseCode.SERVER_RESTART, 'Servidor reiniciando');
 }

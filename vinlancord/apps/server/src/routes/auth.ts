@@ -145,6 +145,7 @@ export default async function authRoutes(app: FastifyInstance) {
     }
     if (!(await verifyPassword(user.passwordHash, body.password)))
       throw new ApiError(401, 'INVALID_CREDENTIALS', 'Login ou senha incorretos.');
+    if (user.suspendedAt) throw forbidden('Esta conta foi suspensa pelo criador do servidor.', 'ACCOUNT_SUSPENDED');
     if (config.REQUIRE_EMAIL_VERIFICATION && !user.emailVerified)
       throw forbidden('Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.', 'EMAIL_NOT_VERIFIED');
 

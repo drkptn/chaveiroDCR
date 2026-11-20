@@ -203,6 +203,8 @@ export const reducers: Record<string, Handler> = {
   USER_UPDATE: (u: SelfUser) => setS((s) => ({ me: u, users: { ...s.users, [u.id]: u } })),
   USER_SETTINGS_UPDATE: (settings: UserSettings) => setS({ settings }),
   USER_PUBLIC_UPDATE: (u: PublicUser) => setS((s) => ({ users: { ...s.users, [u.id]: u } })),
+  // anúncio do criador do servidor: mostrado pelo App (toast em destaque)
+  ANNOUNCEMENT: (d: { text: string; from: PublicUser; at: string }) => window.dispatchEvent(new CustomEvent('vl:announcement', { detail: d })),
   PRESENCE_UPDATE: (p: Presence) => setS((s) => ({ presences: { ...s.presences, [p.userId]: p } })),
   RELATIONSHIP_ADD: (r: Relationship) =>
     setS((s) => ({ relationships: { ...s.relationships, [r.id]: r }, users: { ...s.users, [r.user.id]: r.user } })),

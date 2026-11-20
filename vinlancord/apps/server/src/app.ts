@@ -21,6 +21,7 @@ import inviteRoutes from './routes/invites';
 import fileRoutes from './routes/files';
 import miscRoutes, { gauges } from './routes/misc';
 import adminRoutes from './routes/admin';
+import creatorRoutes from './routes/creator';
 import { registerGateway } from './gateway';
 
 export async function buildApp() {
@@ -100,6 +101,7 @@ export async function buildApp() {
       await api.register(inviteRoutes);
       await api.register(miscRoutes);
       await api.register(adminRoutes);
+      await api.register(creatorRoutes);
     },
     { prefix: '/api/v1' },
   );

@@ -89,6 +89,8 @@ model User {
   system          Boolean        @default(false)
   /// selos especiais (ex.: "creator"), concedidos só pelo operador do servidor
   badges          String[]       @default([])
+  /// conta suspensa pelo criador do servidor (não entra nem usa a API)
+  suspendedAt     DateTime?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   usernameChangedAt DateTime?

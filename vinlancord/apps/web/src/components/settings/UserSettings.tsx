@@ -12,6 +12,7 @@ import { desktop, type DesktopSettings, type UpdateStatus } from '../../lib/desk
 import { ACCENTS } from '../../lib/themes';
 import AppearanceStudio from './AppearanceStudio';
 import HostSettings from './HostSettings';
+import CreatorPanel from './CreatorPanel';
 import { voice, useVoice } from '../../lib/voice/engine';
 import { AudioEngine } from '../../lib/voice/audio';
 import { requestNotificationPermission } from '../../lib/notify';
@@ -24,7 +25,10 @@ import { formatAccelerator } from '../../lib/keybinds';
 
 export default function UserSettings({ onClose, initialTab }: { onClose: () => void; initialTab?: string }) {
   const [tab, setTab] = useState(initialTab ?? 'account');
+  const isCreator = useStore((s) => !!s.me?.badges?.includes('creator'));
   const tabs: SettingsTab[] = [
+    // só aparece na conta criadora (o servidor confere de novo em toda ação)
+    { id: 'creator', label: '👑 Painel do Criador', section: 'Criador', hidden: !isCreator },
     { id: 'account', label: 'Minha conta', section: 'Configurações de usuário' },
     { id: 'profile', label: 'Perfil' },
     { id: 'privacy', label: 'Privacidade e segurança' },
@@ -51,6 +55,7 @@ export default function UserSettings({ onClose, initialTab }: { onClose: () => v
       {tab === 'keybinds' && <Keybinds />}
       {tab === 'activity' && <Activity />}
       {tab === 'host' && <HostSettings />}
+      {tab === 'creator' && isCreator && <CreatorPanel />}
       {tab === 'desktop' && <DesktopTab />}
       {tab === 'about' && <About />}
     </SettingsLayout>

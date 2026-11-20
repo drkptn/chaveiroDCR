@@ -95,6 +95,8 @@ export interface GatewayEvents {
   EVENT_UPDATE: ScheduledEvent;
   EVENT_DELETE: { id: string; guildId: string };
   SESSION_REVOKED: { sessionId: string };
+  /** Anúncio do criador do servidor para todos os conectados */
+  ANNOUNCEMENT: { text: string; from: PublicUser; at: string };
   VOICE_STATE_UPDATE: VoiceState | { userId: string; channelId: null; guildId: string | null };
   VOICE_PRODUCER_NEW: ProducerInfo & { channelId: string };
   VOICE_PRODUCER_CLOSED: { channelId: string; producerId: string; userId: string; source: SourceType };

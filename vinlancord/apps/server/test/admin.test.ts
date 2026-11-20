@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { gateway, registerUser, startServer, stopServer, sleep } from './helpers';
+import { client, gateway, registerUser, startServer, stopServer, sleep } from './helpers';
 
 let base = '';
 beforeAll(async () => {
@@ -30,7 +30,7 @@ describe('selos do operador', () => {
     const gw = await gateway(d.token);
     const ok = await admin(`/admin/users/${d.user.username}/badges`, { badges: ['creator'] }, 'test-admin-token-test-admin-token-123');
     expect(ok.status).toBe(200);
-    expect((await ok.json()).badges).toEqual(['creator']);
+    expect(((await ok.json()) as { badges: string[] }).badges).toEqual(['creator']);
     // aparece no perfil público para outro usuário e chega ao vivo
     const prof = await amigo.api.get(`/users/${d.user.id}/profile`);
     expect(prof.body.user.badges).toEqual(['creator']);
@@ -39,7 +39,56 @@ describe('selos do operador', () => {
     gw.close();
     // remove
     const off = await admin(`/admin/users/${d.user.username}/badges`, { badges: [] }, 'test-admin-token-test-admin-token-123');
-    expect((await off.json()).badges).toEqual([]);
+    expect(((await off.json()) as { badges: string[] }).badges).toEqual([]);
     expect((await amigo.api.get(`/users/${d.user.id}/profile`)).body.user.badges).toBeUndefined();
+  });
+});
+
+describe('Painel do Criador', () => {
+  const TOKEN = 'test-admin-token-test-admin-token-123';
+  it('só a conta criadora usa o painel; criador é único; suspender, anunciar e apagar funcionam', async () => {
+    const d = await registerUser('lord');
+    const outro = await registerUser('outro');
+    const vitima = await registerUser('vitima');
+    // ninguém é criador ainda
+    expect((await d.api.get('/creator/overview')).status).toBe(403);
+    expect((await admin(`/admin/users/${d.user.username}/badges`, { badges: ['creator'] }, TOKEN)).status).toBe(200);
+    expect((await outro.api.get('/creator/overview')).status).toBe(403);
+    const ov = await d.api.get('/creator/overview');
+    expect(ov.status).toBe(200);
+    expect(ov.body.users).toBeGreaterThanOrEqual(3);
+
+    // lista de contas e busca
+    const list = await d.api.get(`/creator/users?q=${vitima.user.username}`);
+    expect(list.body.map((r: { user: { id: string } }) => r.user.id)).toContain(vitima.user.id);
+
+    // suspender: sessão cai e login é recusado; reativar volta ao normal
+    expect((await d.api.post(`/creator/users/${d.user.id}/suspend`, { suspended: true })).status).toBe(403);
+    expect((await d.api.post(`/creator/users/${vitima.user.id}/suspend`, { suspended: true })).status).toBe(200);
+    expect((await vitima.api.get('/users/@me')).status).toBe(401);
+    const login = await client().post('/auth/login', { login: vitima.user.username, password: vitima.password });
+    expect(login.status).toBe(403);
+    expect(login.body.error.code).toBe('ACCOUNT_SUSPENDED');
+    expect((await d.api.post(`/creator/users/${vitima.user.id}/suspend`, { suspended: false })).status).toBe(200);
+    expect((await client().post('/auth/login', { login: vitima.user.username, password: vitima.password })).status).toBe(200);
+
+    // anúncio chega a quem está conectado
+    const gw = await gateway(outro.token);
+    const ann = await d.api.post('/creator/announce', { text: 'Atualização hoje à noite!' });
+    expect(ann.status).toBe(200);
+    const ev = await gw.waitFor('ANNOUNCEMENT');
+    expect((ev as { text: string }).text).toBe('Atualização hoje à noite!');
+    gw.close();
+
+    // apagar comunidade de outra pessoa
+    const g = await outro.api.post('/guilds', { name: 'Comunidade do outro' });
+    expect((await d.api.get('/creator/guilds')).body.some((x: { id: string }) => x.id === g.body.id)).toBe(true);
+    expect((await d.api.del(`/creator/guilds/${g.body.id}`)).status).toBe(200);
+    expect((await outro.api.get(`/guilds/${g.body.id}`)).status).toBe(404);
+
+    // criador é único: registrar outra conta tira o selo da anterior
+    expect((await admin(`/admin/users/${outro.user.username}/badges`, { badges: ['creator'] }, TOKEN)).status).toBe(200);
+    expect((await d.api.get('/creator/overview')).status).toBe(403);
+    expect((await outro.api.get('/creator/overview')).status).toBe(200);
   });
 });

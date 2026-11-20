@@ -31,6 +31,14 @@ export default async function adminRoutes(app: FastifyInstance) {
     const { badges } = parse(zBadges, req.body);
     const user = await prisma.user.findUnique({ where: { username: username.toLowerCase() }, select: { id: true } });
     if (!user) throw notFound('Usuário');
+    // o selo de criador é único: só uma conta por servidor
+    if (badges.includes('creator')) {
+      const others = await prisma.user.findMany({ where: { badges: { has: 'creator' }, NOT: { id: user.id } }, select: { id: true, badges: true } });
+      for (const o of others) {
+        await prisma.user.update({ where: { id: o.id }, data: { badges: o.badges.filter((b) => b !== 'creator') } });
+        await broadcastUserUpdate(o.id);
+      }
+    }
     await prisma.user.update({ where: { id: user.id }, data: { badges: [...new Set(badges)] } });
     const updated = await broadcastUserUpdate(user.id);
     return { id: updated.id, username: updated.username, badges: updated.badges };

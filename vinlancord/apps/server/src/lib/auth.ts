@@ -82,10 +82,10 @@ export async function authenticateToken(token: string | undefined | null, ip?: s
 
   const session = await prisma.session.findUnique({
     where: { tokenHash },
-    select: { id: true, userId: true, expiresAt: true, revokedAt: true, user: { select: { emailVerified: true } } },
+    select: { id: true, userId: true, expiresAt: true, revokedAt: true, user: { select: { emailVerified: true, suspendedAt: true } } },
   });
   let ctx: AuthContext | null = null;
-  if (session && !session.revokedAt && session.expiresAt.getTime() > now) {
+  if (session && !session.revokedAt && !session.user.suspendedAt && session.expiresAt.getTime() > now) {
     ctx = { userId: session.userId, sessionId: session.id, emailVerified: session.user.emailVerified };
     const lt = lastTouch.get(session.id) ?? 0;
     if (now - lt > TOUCH_MS) {

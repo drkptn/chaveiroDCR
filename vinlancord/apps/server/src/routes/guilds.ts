@@ -109,6 +109,18 @@ export async function removeMember(guildId: string, userId: string) {
   await bus.toGuild(guildId, 'GUILD_MEMBER_REMOVE', { guildId, userId });
 }
 
+/** Apaga um servidor (comunidade) com canais, voz e imagens, avisando os membros. */
+export async function deleteGuildCompletely(g: { id: string; iconKey: string | null; bannerKey: string | null }) {
+  const memberIds = [...((await getGuild(g.id))?.members.keys() ?? [])];
+  const channels = await prisma.channel.findMany({ where: { guildId: g.id }, select: { id: true } });
+  for (const c of channels) await voiceHooks.onChannelDeleted(c.id);
+  await prisma.guild.delete({ where: { id: g.id } });
+  invalidateGuild(g.id);
+  await deleteImage(g.iconKey);
+  await deleteImage(g.bannerKey);
+  await bus.toUsers(memberIds, 'GUILD_DELETE', { id: g.id });
+}
+
 export default async function guildRoutes(app: FastifyInstance) {
   app.addHook('preHandler', requireAuth);
 
@@ -257,15 +269,7 @@ export default async function guildRoutes(app: FastifyInstance) {
     if (g.ownerId !== req.auth.userId) throw forbidden('Apenas o dono pode excluir o servidor.');
     const user = await prisma.user.findUniqueOrThrow({ where: { id: req.auth.userId } });
     if (!(await verifyPassword(user.passwordHash, password))) throw invalidPassword();
-    const members = (await getGuild(id))?.members.keys() ?? [];
-    const memberIds = [...members];
-    const channels = await prisma.channel.findMany({ where: { guildId: id }, select: { id: true } });
-    for (const c of channels) await voiceHooks.onChannelDeleted(c.id);
-    await prisma.guild.delete({ where: { id } });
-    invalidateGuild(id);
-    await deleteImage(g.iconKey);
-    await deleteImage(g.bannerKey);
-    await bus.toUsers(memberIds, 'GUILD_DELETE', { id });
+    await deleteGuildCompletely(g);
     return { ok: true };
   });
 

@@ -5,7 +5,7 @@ import { desktop, type HostStatus } from '../../lib/desktop';
 import { api } from '../../lib/api';
 import { connectToServer } from '../../lib/serverLink';
 import { ui } from '../../store/ui';
-import { Button, Input, Select, Spinner, cx } from '../ui';
+import { Button, Select, Spinner, cx } from '../ui';
 import { useStore } from '../../store';
 import { SectionTitle, Card } from './SettingsLayout';
 
@@ -170,17 +170,20 @@ export default function HostSettings() {
   );
 }
 
-/** Selo exclusivo de criador ("Lord of Freedom"): só quem roda o servidor neste PC pode conceder. */
+/**
+ * Registro do criador: torna A CONTA LOGADA neste app a única conta criadora do servidor
+ * (selo "Lord of Freedom" + Painel do Criador). Só funciona daqui, do PC que roda o servidor.
+ */
 function CreatorBadgeCard() {
   const me = useStore((s) => s.me);
-  const [name, setName] = useState(me?.username ?? '');
   const [busy, setBusy] = useState(false);
+  const isCreator = !!me?.badges?.includes('creator');
   const apply = async (badges: string[]) => {
-    if (!desktop || !name.trim()) return;
+    if (!desktop || !me) return;
     setBusy(true);
     try {
-      await desktop.host.setBadges(name, badges);
-      ui.success(badges.length ? `Selo "Lord of Freedom" dado para ${name.trim()}! 👑` : `Selo removido de ${name.trim()}.`);
+      await desktop.host.setBadges(me.username, badges);
+      ui.success(badges.length ? 'Pronto, Lord! Sua conta agora é a criadora deste servidor. 👑' : 'Sua conta deixou de ser a criadora.');
     } catch (e) {
       ui.error(e);
     } finally {
@@ -188,20 +191,30 @@ function CreatorBadgeCard() {
     }
   };
   return (
-    <Card title="Selo de criador">
-      <p className="mb-3 text-sm text-fg-1">
-        Dê o selo <span className="vl-badge-creator inline-flex items-center rounded-full px-2 py-0.5 font-heading text-[12px]">👑 Lord of Freedom</span> para a sua conta neste servidor. Só dá pra fazer
-        isso daqui, do PC que roda o servidor.
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <Input className="max-w-[220px]" value={name} onChange={(e) => setName(e.target.value)} placeholder="seu nome de usuário" />
-        <Button loading={busy} onClick={() => void apply(['creator'])}>
-          Dar selo
-        </Button>
-        <Button variant="ghost" disabled={busy} onClick={() => void apply([])}>
-          Remover
-        </Button>
-      </div>
+    <Card title="Conta do criador">
+      {!me ? (
+        <p className="text-sm text-fg-1">Clique em “Conectar” abaixo e entre na sua conta; depois volte aqui para registrá-la como a conta do criador.</p>
+      ) : isCreator ? (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-fg-1">
+            <b className="vl-name-creator">{me.displayName}</b> (@{me.username}) é a conta do criador deste servidor: selo <span className="vl-badge-creator rounded-full px-2 py-0.5 font-heading text-[12px]">👑 Lord of Freedom</span> e o{' '}
+            <b>Painel do Criador</b> nas configurações.
+          </p>
+          <Button variant="ghost" disabled={busy} onClick={() => void apply([])}>
+            Remover
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="max-w-md text-sm text-fg-1">
+            Registrar <b>{me.displayName}</b> (@{me.username}) como a <b>única</b> conta criadora deste servidor: ganha o selo Lord of Freedom, nome dourado e o Painel do Criador. Só dá para
+            fazer isso daqui, do PC que roda o servidor.
+          </p>
+          <Button loading={busy} onClick={() => void apply(['creator'])}>
+            👑 Registrar minha conta
+          </Button>
+        </div>
+      )}
     </Card>
   );
 }

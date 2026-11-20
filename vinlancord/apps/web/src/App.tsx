@@ -14,7 +14,7 @@ import { useAppearance, syncAppearance } from './store/appearance';
 import { Ambience } from './components/Ambience';
 import { desktop } from './lib/desktop';
 import { badgeCount } from './lib/notify';
-import { setSoundVolume, setSoundOutput } from './lib/sounds';
+import { setSoundVolume, setSoundOutput, playSound } from './lib/sounds';
 import { useKeybinds, type KeybindHandlers } from './lib/keybinds';
 import { voice, useVoice } from './lib/voice/engine';
 import { LoginPage, RegisterPage, ForgotPage, ResetPage, VerifyPage, HostPage } from './pages/Auth';
@@ -231,6 +231,17 @@ function GlobalEffects() {
   useEffect(() => useStore.subscribe(() => desktop?.notify.setBadge(badgeCount())), []);
 
   // links vinlancord://invite/CODE e vinlancord://servidor: tratados no NavigationBridge (desktop e celular)
+
+  // anúncios do criador do servidor
+  useEffect(() => {
+    const f = (e: Event) => {
+      const d = (e as CustomEvent<{ text: string; from: { displayName: string } }>).detail;
+      playSound('mention');
+      ui.toast({ kind: 'info', title: `📣 Anúncio de ${d.from.displayName}`, body: d.text, timeout: 20_000 });
+    };
+    window.addEventListener('vl:announcement', f);
+    return () => window.removeEventListener('vl:announcement', f);
+  }, []);
 
   // avisos do motor de voz
   useEffect(() => {

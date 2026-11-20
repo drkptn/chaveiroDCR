@@ -47,11 +47,12 @@ function Header({ m, guildId }: { m: ClientMessage; guildId: string | null }) {
   const name = useStore(() => displayName(m.author.id, guildId));
   const color = useStore((s) => memberColor(s, guildId, m.author.id));
   const showSeconds = useStore((s) => s.settings.showSeconds);
+  const creator = useStore((s) => !!s.users[m.author.id]?.badges?.includes('creator'));
   return (
     <div className="flex items-baseline gap-2">
       <button
-        className="vl-msg-author truncate text-[15px] font-semibold hover:underline"
-        style={{ color: color ?? 'var(--vl-text-0)' }}
+        className={cx('vl-msg-author truncate text-[15px] font-semibold hover:underline', creator && 'vl-name-creator')}
+        style={creator ? undefined : { color: color ?? 'var(--vl-text-0)' }}
         onClick={(e) => ui.profile(m.author.id, guildId, e.currentTarget)}
       >
         {name}
