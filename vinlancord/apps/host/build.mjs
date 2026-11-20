@@ -6,7 +6,7 @@
 // As dependências nativas são instaladas para a plataforma em que o build roda (Windows no CI).
 import { build } from 'esbuild';
 import { execSync } from 'node:child_process';
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -64,4 +64,23 @@ execSync('npm install --omit=dev --no-audit --no-fund --no-package-lock --ignore
 // arquivos de documentação/teste não precisam ir no instalador
 for (const p of ['node_modules/mediasoup/worker/src', 'node_modules/mediasoup/worker/include', 'node_modules/mediasoup/worker/subprojects', 'node_modules/mediasoup/worker/deps'])
   rmSync(join(dist, p), { recursive: true, force: true });
+// Windows: postgres.exe, initdb.exe, pg_ctl.exe, mediasoup-worker.exe e o argon2 (.node) dependem do
+// runtime do Visual C++ (VCRUNTIME140/140_1, MSVCP140), que muitos PCs NÃO têm instalado.
+// Distribuição "app-local" (permitida pela Microsoft): as DLLs vão ao lado de cada executável/módulo.
+if (process.platform === 'win32') {
+  const sys = join(process.env.SystemRoot || 'C:\\Windows', 'System32');
+  const dlls = ['vcruntime140.dll', 'vcruntime140_1.dll', 'msvcp140.dll'];
+  for (const d of dlls) if (!existsSync(join(sys, d))) throw new Error(`Runtime do Visual C++ não encontrado neste PC de build: ${d}`);
+  const dirs = new Set();
+  const walk = (dir) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else if (/\.(exe|node)$/i.test(e.name)) dirs.add(dir);
+    }
+  };
+  walk(join(dist, 'node_modules'));
+  for (const dir of dirs) for (const d of dlls) if (!existsSync(join(dir, d))) copyFileSync(join(sys, d), join(dir, d));
+  console.log(`Runtime do Visual C++ incluído em ${dirs.size} pasta(s).`);
+}
 console.log('Modo anfitrião pronto em', dist);

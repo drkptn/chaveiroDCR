@@ -163,6 +163,9 @@ jobs:
           R=apps/desktop/release/win-unpacked
           test -f "$R/resources/host/dist/node_modules/mediasoup/worker/out/Release/mediasoup-worker.exe"
           test -d "$R/resources/host/dist/node_modules/@embedded-postgres/windows-x64"
+          # o runtime do Visual C++ vai junto (muitos PCs não têm o pacote instalado)
+          test -f "$R/resources/host/dist/node_modules/@embedded-postgres/windows-x64/native/bin/vcruntime140.dll"
+          test -f "$R/resources/host/dist/node_modules/mediasoup/worker/out/Release/msvcp140.dll"
           mkdir -p "$RUNNER_TEMP/anfitriao-pkg"
           ELECTRON_RUN_AS_NODE=1 VL_DATA_DIR="$RUNNER_TEMP/anfitriao-pkg" VL_UPNP=1 "$R/Vinlancord.exe" "$R/resources/host/dist/runtime.mjs" > "$RUNNER_TEMP/anfitriao-pkg.log" 2>&1 &
           ok=0
