@@ -57,7 +57,7 @@ export interface UpnpResult {
 
 /** Abre as portas no roteador via UPnP. Devolve o gateway para fechar depois. */
 export async function openPorts(lanIp: string, ports: { port: number; protocol: 'tcp' | 'udp' }[]): Promise<UpnpResult> {
-  const client = upnpNat({ description: 'Vinlancord', ttl: 2 * 3600_000, autoRefresh: true });
+  const client = upnpNat({ description: 'Alem-Mar', ttl: 2 * 3600_000, autoRefresh: true });
   try {
     for await (const gateway of client.findGateways({ signal: AbortSignal.timeout(8000) })) {
       if (gateway.family !== 'IPv4') continue;

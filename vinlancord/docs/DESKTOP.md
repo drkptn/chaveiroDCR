@@ -21,11 +21,11 @@ $env:VINLANCORD_SERVER_URL = "https://vinlancord.seudominio.com"
 npm run dist:win
 ```
 
-3. O instalador fica em `apps\desktop\release\Vinlancord-Setup-1.0.0.exe`.
+3. O instalador fica em `apps\desktop\release\Alem-Mar-Setup-1.0.0.exe`.
 
 ### Opção B — GitHub Actions
 
-O workflow `.github/workflows/vinlancord.yml` roda todos os testes e gera o instalador num Windows. Em **Settings → Secrets and variables → Actions → Variables**, crie `VINLANCORD_SERVER_URL` com o endereço do seu servidor, ou rode manualmente (**Actions → Vinlancord → Run workflow**) informando o endereço. Baixe o artefato **Vinlancord-Windows** ao final.
+O workflow `.github/workflows/vinlancord.yml` roda todos os testes e gera o instalador num Windows. Em **Settings → Secrets and variables → Actions → Variables**, crie `VINLANCORD_SERVER_URL` com o endereço do seu servidor, ou rode manualmente (**Actions → Além-Mar → Run workflow**) informando o endereço. Baixe o artefato **Além-Mar-Windows** ao final.
 
 ### Opção C — no Linux
 
@@ -34,7 +34,7 @@ Precisa do Wine 64 e 32 bits (`dpkg --add-architecture i386 && apt install wine6
 ## O que o instalador faz
 
 - Instalação por usuário (sem pedir administrador), com opção de escolher a pasta.
-- Atalho na **área de trabalho** e no **menu Iniciar**, ícone próprio, nome “Vinlancord”.
+- Atalho na **área de trabalho** e no **menu Iniciar**, ícone próprio, nome “Além-Mar”.
 - Registra links `vinlancord://` (ex.: `vinlancord://invite/aBcD1234`).
 - Abre o app ao final; desinstalador incluso (preserva seus dados/login).
 
@@ -42,7 +42,7 @@ No app: *Configurações → Windows e desktop* → **Iniciar com o Windows** (a
 
 ## Endereço do servidor
 
-O `VINLANCORD_SERVER_URL` vira o servidor padrão do app. Mesmo assim, a tela de login tem “Servidor: … alterar”, então o mesmo instalador funciona com qualquer servidor Vinlancord.
+O `VINLANCORD_SERVER_URL` vira o servidor padrão do app. Mesmo assim, a tela de login tem “Servidor: … alterar”, então o mesmo instalador funciona com qualquer servidor Além-Mar.
 
 ## Assinatura de código (recomendado)
 

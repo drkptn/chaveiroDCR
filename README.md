@@ -110,6 +110,6 @@ tools/capture-renders.mjs
 
 ---
 
-## Vinlancord (app de comunicação)
+## Além-Mar (app de comunicação)
 
-Este repositório também contém o **Vinlancord** — plataforma de chat, voz, vídeo e compartilhamento de tela com app desktop para Windows — na pasta [`vinlancord/`](vinlancord/README.md). Ele é independente da landing page (está excluído do `tsconfig` e do deploy da Vercel).
+Este repositório também contém o **Além-Mar** — plataforma de chat, voz, vídeo e compartilhamento de tela com app desktop para Windows — na pasta [`vinlancord/`](vinlancord/README.md). Ele é independente da landing page (está excluído do `tsconfig` e do deploy da Vercel).

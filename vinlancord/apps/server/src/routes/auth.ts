@@ -29,7 +29,7 @@ function deviceMeta(req: FastifyRequest, device?: { name?: string; platform?: st
   const ua = req.headers['user-agent'] ?? '';
   const guess = /Electron/i.test(ua) ? 'desktop' : 'web';
   const os = /Windows/i.test(ua) ? 'Windows' : /Mac OS/i.test(ua) ? 'macOS' : /Linux/i.test(ua) ? 'Linux' : /Android/i.test(ua) ? 'Android' : /iPhone|iPad/i.test(ua) ? 'iOS' : '';
-  const browser = /Electron/i.test(ua) ? 'Vinlancord' : /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : 'Navegador';
+  const browser = /Electron/i.test(ua) ? 'Além-Mar' : /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : 'Navegador';
   return {
     deviceName: device?.name || [browser, os && `no ${os}`].filter(Boolean).join(' '),
     platform: device?.platform || guess,
@@ -76,7 +76,7 @@ export async function revokeAllSessions(userId: string, exceptSessionId?: string
 
 export default async function authRoutes(app: FastifyInstance) {
   app.get('/auth/config', async () => ({
-    name: 'Vinlancord',
+    name: 'Além-Mar',
     version: process.env.npm_package_version ?? '1.0.0',
     registrationEnabled: config.REGISTRATION_ENABLED,
     registrationCodeRequired: !!config.REGISTRATION_CODE,

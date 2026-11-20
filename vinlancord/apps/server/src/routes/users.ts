@@ -41,7 +41,7 @@ const zAppearance = z.object({
   blur: z.number().min(0).max(32),
   glow: zUnit,
   ornaments: z.boolean(),
-  effect: z.enum(['none', 'feathers', 'ink', 'embers', 'ash', 'sigils', 'snow', 'rain', 'petals', 'stars']),
+  effect: z.enum(['none', 'feathers', 'ink', 'embers', 'ash', 'sigils', 'snow', 'rain', 'petals', 'stars', 'tide']),
   effectIntensity: z.number().min(0).max(2),
   fog: z.boolean(),
   grain: zUnit,

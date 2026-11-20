@@ -1,5 +1,5 @@
 /**
- * Sistema de permissões do Vinlancord (bitflags em BigInt).
+ * Sistema de permissões do Além-Mar (bitflags em BigInt).
  *
  * O cálculo é compartilhado entre servidor e cliente, mas o servidor é a
  * única autoridade: o cliente usa apenas para esconder/mostrar controles.

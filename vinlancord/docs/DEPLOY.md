@@ -1,4 +1,4 @@
-# Colocando o Vinlancord no ar
+# Colocando o Além-Mar no ar
 
 Guia para hospedar o servidor numa VPS Linux (Ubuntu 22.04/24.04, 2 vCPU e 2–4 GB de RAM atendem bem um grupo de amigos).
 
@@ -51,7 +51,7 @@ Opções importantes do `.env`:
 ```bash
 cd infra
 docker compose --env-file ../.env up -d --build
-docker compose logs -f server      # acompanhe; procure "Vinlancord no ar"
+docker compose logs -f server      # acompanhe; procure "Além-Mar no ar"
 curl https://SEU-DOMINIO/api/v1/health
 ```
 

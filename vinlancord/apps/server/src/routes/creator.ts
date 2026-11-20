@@ -26,7 +26,7 @@ export async function isCreator(userId: string) {
 export default async function creatorRoutes(app: FastifyInstance) {
   app.addHook('preHandler', requireAuth);
   app.addHook('preHandler', async (req) => {
-    if (!(await isCreator(req.auth.userId))) throw forbidden('Exclusivo do criador do Vinlancord.');
+    if (!(await isCreator(req.auth.userId))) throw forbidden('Exclusivo do criador do Além-Mar.');
   });
 
   /** Números do servidor. */

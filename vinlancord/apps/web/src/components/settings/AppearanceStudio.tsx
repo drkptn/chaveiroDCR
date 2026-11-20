@@ -23,6 +23,7 @@ import {
   Trash2,
   Upload,
   Wand2,
+  Waves,
   Wind,
 } from 'lucide-react';
 import type { AmbientEffect, Appearance, CornerStyle, IconShape, MessageStyle, TransitionStyle } from '@vinlancord/shared';
@@ -360,7 +361,7 @@ function Typography() {
               className={cx('vl-cut-sm rounded-lg border px-3 py-2.5 text-left transition-all hover:-translate-y-0.5', a.displayFont === f.id ? 'border-accent bg-accent/10' : 'border-line hover:border-line-strong')}
             >
               <div className="truncate text-2xl leading-tight text-fg" style={{ fontFamily: f.family }}>
-                Vinlancord
+                Além-Mar
               </div>
               <div className="mt-0.5 text-[11.5px] text-fg-2">
                 {f.label} · {f.hint}
@@ -507,6 +508,7 @@ function Shapes() {
 
 const EFFECTS: { value: AmbientEffect; label: string; icon: ReactNode }[] = [
   { value: 'none', label: 'Nenhum', icon: <Ban size={18} /> },
+  { value: 'tide', label: 'Maré', icon: <Waves size={18} /> },
   { value: 'feathers', label: 'Penas', icon: <Feather size={18} /> },
   { value: 'ink', label: 'Tinta', icon: <Droplet size={18} /> },
   { value: 'embers', label: 'Brasas', icon: <Flame size={18} /> },

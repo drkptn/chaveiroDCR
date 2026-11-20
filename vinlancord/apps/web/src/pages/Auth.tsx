@@ -22,9 +22,9 @@ interface ServerConfig {
 
 const TAGLINES = [
   'Sua turma, sua voz, seu lugar.',
-  'Escreva seu nome na história do servidor.',
-  'Toda muralha tem um portão. Este é o seu.',
-  'Mova suas peças. Chame seus aliados.',
+  'O que existe além do mar? A sua turma.',
+  'Toda muralha tem uma brecha. Esta é a sua.',
+  'Livre pra falar. Livre pra chamar quem quiser.',
   'Chamadas cristalinas. Zero enrolação.',
 ];
 
@@ -440,7 +440,7 @@ export function VerifyPage() {
         <p className="mt-2 text-sm text-fg-2">{state === 'ok' ? 'Tudo certo, sua conta está protegida.' : state === 'error' ? error : 'Só um instante.'}</p>
         {state !== 'loading' && (
           <Link to="/channels/@me" className="mt-6 inline-block">
-            <Button>Abrir o Vinlancord</Button>
+            <Button>Abrir o Além-Mar</Button>
           </Link>
         )}
       </div>

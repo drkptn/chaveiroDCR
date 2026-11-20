@@ -18,7 +18,7 @@ async function main() {
 
   const app = await buildApp();
   await app.listen({ host: config.HOST, port: config.PORT });
-  app.log.info(`🚀 Vinlancord no ar em ${config.PUBLIC_URL} (KV: ${kv.kind})`);
+  app.log.info(`🚀 Além-Mar no ar em ${config.PUBLIC_URL} (KV: ${kv.kind})`);
 
   const jobs = [
     setInterval(() => void cleanupOrphanAttachments().catch((e) => app.log.error(e)), 60 * 60_000),

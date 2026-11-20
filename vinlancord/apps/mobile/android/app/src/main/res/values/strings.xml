@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Vinlancord</string>
-    <string name="title_activity_main">Vinlancord</string>
+    <string name="app_name">Além-Mar</string>
+    <string name="title_activity_main">Além-Mar</string>
     <string name="package_name">com.vinlancord.app</string>
     <string name="custom_url_scheme">com.vinlancord.app</string>
 </resources>

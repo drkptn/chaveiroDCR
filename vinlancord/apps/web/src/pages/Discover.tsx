@@ -31,7 +31,7 @@ export function DiscoverPage() {
         <div className="absolute -right-20 -top-24 size-96 rounded-full bg-accent/25 blur-[100px]" />
         <div className="absolute -left-10 top-10 size-72 rounded-full bg-accent-2/15 blur-[90px]" />
         <div className="relative max-w-3xl">
-          <h1 className="font-display text-4xl font-bold text-fg">Encontre sua turma no <span className="gradient-text">Vinlancord</span></h1>
+          <h1 className="font-display text-4xl font-bold text-fg">Encontre sua turma no <span className="gradient-text">Além-Mar</span></h1>
           <p className="mt-2 text-fg-1">De jogos a estudos: comunidades públicas esperando por você.</p>
           <div className="mt-6 flex h-12 items-center gap-3 rounded-xl border border-line-strong bg-bg-1/80 px-4 backdrop-blur focus-within:border-accent">
             <Search size={18} className="text-fg-2" />

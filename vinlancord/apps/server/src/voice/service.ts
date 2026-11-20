@@ -1,5 +1,5 @@
 /**
- * Serviço de voz/vídeo/tela do Vinlancord.
+ * Serviço de voz/vídeo/tela do Além-Mar.
  *
  * Arquitetura SFU: cada participante envia sua mídia uma única vez ao servidor,
  * que a encaminha aos demais. Isso mantém o uso de CPU/banda do cliente baixo

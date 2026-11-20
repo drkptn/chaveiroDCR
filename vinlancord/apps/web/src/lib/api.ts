@@ -1,4 +1,4 @@
-/** Cliente REST do Vinlancord. */
+/** Cliente REST do Além-Mar. */
 import { desktop } from './desktop';
 
 export class ApiError extends Error {

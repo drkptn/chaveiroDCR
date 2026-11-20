@@ -69,3 +69,17 @@ A interface ganhou identidade própria, inspirada em estéticas sombrias de anim
 3. Painel administrativo global (denúncias, usuários, servidores).
 4. Supressão de ruído com RNNoise (AudioWorklet) e captura de áudio por aplicativo no Windows.
 5. Pastas de servidores, threads, mensagens de voz e cliente mobile.
+
+## Nova marca: Além-Mar (antigo Vinlancord)
+
+- Nome e logo novos: o horizonte visto pela brecha de uma muralha rompida, com a luz atravessando
+  e o mar escuro embaixo (arte original em `apps/web/src/assets/logo.svg`, igual ao ícone do app).
+- Ícones regenerados para Windows (`npm run icons -w @vinlancord/desktop`) e Android (`node icons.mjs`
+  em `apps/mobile`, com ícone adaptativo sem bordas); tela de abertura nova.
+- Estética padrão "Além-Mar" (azul-marinho, fonte imperial) com o efeito de fundo novo **Maré**
+  (ondas em camadas + luzes subindo do mar), disponível também no Estúdio de Aparência.
+- Instalador: `Alem-Mar-Setup-<versão>.exe` e `Alem-Mar.apk`. Os nomes antigos (`Vinlancord-Setup.exe`,
+  `Vinlancord.apk`) continuam publicados em cada release para os links já enviados funcionarem.
+- Compatibilidade mantida de propósito: pasta de dados (`%APPDATA%\Vinlancord`), appId, protocolo
+  `vinlancord://` dos convites e nomes internos dos pacotes. Quem atualiza continua na mesma pasta de
+  instalação; o atalho "Iniciar com o Windows" é regravado para o executável novo.

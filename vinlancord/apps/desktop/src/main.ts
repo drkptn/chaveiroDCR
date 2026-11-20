@@ -1,5 +1,5 @@
 /**
- * Processo principal do Vinlancord (Electron).
+ * Processo principal do Além-Mar (Electron).
  *
  * Por que Electron: WebRTC idêntico ao Chrome, captura de tela/janela com
  * seletor próprio, áudio do sistema no Windows (loopback), aceleração de
@@ -42,9 +42,11 @@ const RENDERER_DIR = resolve(__dirname, '..', 'renderer');
 const ASSETS_DIR = resolve(__dirname, '..', 'build');
 
 app.setAppUserModelId('com.vinlancord.app');
-app.setName('Vinlancord');
-// pasta de dados alternativa (modo portátil / testes automatizados)
-if (process.env.VINLANCORD_USER_DATA) app.setPath('userData', resolve(process.env.VINLANCORD_USER_DATA));
+// O app virou "Além-Mar", mas a pasta de dados continua a de antes ("Vinlancord"): contas salvas,
+// servidores confiáveis e o banco do modo anfitrião continuam onde estavam depois da atualização.
+// VINLANCORD_USER_DATA: pasta alternativa (modo portátil / testes automatizados).
+app.setPath('userData', process.env.VINLANCORD_USER_DATA ? resolve(process.env.VINLANCORD_USER_DATA) : join(app.getPath('appData'), 'Vinlancord'));
+app.setName('Além-Mar');
 
 /* ───────────── configurações locais do desktop ───────────── */
 
@@ -161,9 +163,9 @@ function createWindow() {
     show: false,
     frame: process.platform === 'darwin',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
-    backgroundColor: '#08080c',
+    backgroundColor: '#02060f',
     icon: join(ASSETS_DIR, process.platform === 'win32' ? 'icon.ico' : 'icon.png'),
-    title: 'Vinlancord',
+    title: 'Além-Mar',
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -269,7 +271,7 @@ function setupMedia() {
   session.defaultSession.setPermissionRequestHandler((wc, permission, cb) => cb(allowed.has(permission) && fromApp(wc.getURL())));
   session.defaultSession.setPermissionCheckHandler((_wc, permission, origin) => allowed.has(permission) && fromApp(origin));
 
-  // O renderer escolhe a fonte no seletor próprio do Vinlancord e então chama getDisplayMedia.
+  // O renderer escolhe a fonte no seletor próprio do Além-Mar e então chama getDisplayMedia.
   session.defaultSession.setDisplayMediaRequestHandler(
     async (_request, callback) => {
       try {
@@ -315,11 +317,11 @@ function listProcesses(): Promise<string[]> {
 function createTray() {
   const icon = nativeImage.createFromPath(join(ASSETS_DIR, process.platform === 'win32' ? 'icon.ico' : 'tray.png'));
   tray = new Tray(icon.isEmpty() ? nativeImage.createEmpty() : icon.resize({ width: 16, height: 16 }));
-  tray.setToolTip('Vinlancord');
+  tray.setToolTip('Além-Mar');
   const send = (action: string) => win?.webContents.send('shortcut', action);
   tray.setContextMenu(
     Menu.buildFromTemplate([
-      { label: 'Abrir o Vinlancord', click: showWindow },
+      { label: 'Abrir o Além-Mar', click: showWindow },
       { type: 'separator' },
       { label: 'Silenciar/ativar microfone', click: () => send('toggleMute') },
       { label: 'Desativar/ativar áudio', click: () => send('toggleDeafen') },
@@ -368,7 +370,7 @@ async function setupUpdates() {
   autoUpdater.on('download-progress', (p) => emitUpdate({ state: 'downloading', progress: p.percent / 100, version: updateState.version }));
   autoUpdater.on('update-downloaded', (i) => {
     emitUpdate({ state: 'ready', version: i.version });
-    if (Notification.isSupported()) new Notification({ title: 'Atualização pronta', body: `O Vinlancord ${i.version} será instalado ao reiniciar.` }).show();
+    if (Notification.isSupported()) new Notification({ title: 'Atualização pronta', body: `O Além-Mar ${i.version} será instalado ao reiniciar.` }).show();
   });
   autoUpdater.on('error', (e) => emitUpdate({ state: 'error', message: e.message }));
   setTimeout(() => void autoUpdater?.checkForUpdates().catch(() => {}), 10_000);
@@ -409,7 +411,8 @@ function setupIpc() {
   ipcMain.handle('screen:getSources', async () => {
     const sources = await desktopCapturer.getSources({ types: ['screen', 'window'], thumbnailSize: { width: 320, height: 180 }, fetchWindowIcons: true });
     return sources
-      .filter((s) => !s.name.startsWith('Vinlancord'))
+      // esconde a própria janela do app (o nome antigo cobre a versão anterior ainda aberta)
+      .filter((s) => !/^(Além-Mar|Vinlancord)/.test(s.name))
       .map((s) => ({
         id: s.id,
         name: s.name,
@@ -428,7 +431,7 @@ function setupIpc() {
       if (n > 0) win?.setOverlayIcon(nativeImage.createFromPath(join(ASSETS_DIR, 'badge.png')), `${n} menções não lidas`);
       else win?.setOverlayIcon(null, '');
     } else app.setBadgeCount(n);
-    tray?.setToolTip(n ? `Vinlancord — ${n} menções` : 'Vinlancord');
+    tray?.setToolTip(n ? `Além-Mar — ${n} menções` : 'Além-Mar');
   });
   ipcMain.on('notify:flash', () => {
     if (win && !win.isFocused()) win.flashFrame(true);
@@ -499,8 +502,25 @@ function setupIpc() {
 
 /* ───────────── inicialização ───────────── */
 
+/**
+ * Quem ativou "Iniciar com o Windows" na versão com o nome antigo tem o registro apontando para
+ * Vinlancord.exe, que a atualização removeu: regrava apontando para o executável atual.
+ */
+function migrateLoginItem() {
+  if (process.platform !== 'win32' || !app.isPackaged) return;
+  try {
+    const items = app.getLoginItemSettings({ args: ['--hidden'] }).launchItems ?? [];
+    if (items.some((i) => /vinlancord\.exe$/i.test(i.path) && i.path.toLowerCase() !== process.execPath.toLowerCase())) {
+      app.setLoginItemSettings({ openAtLogin: true, args: ['--hidden'] });
+    }
+  } catch {
+    /* sem acesso ao registro: dá para religar em Configurações */
+  }
+}
+
 app.whenReady().then(() => {
   Menu.setApplicationMenu(null);
+  migrateLoginItem();
   registerAppProtocol();
   setupMedia();
   setupIpc();

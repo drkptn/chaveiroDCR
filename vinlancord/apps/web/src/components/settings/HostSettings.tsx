@@ -51,7 +51,7 @@ export default function HostSettings() {
 
       {available === false && (
         <Card>
-          <p className="text-sm text-fg-1">Esta versão do app não inclui o modo anfitrião. Atualize o Vinlancord.</p>
+          <p className="text-sm text-fg-1">Esta versão do app não inclui o modo anfitrião. Atualize o Além-Mar.</p>
         </Card>
       )}
 
@@ -161,7 +161,7 @@ export default function HostSettings() {
 
       <Card title="Bom saber">
         <ul className="list-disc space-y-1 pl-5 text-sm text-fg-2">
-          <li>Na primeira vez o Windows pergunta se o Vinlancord pode usar a rede: clique em <b>Permitir</b> (redes privadas e públicas).</li>
+          <li>Na primeira vez o Windows pergunta se o Além-Mar pode usar a rede: clique em <b>Permitir</b> (redes privadas e públicas).</li>
           <li>Contas, servidores e mensagens ficam guardados no seu PC e voltam quando você liga de novo.</li>
           <li>Enquanto o servidor estiver ligado, deixe o app aberto (pode minimizar).</li>
         </ul>

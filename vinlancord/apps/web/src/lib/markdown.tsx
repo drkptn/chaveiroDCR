@@ -1,5 +1,5 @@
 /**
- * Markdown do Vinlancord: negrito, itálico, sublinhado, tachado, spoiler, código,
+ * Markdown do Além-Mar: negrito, itálico, sublinhado, tachado, spoiler, código,
  * blocos de código, citações, listas, títulos, links, menções e emojis.
  *
  * Seguro por construção: o texto vira nós React (nunca innerHTML), links só

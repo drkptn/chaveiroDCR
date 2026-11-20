@@ -1,4 +1,4 @@
-# Arquitetura do Vinlancord
+# Arquitetura do Além-Mar
 
 ```
                 ┌─────────────────────── Cliente (Electron ou navegador) ───────────────────────┐

@@ -2,8 +2,8 @@
   "name": "@vinlancord/desktop",
   "version": "1.0.0",
   "private": true,
-  "description": "Vinlancord — app desktop",
-  "author": "Vinlancord",
+  "description": "Além-Mar — app desktop",
+  "author": "Além-Mar",
   "main": "dist-electron/main.js",
   "scripts": {
     "icons": "node scripts/icons.mjs",

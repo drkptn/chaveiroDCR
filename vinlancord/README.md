@@ -1,4 +1,4 @@
-# Vinlancord
+# Além-Mar
 
 **Sua turma, sua voz, seu lugar.** Plataforma de comunicação para PC com chat em tempo real, chamadas de voz e vídeo, compartilhamento de tela com áudio, servidores, cargos e perfis — feita para você e seus amigos hospedarem e usarem de verdade.
 
@@ -84,10 +84,10 @@ Resumo (detalhes em **[docs/DEPLOY.md](docs/DEPLOY.md)**):
 cd vinlancord
 set VINLANCORD_SERVER_URL=https://vinlancord.seudominio.com   # PowerShell: $env:VINLANCORD_SERVER_URL="..."
 npm run dist:win
-# → apps/desktop/release/Vinlancord-Setup-1.0.0.exe
+# → apps/desktop/release/Alem-Mar-Setup-1.0.0.exe
 ```
 
-Também há um workflow do GitHub Actions (`.github/workflows/vinlancord.yml`) que roda todos os testes e gera o instalador num Windows de verdade (artefato **Vinlancord-Windows**). Detalhes, assinatura de código e atualização automática em **[docs/DESKTOP.md](docs/DESKTOP.md)**.
+Também há um workflow do GitHub Actions (`.github/workflows/vinlancord.yml`) que roda todos os testes e gera o instalador num Windows de verdade (artefato **Além-Mar-Windows**). Detalhes, assinatura de código e atualização automática em **[docs/DESKTOP.md](docs/DESKTOP.md)**.
 
 ## Documentação
 

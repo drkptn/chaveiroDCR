@@ -366,7 +366,7 @@ function InviteModal({ onClose, guildId, channelId }: { onClose: () => void; gui
             />
           </Field>
         </div>
-        <p className="mt-3 text-xs text-fg-2">Quem abrir o link no app Vinlancord ou no navegador cai direto no servidor. Para entrar pelo app, use “Entrar em um servidor” e cole o link.</p>
+        <p className="mt-3 text-xs text-fg-2">Quem abrir o link no app Além-Mar ou no navegador cai direto no servidor. Para entrar pelo app, use “Entrar em um servidor” e cole o link.</p>
       </div>
     </Modal>
   );
@@ -434,7 +434,7 @@ function ReportModal({ onClose, spec }: { onClose: () => void; spec: Extract<Mod
     <Modal
       onClose={onClose}
       title={`Denunciar ${spec.label ?? ''}`}
-      subtitle="Sua denúncia é confidencial. Obrigado por ajudar a manter o Vinlancord seguro."
+      subtitle="Sua denúncia é confidencial. Obrigado por ajudar a manter o Além-Mar seguro."
       width={460}
       footer={
         <>
@@ -608,7 +608,7 @@ function ExternalLinkModal({ onClose, url }: { onClose: () => void; url: string 
   return (
     <Modal
       onClose={onClose}
-      title="Saindo do Vinlancord"
+      title="Saindo do Além-Mar"
       width={460}
       footer={
         <>

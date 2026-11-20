@@ -1,7 +1,10 @@
-# Empacotamento do Vinlancord (instalador NSIS para Windows; AppImage/deb e dmg preparados).
+# Empacotamento do Além-Mar (instalador NSIS para Windows; AppImage/deb e dmg preparados).
 appId: com.vinlancord.app
-productName: Vinlancord
-copyright: Copyright © 2026 Vinlancord
+productName: Além-Mar
+# nome do .exe e da pasta de instalação nova sem acento (o banco do modo anfitrião não gosta de
+# acento no caminho). Quem já tinha o app atualiza na mesma pasta de antes (o instalador lê do registro).
+executableName: Alem-Mar
+copyright: Copyright © 2026 Além-Mar
 directories:
   output: release
   buildResources: build
@@ -23,14 +26,15 @@ extraResources:
     to: host
     filter: ['dist/**/*']
 protocols:
-  - name: Vinlancord
+  # o esquema continua vinlancord:// para os convites já enviados continuarem funcionando
+  - name: Além-Mar
     schemes: [vinlancord]
 win:
   target:
     - target: nsis
       arch: [x64]
   icon: build/icon.ico
-  artifactName: Vinlancord-Setup-${version}.${ext}
+  artifactName: Alem-Mar-Setup-${version}.${ext}
   # Assinatura de código (opcional, recomendada): defina CSC_LINK e CSC_KEY_PASSWORD no ambiente de build.
 nsis:
   oneClick: false
@@ -38,7 +42,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  shortcutName: Vinlancord
+  shortcutName: Além-Mar
   runAfterFinish: true
   installerIcon: build/icon.ico
   uninstallerIcon: build/icon.ico
@@ -49,14 +53,14 @@ linux:
   target: [AppImage, deb]
   category: Network
   icon: build/icons
-  maintainer: Vinlancord
+  maintainer: Além-Mar
 mac:
   target: dmg
   category: public.app-category.social-networking
   icon: build/icon.png
   extendInfo:
-    NSMicrophoneUsageDescription: O Vinlancord usa o microfone nas chamadas de voz.
-    NSCameraUsageDescription: O Vinlancord usa a câmera nas chamadas de vídeo.
+    NSMicrophoneUsageDescription: O Além-Mar usa o microfone nas chamadas de voz.
+    NSCameraUsageDescription: O Além-Mar usa a câmera nas chamadas de vídeo.
 # Atualização automática pelas Releases do GitHub (repositório público: não precisa de token no app).
 # O workflow publica cada versão nova (v1.0.N) com o instalador e o latest.yml.
 publish:

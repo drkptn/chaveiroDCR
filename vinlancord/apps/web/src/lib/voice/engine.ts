@@ -557,7 +557,7 @@ class VoiceEngine {
     }
     if (!stream) {
       const err = new Error(
-        'O Windows não deixou capturar a tela. Tente: escolher a tela inteira em vez de uma janela, desligar "áudio do sistema", ou (em notebook) abrir Configurações do Windows → Sistema → Tela → Gráficos e colocar o Vinlancord em "Economia de energia".',
+        'O Windows não deixou capturar a tela. Tente: escolher a tela inteira em vez de uma janela, desligar "áudio do sistema", ou (em notebook) abrir Configurações do Windows → Sistema → Tela → Gráficos e colocar o Além-Mar em "Economia de energia".',
       );
       err.name = 'NotReadableError';
       console.warn('[voz] última falha de captura:', lastError);

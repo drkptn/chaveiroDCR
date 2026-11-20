@@ -1,5 +1,5 @@
 /**
- * Motor de aparência do Vinlancord.
+ * Motor de aparência do Além-Mar.
  *
  * Cada estética (preset) define TUDO: cores, tipografia, formas, atmosfera
  * (efeitos de fundo), transições e estilo das mensagens. O usuário parte de um
@@ -119,6 +119,23 @@ const STATES_DARK = { success: '#3fb37f', warning: '#e0a43b', danger: '#ff3b4e' 
 
 export const THEMES: ThemeDef[] = [
   preset(
+    'alem-mar',
+    'Além-Mar',
+    'Mar escuro · horizonte · liberdade',
+    'Azul-marinho profundo, a luz do horizonte e ondas que passam devagar lá embaixo. A estética da casa.',
+    'dark',
+    {
+      'bg-0': '#02060f', 'bg-1': '#040b19', 'bg-2': '#071123', 'bg-3': '#0b1830', 'bg-4': '#11223f', 'bg-5': '#1a3054',
+      border: '#0f203b', 'border-strong': '#1e3a62', 'text-0': '#e8f3ff', 'text-1': '#a9c3df', 'text-2': '#6c88a8',
+      accent: '#2b74cc', 'accent-2': '#9cd3ff', success: '#3fb37f', warning: '#e0a43b', danger: '#ff4d5e',
+    },
+    {
+      displayFont: 'cinzel', bodyFont: 'inter', corners: 'soft', serverShape: 'squircle', avatarShape: 'circle',
+      panelOpacity: 0.8, blur: 14, glow: 0.75, ornaments: true, effect: 'tide', effectIntensity: 1, fog: true,
+      grain: 0.12, vignette: 0.6, transition: 'rise', messageStyle: 'flat',
+    },
+  ),
+  preset(
     'caderno',
     'Caderno Negro',
     'Gótico · tinta · penas',
@@ -206,7 +223,7 @@ export const THEMES: ThemeDef[] = [
   preset(
     'nebula',
     'Nebulosa',
-    'Clássico Vinlancord',
+    'O visual de antes',
     'O visual original: grafite profundo, violeta e ciano, com estrelas ao fundo.',
     'dark',
     {
@@ -280,9 +297,9 @@ export const CREATOR_THEME: ThemeDef = preset(
   },
 );
 
-export const DEFAULT_PRESET = 'caderno';
+export const DEFAULT_PRESET = 'alem-mar';
 
-export const ACCENTS = ['#c1121f', '#ff2d55', '#e07a2e', '#d9b44a', '#8fa36b', '#22d3ee', '#3b82f6', '#7c5cff', '#a855f7', '#ec4899', '#e9dcc0'];
+export const ACCENTS = ['#2b74cc', '#c1121f', '#ff2d55', '#e07a2e', '#d9b44a', '#8fa36b', '#22d3ee', '#3b82f6', '#7c5cff', '#a855f7', '#ec4899', '#e9dcc0'];
 
 export function findTheme(id: string, custom: ThemeDef[] = []): ThemeDef {
   return [...THEMES, CREATOR_THEME, ...custom].find((t) => t.id === id) ?? THEMES.find((t) => t.id === DEFAULT_PRESET)!;
@@ -447,7 +464,7 @@ export function validateCustomTheme(raw: unknown): ThemeDef {
     ...pick('serverShape', isOneOf(['circle', 'squircle', 'diamond', 'hexagon', 'shield'])),
     ...pick('avatarShape', isOneOf(['circle', 'squircle', 'diamond', 'hexagon', 'shield'])),
     ...pick('layout', isOneOf(['floating', 'classic'])),
-    ...pick('effect', isOneOf(['none', 'feathers', 'ink', 'embers', 'ash', 'sigils', 'snow', 'rain', 'petals', 'stars'])),
+    ...pick('effect', isOneOf(['none', 'feathers', 'ink', 'embers', 'ash', 'sigils', 'snow', 'rain', 'petals', 'stars', 'tide'])),
     ...pick('transition', isOneOf(['none', 'fade', 'rise', 'slash', 'ink', 'shutter'])),
     ...pick('messageStyle', isOneOf(['flat', 'cards', 'letter'])),
     ...pick('panelOpacity', isNum(0.3, 1)),

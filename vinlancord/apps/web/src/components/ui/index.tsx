@@ -1,4 +1,4 @@
-/** Componentes base do design system do Vinlancord. */
+/** Componentes base do design system do Além-Mar. */
 import {
   forwardRef,
   useEffect,
@@ -15,6 +15,7 @@ import { X, Loader2 } from 'lucide-react';
 import type { VisibleStatus } from '@vinlancord/shared';
 import { colorFromId, initials, staticImage } from '../../lib/format';
 import { useStore } from '../../store';
+import logoUrl from '../../assets/logo.svg';
 
 export function cx(...c: (string | false | null | undefined)[]) {
   return c.filter(Boolean).join(' ');
@@ -22,34 +23,18 @@ export function cx(...c: (string | false | null | undefined)[]) {
 
 /* ─────────────── Logo ─────────────── */
 
+/**
+ * Logo do Além-Mar: o horizonte visto pela brecha de uma muralha rompida, com a luz
+ * atravessando e o mar escuro embaixo. Arquivo único (src/assets/logo.svg), igual ao ícone do app.
+ */
 export function LogoMark({ size = 32, className = '' }: { size?: number; className?: string }) {
-  const id = useRef(`g${Math.random().toString(36).slice(2, 8)}`).current;
-  return (
-    <svg width={size} height={size} viewBox="0 0 128 128" className={className} aria-label="Vinlancord">
-      <defs>
-        <linearGradient id={`${id}a`} x1="10" y1="6" x2="118" y2="122" gradientUnits="userSpaceOnUse">
-          <stop offset="0" style={{ stopColor: 'color-mix(in oklab, var(--vl-accent) 78%, #fff)' }} />
-          <stop offset=".5" style={{ stopColor: 'var(--vl-accent)' }} />
-          <stop offset="1" style={{ stopColor: 'color-mix(in oklab, var(--vl-accent) 50%, #000)' }} />
-        </linearGradient>
-        <linearGradient id={`${id}b`} x1="64" y1="4" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#fff" stopOpacity=".22" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d="M64 4c38 0 60 4 60 60s-22 60-60 60S4 120 4 64 26 4 64 4z" fill={`url(#${id}a)`} />
-      <path d="M64 4c38 0 60 4 60 60H4C4 8 26 4 64 4z" fill={`url(#${id}b)`} />
-      <path d="M33 38 L58 91 Q64 102 70 91 L86 57" fill="none" style={{ stroke: 'var(--vl-accent-fg)' }} strokeWidth="15" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="95" cy="38" r="9.5" style={{ fill: 'var(--vl-accent-fg)' }} />
-      <path d="M106 22a22 22 0 0 1 6 18" fill="none" style={{ stroke: 'var(--vl-accent-fg)' }} strokeOpacity=".75" strokeWidth="5" strokeLinecap="round" />
-    </svg>
-  );
+  return <img src={logoUrl} width={size} height={size} alt="Além-Mar" draggable={false} className={cx('shrink-0 select-none', className)} style={{ width: size, height: size }} />;
 }
 
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
     <span className={cx('font-display font-bold tracking-tight', className)}>
-      Vinlan<span className="gradient-text">cord</span>
+      Além-<span className="gradient-text">Mar</span>
     </span>
   );
 }

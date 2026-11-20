@@ -112,7 +112,7 @@ export function startHost(opts: { network?: string; upnp?: boolean } = {}) {
   const data = join(app.getPath('userData'), 'anfitriao');
   mkdirSync(data, { recursive: true });
   proc = utilityProcess.fork(runtimePath(), [], {
-    serviceName: 'Vinlancord Servidor',
+    serviceName: 'Além-Mar Servidor',
     stdio: 'pipe',
     env: {
       ...process.env,
@@ -123,7 +123,7 @@ export function startHost(opts: { network?: string; upnp?: boolean } = {}) {
   });
   const logFile = join(data, 'anfitriao.log');
   try {
-    writeFileSync(logFile, `\n===== ${new Date().toISOString()} · Vinlancord ${app.getVersion()} =====\n`, { flag: 'a' });
+    writeFileSync(logFile, `\n===== ${new Date().toISOString()} · Além-Mar ${app.getVersion()} =====\n`, { flag: 'a' });
   } catch {
     /* sem log */
   }

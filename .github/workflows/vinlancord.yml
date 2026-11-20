@@ -1,5 +1,5 @@
-# Vinlancord: testes automáticos e geração do instalador para Windows.
-name: Vinlancord
+# Além-Mar (antigo Vinlancord): testes automáticos e geração do instalador para Windows.
+name: Além-Mar
 
 on:
   push:
@@ -167,12 +167,12 @@ jobs:
           test -f "$R/resources/host/dist/node_modules/@embedded-postgres/windows-x64/native/bin/vcruntime140.dll"
           test -f "$R/resources/host/dist/node_modules/mediasoup/worker/out/Release/msvcp140.dll"
           mkdir -p "$RUNNER_TEMP/anfitriao-pkg"
-          ELECTRON_RUN_AS_NODE=1 VL_DATA_DIR="$RUNNER_TEMP/anfitriao-pkg" VL_UPNP=1 "$R/Vinlancord.exe" "$R/resources/host/dist/runtime.mjs" > "$RUNNER_TEMP/anfitriao-pkg.log" 2>&1 &
+          ELECTRON_RUN_AS_NODE=1 VL_DATA_DIR="$RUNNER_TEMP/anfitriao-pkg" VL_UPNP=1 "$R/Alem-Mar.exe" "$R/resources/host/dist/runtime.mjs" > "$RUNNER_TEMP/anfitriao-pkg.log" 2>&1 &
           ok=0
           for i in $(seq 1 90); do curl -sfk https://127.0.0.1:47800/api/v1/health && ok=1 && break; sleep 2; done
           cat "$RUNNER_TEMP/anfitriao-pkg.log"
           "$R/resources/host/dist/node_modules/@embedded-postgres/windows-x64/native/bin/pg_ctl.exe" stop -D "$RUNNER_TEMP/anfitriao-pkg/banco/data" -m fast -w || true
-          taskkill //F //IM Vinlancord.exe || true
+          taskkill //F //IM Alem-Mar.exe || true
           test "$ok" = 1
       - uses: actions/upload-artifact@v4
         with:
@@ -226,13 +226,13 @@ jobs:
           fi
           BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
           "$BT/zipalign" -p -f 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
-          "$BT/apksigner" sign --ks ks.jks --ks-pass "pass:$KS_PASS" --ks-key-alias vinlancord --out Vinlancord.apk aligned.apk
-          "$BT/apksigner" verify Vinlancord.apk
+          "$BT/apksigner" sign --ks ks.jks --ks-pass "pass:$KS_PASS" --ks-key-alias vinlancord --out Alem-Mar.apk aligned.apk
+          "$BT/apksigner" verify Alem-Mar.apk
           rm -f ks.jks
       - uses: actions/upload-artifact@v4
         with:
           name: Vinlancord-Android
-          path: vinlancord/apps/mobile/android/Vinlancord.apk
+          path: vinlancord/apps/mobile/android/Alem-Mar.apk
           if-no-files-found: error
 
   release:
@@ -258,15 +258,19 @@ jobs:
           VERSION: 1.0.${{ github.run_number }}
         run: |
           ls -la dist
-          cp "dist/Vinlancord-Setup-$VERSION.exe" dist/Vinlancord-Setup.exe
+          cp "dist/Alem-Mar-Setup-$VERSION.exe" dist/Alem-Mar-Setup.exe
+          # nomes antigos continuam valendo (links já enviados para os amigos)
+          cp "dist/Alem-Mar-Setup-$VERSION.exe" dist/Vinlancord-Setup.exe
+          cp dist/Alem-Mar.apk dist/Vinlancord.apk
           cat > notes.md <<EOF
-          **Baixe e instale:** [Vinlancord-Setup.exe](https://github.com/${{ github.repository }}/releases/latest/download/Vinlancord-Setup.exe)
+          **Baixe e instale:** [Alem-Mar-Setup.exe](https://github.com/${{ github.repository }}/releases/latest/download/Alem-Mar-Setup.exe)
 
-          **Android:** [Vinlancord.apk](https://github.com/${{ github.repository }}/releases/latest/download/Vinlancord.apk) — no celular, permita "instalar apps desta fonte" quando pedir.
+          **Android:** [Alem-Mar.apk](https://github.com/${{ github.repository }}/releases/latest/download/Alem-Mar.apk) — no celular, permita "instalar apps desta fonte" quando pedir.
 
           O app de Windows se atualiza sozinho quando sair uma versão nova.
           Na primeira execução o Windows pode mostrar "O Windows protegeu o computador" (o instalador ainda não tem assinatura digital): clique em **Mais informações → Executar assim mesmo**.
           EOF
           gh release create "v$VERSION" --repo "${{ github.repository }}" --target "${{ github.sha }}" \
-            --title "Vinlancord $VERSION" --notes-file notes.md --latest \
-            dist/Vinlancord-Setup-$VERSION.exe dist/Vinlancord-Setup-$VERSION.exe.blockmap dist/latest.yml dist/Vinlancord-Setup.exe dist/Vinlancord.apk
+            --title "Além-Mar $VERSION" --notes-file notes.md --latest \
+            dist/Alem-Mar-Setup-$VERSION.exe dist/Alem-Mar-Setup-$VERSION.exe.blockmap dist/latest.yml dist/Alem-Mar-Setup.exe dist/Alem-Mar.apk \
+            dist/Vinlancord-Setup.exe dist/Vinlancord.apk

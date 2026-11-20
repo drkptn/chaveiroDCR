@@ -1,6 +1,6 @@
 # Servidor grátis na Oracle Cloud (passo a passo, sem terminal)
 
-Você cria a conta e a máquina clicando; **a instalação do Vinlancord é automática** (o script abaixo roda sozinho no primeiro boot). No fim, você só me manda o **IP público** da máquina.
+Você cria a conta e a máquina clicando; **a instalação do Além-Mar é automática** (o script abaixo roda sozinho no primeiro boot). No fim, você só me manda o **IP público** da máquina.
 
 > Custo: **R$ 0** dentro do plano *Always Free*. A Oracle pede um cartão só para confirmar identidade.
 
@@ -40,7 +40,7 @@ A Oracle bloqueia tudo por padrão na rede dela (além do firewall da máquina, 
    - **IP Protocol:** **All Protocols**
    - **Add Ingress Rules**.
 
-Isso só abre a rede da Oracle; o firewall dentro da máquina continua deixando passar **apenas** as portas do Vinlancord (web, voz, vídeo e TURN) e o SSH.
+Isso só abre a rede da Oracle; o firewall dentro da máquina continua deixando passar **apenas** as portas do Além-Mar (web, voz, vídeo e TURN) e o SSH.
 
 ## 4. Pronto
 

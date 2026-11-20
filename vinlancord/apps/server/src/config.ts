@@ -58,7 +58,7 @@ const schema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   SMTP_SECURE: bool(false),
-  MAIL_FROM: z.string().default('Vinlancord <no-reply@vinlancord.local>'),
+  MAIL_FROM: z.string().default('Além-Mar <no-reply@vinlancord.local>'),
   MAIL_OUTBOX_DIR: z.string().default('./data/mail-outbox'),
 
   MEDIASOUP_LISTEN_IP: z.string().default('0.0.0.0'),

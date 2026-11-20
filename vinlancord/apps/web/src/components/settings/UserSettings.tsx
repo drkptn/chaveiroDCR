@@ -40,7 +40,7 @@ export default function UserSettings({ onClose, initialTab }: { onClose: () => v
     { id: 'activity', label: 'Atividade de jogo' },
     { id: 'host', label: 'Servidor no meu PC', hidden: !desktop },
     { id: 'desktop', label: 'Windows e desktop', hidden: !desktop },
-    { id: 'about', label: 'Sobre o Vinlancord', section: 'Outros' },
+    { id: 'about', label: 'Sobre o Além-Mar', section: 'Outros' },
     { id: 'logout', label: 'Sair', danger: true, onClick: () => ui.confirm({ title: 'Sair da conta?', body: 'Você precisará entrar de novo neste dispositivo.', confirmLabel: 'Sair', danger: true, onConfirm: () => logout() }) },
   ];
   return (
@@ -569,7 +569,7 @@ function Notifications() {
     <>
       <SectionTitle sub="Escolha como e quando ser avisado. Por servidor/canal, use o clique direito para silenciar ou mudar o nível.">Notificações</SectionTitle>
       <Card title="Notificações do sistema">
-        <SettingRow title="Ativar notificações na área de trabalho" description={perm === 'denied' ? 'Bloqueadas pelo sistema. Libere nas configurações do sistema operacional.' : 'Aparecem quando o Vinlancord não está em foco.'}>
+        <SettingRow title="Ativar notificações na área de trabalho" description={perm === 'denied' ? 'Bloqueadas pelo sistema. Libere nas configurações do sistema operacional.' : 'Aparecem quando o Além-Mar não está em foco.'}>
           <Switch
             checked={n.desktop && perm === 'granted'}
             onChange={async (v) => {
@@ -746,7 +746,7 @@ function DesktopTab() {
     <>
       <SectionTitle>Windows e desktop</SectionTitle>
       <Card title="Sistema">
-        <SettingRow title="Iniciar com o Windows" description="Abre o Vinlancord minimizado quando você liga o PC."><Switch checked={ds.openAtLogin} onChange={(v) => void set({ openAtLogin: v })} /></SettingRow>
+        <SettingRow title="Iniciar com o Windows" description="Abre o Além-Mar minimizado quando você liga o PC."><Switch checked={ds.openAtLogin} onChange={(v) => void set({ openAtLogin: v })} /></SettingRow>
         <SettingRow title="Minimizar para a bandeja ao fechar" description="O X esconde a janela e você continua recebendo mensagens e chamadas."><Switch checked={ds.minimizeToTray} onChange={(v) => (void set({ minimizeToTray: v }), local().set({ closeToTray: v }))} /></SettingRow>
         <SettingRow title="Aceleração por hardware" description="Usa a placa de vídeo para interface e vídeo. Desative só se tiver problemas gráficos (requer reiniciar)."><Switch checked={ds.hardwareAcceleration} onChange={(v) => void set({ hardwareAcceleration: v })} /></SettingRow>
       </Card>
@@ -777,10 +777,10 @@ function DesktopTab() {
 function About() {
   return (
     <>
-      <SectionTitle>Sobre o Vinlancord</SectionTitle>
+      <SectionTitle>Sobre o Além-Mar</SectionTitle>
       <Card>
         <p className="text-sm text-fg-1">
-          Vinlancord é uma plataforma de comunicação para você e seus amigos: chat em tempo real, chamadas de voz e vídeo com SFU (mediasoup/WebRTC), compartilhamento de tela com áudio, servidores, cargos e muito mais.
+          O Além-Mar é uma plataforma de comunicação para você e seus amigos: chat em tempo real, chamadas de voz e vídeo com SFU (mediasoup/WebRTC), compartilhamento de tela com áudio, servidores, cargos e muito mais.
         </p>
         <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
           <div className="rounded-lg bg-bg-2 p-3"><div className="text-xs text-fg-2">Servidor</div><div className="truncate text-fg">{api.server}</div></div>

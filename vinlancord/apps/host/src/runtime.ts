@@ -1,5 +1,5 @@
 /**
- * Modo anfitrião do Vinlancord: o servidor completo rodando no PC de quem hospeda.
+ * Modo anfitrião do Além-Mar: o servidor completo rodando no PC de quem hospeda.
  *
  * Roda dentro do app desktop (utilityProcess do Electron) ou direto no Node:
  *   VL_DATA_DIR=./dados node runtime.mjs

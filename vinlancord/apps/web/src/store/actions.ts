@@ -60,7 +60,7 @@ function deviceInfo() {
   const ua = navigator.userAgent;
   const os = /Windows/.test(ua) ? 'Windows' : /Mac OS/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : 'dispositivo';
   const isDesktop = !!window.vinlancord;
-  return { name: isDesktop ? `Vinlancord para ${os}` : `Navegador no ${os}`, platform: isDesktop ? 'desktop' : 'web' };
+  return { name: isDesktop ? `Além-Mar para ${os}` : `Navegador no ${os}`, platform: isDesktop ? 'desktop' : 'web' };
 }
 
 export async function logout(expired = false) {
@@ -130,7 +130,7 @@ function callNotice(c: ActiveCall) {
     window.vinlancord?.notify.flash();
     if (S().settings.notifications.desktop && Notification.permission === 'granted' && S().me?.status !== 'dnd') {
       const caller = S().users[c.startedBy];
-      const n = new Notification('Chamada recebida', { body: `${caller?.displayName ?? 'Alguém'} está te ligando no Vinlancord`, silent: true, tag: 'call-' + c.channelId });
+      const n = new Notification('Chamada recebida', { body: `${caller?.displayName ?? 'Alguém'} está te ligando no Além-Mar`, silent: true, tag: 'call-' + c.channelId });
       n.onclick = () => {
         window.vinlancord?.window.focus();
         window.focus();

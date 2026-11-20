@@ -1,7 +1,7 @@
 /**
  * Motor de partículas do fundo (canvas 2D). Cada efeito é desenhado à mão com
  * formas próprias — penas, gotas de tinta, brasas, cinzas, sigilos geométricos,
- * neve, chuva, pétalas e estrelas. Limita o FPS e pausa com a janela oculta.
+ * neve, chuva, pétalas, estrelas e a maré (ondas + luzes do mar). Limita o FPS e pausa com a janela oculta.
  */
 import type { AmbientEffect } from '@vinlancord/shared';
 import { isLowPower } from './perf';
@@ -48,6 +48,7 @@ const DENSITY: Record<Exclude<AmbientEffect, 'none'>, number> = {
   rain: 140,
   petals: 26,
   stars: 160,
+  tide: 46,
 };
 
 const FPS: Record<Exclude<AmbientEffect, 'none'>, number> = {
@@ -60,6 +61,7 @@ const FPS: Record<Exclude<AmbientEffect, 'none'>, number> = {
   rain: 50,
   petals: 40,
   stars: 24,
+  tide: 30,
 };
 
 export class ParticleField {
@@ -184,6 +186,16 @@ export class ParticleField {
         p.a = rand(0.2, 0.9);
         p.vr = rand(0.5, 2.2);
         break;
+      case 'tide':
+        // luzes do mar: sobem devagar da metade de baixo e somem
+        p.y = rand(h * 0.5, h);
+        p.vy = -rand(4, 16);
+        p.vx = rand(-7, 7);
+        p.r = rand(0.6, 2.2);
+        p.a = rand(0.25, 0.75);
+        p.max = rand(6, 14);
+        p.life = initial ? rand(0, p.max) : 0;
+        break;
     }
     return p;
   }
@@ -217,7 +229,8 @@ export class ParticleField {
   private frame(dt: number, time: number) {
     const { ctx, w, h, pal } = this;
     ctx.clearRect(0, 0, w, h);
-    ctx.globalCompositeOperation = this.effect === 'embers' || (this.effect === 'stars' && pal.dark) ? 'lighter' : 'source-over';
+    if (this.effect === 'tide') this.waves(time);
+    ctx.globalCompositeOperation = this.effect === 'embers' || ((this.effect === 'stars' || this.effect === 'tide') && pal.dark) ? 'lighter' : 'source-over';
     for (let i = 0; i < this.ps.length; i++) {
       const p = this.ps[i]!;
       p.life += dt;
@@ -279,6 +292,21 @@ export class ParticleField {
           this.petal(p);
           dead = p.y > h + 30 || p.x > w + 40;
           break;
+        case 'tide': {
+          p.x += Math.sin(time * 0.7 + p.seed) * 6 * dt;
+          const fade = Math.sin(Math.PI * Math.min(1, p.life / p.max));
+          const c = pal.dark ? pal.accent2 : pal.accent;
+          ctx.fillStyle = hexA(c, p.a * fade * 0.18);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * 4, 0, TAU);
+          ctx.fill();
+          ctx.fillStyle = hexA(c, p.a * fade);
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, TAU);
+          ctx.fill();
+          dead = p.life > p.max || p.y < h * 0.25;
+          break;
+        }
         case 'stars': {
           const tw = 0.5 + 0.5 * Math.sin(time * p.vr + p.seed);
           ctx.fillStyle = hexA(pal.dark ? '#ffffff' : pal.dim, p.a * (0.35 + tw * 0.65));
@@ -292,6 +320,37 @@ export class ParticleField {
     }
     if (this.effect === 'stars') this.shootingStar(dt);
     ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /** Três camadas de onda no pé da tela, cada uma no seu ritmo, com a crista iluminada. */
+  private waves(time: number) {
+    const { ctx, w, h, pal } = this;
+    const k = Math.min(1.4, this.intensity);
+    const layers = [
+      { base: 0.83, amp: 16, len: 620, speed: 0.22, fill: 0.05, crest: 0.16 },
+      { base: 0.9, amp: 13, len: 460, speed: -0.3, fill: 0.07, crest: 0.2 },
+      { base: 0.96, amp: 10, len: 340, speed: 0.4, fill: 0.1, crest: 0.24 },
+    ];
+    const step = this.low ? 24 : 14;
+    for (const [i, L] of layers.entries()) {
+      const y0 = h * L.base;
+      const yAt = (x: number) =>
+        y0 + Math.sin((x / L.len) * TAU + time * L.speed + i * 1.7) * L.amp + Math.sin((x / (L.len * 0.43)) * TAU - time * L.speed * 1.6 + i) * L.amp * 0.35;
+      ctx.beginPath();
+      ctx.moveTo(0, yAt(0));
+      for (let x = step; x <= w + step; x += step) ctx.lineTo(x, yAt(x));
+      ctx.strokeStyle = hexA(pal.dark ? pal.accent2 : pal.accent, L.crest * k);
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+      ctx.lineTo(w + step, h);
+      ctx.lineTo(0, h);
+      ctx.closePath();
+      const g = ctx.createLinearGradient(0, y0 - L.amp, 0, h);
+      g.addColorStop(0, hexA(pal.accent, L.fill * k));
+      g.addColorStop(1, hexA(pal.dark ? '#000814' : pal.accent, L.fill * k * 1.6));
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
   }
 
   private feather(p: P) {

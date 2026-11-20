@@ -1,5 +1,5 @@
 /**
- * Sons do Vinlancord sintetizados com WebAudio (sem arquivos externos).
+ * Sons do Além-Mar sintetizados com WebAudio (sem arquivos externos).
  * Cada som é curto, suave e reconhecível.
  */
 type SoundName = 'message' | 'mention' | 'join' | 'leave' | 'mute' | 'unmute' | 'deafen' | 'undeafen' | 'ring' | 'outgoing' | 'notify' | 'stream' | 'disconnect';

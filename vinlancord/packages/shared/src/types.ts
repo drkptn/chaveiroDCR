@@ -17,7 +17,7 @@ export interface PublicUser {
 
 /** Selos que o app sabe exibir. */
 export const BADGES = {
-  creator: { label: 'Lord of Freedom', description: 'Criador do Vinlancord' },
+  creator: { label: 'Lord of Freedom', description: 'Criador do Além-Mar' },
 } as const;
 export type BadgeId = keyof typeof BADGES;
 
@@ -366,7 +366,7 @@ export interface NotificationPrefs {
 
 export type CornerStyle = 'round' | 'soft' | 'sharp' | 'cut';
 export type IconShape = 'circle' | 'squircle' | 'diamond' | 'hexagon' | 'shield';
-export type AmbientEffect = 'none' | 'feathers' | 'ink' | 'embers' | 'ash' | 'sigils' | 'snow' | 'rain' | 'petals' | 'stars';
+export type AmbientEffect = 'none' | 'feathers' | 'ink' | 'embers' | 'ash' | 'sigils' | 'snow' | 'rain' | 'petals' | 'stars' | 'tide';
 export type TransitionStyle = 'none' | 'fade' | 'rise' | 'slash' | 'ink' | 'shutter';
 export type MessageStyle = 'flat' | 'cards' | 'letter';
 export type AnimationLevel = 'full' | 'reduced' | 'off';
@@ -421,7 +421,7 @@ export interface UserSettings {
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
-  theme: 'caderno',
+  theme: 'alem-mar',
   mode: 'dark',
   accent: '#7c5cff',
   fontScale: 1,

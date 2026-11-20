@@ -132,7 +132,7 @@ export default function ProfilePopout({ userId, guildId }: { userId: string; gui
             <section>
               <h4 className="mb-1 text-[11px] font-bold uppercase tracking-wider text-fg-2">Membro desde</h4>
               <div className="text-sm text-fg-1">
-                No Vinlancord desde {formatLongDate(user.createdAt)}
+                No Além-Mar desde {formatLongDate(user.createdAt)}
                 {member && <div className="text-xs text-fg-2">Neste servidor desde {formatLongDate(member.joinedAt)}</div>}
               </div>
             </section>

@@ -145,7 +145,7 @@ function AddFriend() {
   return (
     <div className="max-w-2xl">
       <h2 className="font-heading text-xl uppercase tracking-wide text-fg">Adicionar amigo</h2>
-      <p className="mt-1 text-sm text-fg-2">Você pode adicionar amigos pelo nome de usuário do Vinlancord ou pelo ID.</p>
+      <p className="mt-1 text-sm text-fg-2">Você pode adicionar amigos pelo nome de usuário do Além-Mar ou pelo ID.</p>
       <form
         onSubmit={async (e) => {
           e.preventDefault();

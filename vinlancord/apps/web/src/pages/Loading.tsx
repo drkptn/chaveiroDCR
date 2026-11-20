@@ -9,7 +9,9 @@ import { useStore } from '../store';
 
 const PHRASES = [
   'Molhando a pena no tinteiro…',
-  'Acendendo as tochas da muralha…',
+  'Abrindo uma brecha na muralha…',
+  'Ouvindo as ondas…',
+  'Olhando pro horizonte…',
   'Movendo as peças no tabuleiro…',
   'Afinando os microfones…',
   'Acordando os servidores…',

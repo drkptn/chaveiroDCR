@@ -1,5 +1,5 @@
 /**
- * Grafo de áudio do Vinlancord (WebAudio):
+ * Grafo de áudio do Além-Mar (WebAudio):
  *
  *  microfone ─► ganho de entrada ─► analisador (VAD/medidor) ─► portão (VAD/PTT) ─► trilha enviada
  *  remoto[i] ─► ganho do usuário (0–200%) ─► ganho mestre ─► saída (dispositivo escolhido)

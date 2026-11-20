@@ -1,4 +1,4 @@
-/** Selos especiais ao lado do nome (ex.: "Lord of Freedom", o criador do Vinlancord). */
+/** Selos especiais ao lado do nome (ex.: "Lord of Freedom", o criador do Além-Mar). */
 import { Crown } from 'lucide-react';
 import { BADGES, type BadgeId } from '@vinlancord/shared';
 import { useStore } from '../store';

@@ -1,6 +1,6 @@
 {
   "appId": "com.vinlancord.app",
-  "appName": "Vinlancord",
+  "appName": "Além-Mar",
   "webDir": "../web/dist",
   "android": {
     "allowMixedContent": false,
