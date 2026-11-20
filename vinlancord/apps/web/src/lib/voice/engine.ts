@@ -505,25 +505,64 @@ class VoiceEngine {
   async startScreen(opts: { sourceId?: string; audio: boolean; quality: ScreenQuality; content: 'detail' | 'motion'; codec: ScreenCodec }) {
     if (!this.send) throw new Error('Entre em uma chamada primeiro.');
     const preset = SCREEN_PRESETS[opts.quality];
-    if (desktop && opts.sourceId) await desktop.screen.select(opts.sourceId, opts.audio);
-    const stream = await navigator.mediaDevices.getDisplayMedia({
-      video: {
-        width: { max: preset.width },
-        height: { max: preset.height },
-        frameRate: { ideal: preset.fps, max: preset.fps },
-      },
-      audio: opts.audio
-        ? ({
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-            // evita capturar a voz dos outros participantes junto com o áudio do sistema
-            restrictOwnAudio: true,
-            suppressLocalAudioPlayback: false,
-          } as MediaTrackConstraints)
-        : false,
-      ...({ systemAudio: opts.audio ? 'include' : 'exclude', selfBrowserSurface: 'exclude', surfaceSwitching: 'include' } as object),
-    } as DisplayMediaStreamOptions);
+    const capture = async (sourceId: string | undefined, audio: boolean, constrained: boolean) => {
+      // o processo principal usa a escolha uma vez só: precisa ser refeita a cada tentativa
+      if (desktop && sourceId) await desktop.screen.select(sourceId, audio);
+      return navigator.mediaDevices.getDisplayMedia({
+        video: constrained
+          ? {
+              width: { max: preset.width },
+              height: { max: preset.height },
+              frameRate: { ideal: preset.fps, max: preset.fps },
+            }
+          : true,
+        audio: audio
+          ? ({
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false,
+              // evita capturar a voz dos outros participantes junto com o áudio do sistema
+              restrictOwnAudio: true,
+              suppressLocalAudioPlayback: false,
+            } as MediaTrackConstraints)
+          : false,
+        ...({ systemAudio: audio ? 'include' : 'exclude', selfBrowserSurface: 'exclude', surfaceSwitching: 'include' } as object),
+      } as DisplayMediaStreamOptions);
+    };
+    // Alguns PCs recusam certas capturas ("Could not start video/audio source"): tenta caminhos mais simples
+    // antes de desistir — sem áudio do sistema, sem limites de resolução e, por fim, a tela inteira.
+    const retryable = (e: unknown) => ['NotReadableError', 'AbortError', 'OverconstrainedError', 'NotFoundError'].includes((e as Error)?.name);
+    const primaryScreen = async () => (desktop ? (await desktop.screen.getSources()).find((s) => s.id.startsWith('screen:'))?.id : undefined);
+    const attempts: [() => Promise<string | undefined>, boolean, boolean][] = [
+      [async () => opts.sourceId, opts.audio, true],
+      ...(opts.audio ? ([[async () => opts.sourceId, false, true]] as [() => Promise<string | undefined>, boolean, boolean][]) : []),
+      [async () => opts.sourceId, false, false],
+      ...(desktop && opts.sourceId && !opts.sourceId.startsWith('screen:') ? ([[primaryScreen, false, false]] as [() => Promise<string | undefined>, boolean, boolean][]) : []),
+    ];
+    let stream: MediaStream | null = null;
+    let lastError: unknown = null;
+    for (const [i, [source, audio, constrained]] of attempts.entries()) {
+      try {
+        stream = await capture(await source(), audio, constrained);
+        if (i > 0) {
+          const what = opts.audio && !audio ? ' (sem o áudio do sistema)' : '';
+          window.dispatchEvent(new CustomEvent('vl:voice-notice', { detail: `A captura escolhida falhou neste PC; compartilhando de um jeito alternativo${what}.` }));
+        }
+        break;
+      } catch (e) {
+        lastError = e;
+        if (!retryable(e)) throw e;
+        console.warn('[voz] captura de tela falhou, tentando alternativa:', e);
+      }
+    }
+    if (!stream) {
+      const err = new Error(
+        'O Windows não deixou capturar a tela. Tente: escolher a tela inteira em vez de uma janela, desligar "áudio do sistema", ou (em notebook) abrir Configurações do Windows → Sistema → Tela → Gráficos e colocar o Vinlancord em "Economia de energia".',
+      );
+      err.name = 'NotReadableError';
+      console.warn('[voz] última falha de captura:', lastError);
+      throw err;
+    }
 
     await this.stopScreen(true);
     this.screenStream = stream;

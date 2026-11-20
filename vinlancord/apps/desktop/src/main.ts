@@ -71,6 +71,9 @@ if (!settings.hardwareAcceleration) app.disableHardwareAcceleration();
 
 // Captura de tela via PipeWire no Linux/Wayland (preparação para suporte futuro)
 if (process.platform === 'linux') app.commandLine.appendSwitch('enable-features', 'WebRTCPipeWireCapturer');
+// Windows: captura de tela pelo Windows.Graphics.Capture (funciona em notebooks com duas placas de vídeo,
+// onde a captura DXGI falha com "Could not start video source")
+if (process.platform === 'win32') app.commandLine.appendSwitch('enable-features', 'AllowWgcScreenCapturer,AllowWgcWindowCapturer');
 
 /* ───────────── instância única e links vinlancord:// ───────────── */
 
