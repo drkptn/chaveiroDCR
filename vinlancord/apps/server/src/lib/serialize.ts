@@ -34,7 +34,7 @@ import { kindOf } from './media';
 
 export const imageUrl = (key: string | null | undefined) => (key ? publicUrl(`${key}.webp`) : null);
 
-export type UserRow = Pick<User, 'id' | 'username' | 'displayName' | 'avatarKey' | 'accentColor' | 'createdAt' | 'system'>;
+export type UserRow = Pick<User, 'id' | 'username' | 'displayName' | 'avatarKey' | 'accentColor' | 'createdAt' | 'system' | 'badges'>;
 export const publicUserSelect = {
   id: true,
   username: true,
@@ -43,6 +43,7 @@ export const publicUserSelect = {
   accentColor: true,
   createdAt: true,
   system: true,
+  badges: true,
 } as const;
 
 export function toPublicUser(u: UserRow): PublicUser {
@@ -54,6 +55,7 @@ export function toPublicUser(u: UserRow): PublicUser {
     accentColor: u.accentColor,
     createdAt: u.createdAt.toISOString(),
     ...(u.system ? { system: true } : {}),
+    ...(u.badges?.length ? { badges: u.badges } : {}),
   };
 }
 

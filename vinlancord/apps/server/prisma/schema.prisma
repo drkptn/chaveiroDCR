@@ -87,6 +87,8 @@ model User {
   customStatus    Json?
   settings        Json           @default("{}")
   system          Boolean        @default(false)
+  /// selos especiais (ex.: "creator"), concedidos só pelo operador do servidor
+  badges          String[]       @default([])
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   usernameChangedAt DateTime?

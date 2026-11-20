@@ -148,6 +148,43 @@ export function startHost(opts: { network?: string; upnp?: boolean } = {}) {
   return status;
 }
 
+/** Concede/remove selos no servidor deste PC (usa a chave do operador guardada só aqui). */
+export async function setBadges(username: string, badges: string[]) {
+  if (status.state !== 'running' || !status.port) throw new Error('Ligue o servidor primeiro.');
+  const secrets = JSON.parse(readFileSync(join(app.getPath('userData'), 'anfitriao', 'segredos.json'), 'utf8')) as { adminToken?: string };
+  if (!secrets.adminToken) throw new Error('Desligue e ligue o servidor de novo para gerar a chave de operador.');
+  const { request } = await import('node:https');
+  const body = JSON.stringify({ badges });
+  return new Promise<{ username: string; badges: string[] }>((resolve, reject) => {
+    const req = request(
+      {
+        host: '127.0.0.1',
+        port: status.port,
+        method: 'PUT',
+        path: `/api/v1/admin/users/${encodeURIComponent(username.trim().toLowerCase())}/badges`,
+        headers: { 'content-type': 'application/json', 'x-admin-token': secrets.adminToken, 'content-length': Buffer.byteLength(body) },
+        // conexão local com o próprio servidor deste PC (certificado próprio)
+        rejectUnauthorized: false,
+      },
+      (res) => {
+        let data = '';
+        res.on('data', (c) => (data += c));
+        res.on('end', () => {
+          try {
+            const json = data ? JSON.parse(data) : {};
+            if (res.statusCode === 200) resolve(json);
+            else reject(new Error(json?.error?.message ?? `Erro ${res.statusCode}`));
+          } catch {
+            reject(new Error(`Erro ${res.statusCode}`));
+          }
+        });
+      },
+    );
+    req.on('error', reject);
+    req.end(body);
+  });
+}
+
 export function stopHost(): Promise<void> {
   if (!proc) return Promise.resolve();
   const p = proc;

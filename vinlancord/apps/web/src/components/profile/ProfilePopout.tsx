@@ -11,6 +11,7 @@ import { Markdown } from '../../lib/markdown';
 import { openExternal } from '../../lib/desktop';
 import { Avatar, Button, Spinner, STATUS_LABEL, Tooltip, usePresenceStatus, cx } from '../ui';
 import { userMenu } from './userMenu';
+import { UserBadges } from '../UserBadges';
 
 const cache = new Map<string, { at: number; p: Promise<UserProfile> }>();
 export function fetchProfile(userId: string, force = false) {
@@ -112,6 +113,7 @@ export default function ProfilePopout({ userId, guildId }: { userId: string; gui
         </div>
         <div className="rounded-xl bg-bg-2 p-3">
           <div className="font-display text-xl font-bold leading-tight text-fg">{guildId ? displayName(userId, guildId) : user.displayName}</div>
+          <UserBadges userId={userId} size="md" className="my-1.5" />
           <div className="text-sm text-fg-1">
             {user.username}
             {profile?.pronouns && <span className="text-fg-2"> • {profile.pronouns}</span>}

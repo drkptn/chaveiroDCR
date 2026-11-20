@@ -66,10 +66,11 @@ async function cleanup() {
   emit({ state: 'stopped', step: 'Servidor desligado.' });
 }
 
-function secrets(): { pg: string; secretKey: string } {
+function secrets(): { pg: string; secretKey: string; adminToken: string } {
   const file = join(DATA, 'segredos.json');
-  if (existsSync(file)) return JSON.parse(readFileSync(file, 'utf8'));
-  const s = { pg: randomBytes(18).toString('hex'), secretKey: randomBytes(32).toString('hex') };
+  const s = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : { pg: randomBytes(18).toString('hex'), secretKey: randomBytes(32).toString('hex') };
+  // chave do operador (só o app deste PC lê): usada para conceder selos, como o de criador
+  if (!s.adminToken) s.adminToken = randomBytes(24).toString('hex');
   writeFileSync(file, JSON.stringify(s), { mode: 0o600 });
   return s;
 }
@@ -157,6 +158,7 @@ async function main() {
     DATABASE_URL: db.url,
     REDIS_URL: '',
     SECRET_KEY: keys.secretKey,
+    ADMIN_TOKEN: keys.adminToken,
     TLS_CERT_FILE: tls.certFile,
     TLS_KEY_FILE: tls.keyFile,
     STORAGE_DRIVER: 'local',

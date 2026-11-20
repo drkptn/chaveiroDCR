@@ -68,6 +68,7 @@ services:
       TURN_SECRET: ${TURN_SECRET:?defina TURN_SECRET no .env}
       GIPHY_API_KEY: ${GIPHY_API_KEY:-}
       METRICS_TOKEN: ${METRICS_TOKEN:-}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       - uploads:/data/uploads

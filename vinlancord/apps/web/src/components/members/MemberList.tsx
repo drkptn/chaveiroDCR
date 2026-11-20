@@ -8,6 +8,7 @@ import { ui } from '../../store/ui';
 import { channelPermsFromState } from './permsHelper';
 import { Avatar, usePresenceStatus, cx } from '../ui';
 import { userMenu } from '../profile/userMenu';
+import { UserBadges } from '../UserBadges';
 
 export function MemberList({ channel }: { channel: Channel }) {
   const guildId = channel.guildId;
@@ -83,6 +84,7 @@ const MemberRow = memo(function MemberRow({ userId, guildId, owner }: { userId: 
             {name}
           </span>
           {owner && <Crown size={13} className="shrink-0 text-warning" />}
+          <UserBadges userId={userId} />
         </div>
         {!offline && (activity || custom?.text || custom?.emoji) && (
           <div className="flex items-center gap-1 truncate text-[11.5px] text-fg-2">

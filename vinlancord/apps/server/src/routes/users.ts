@@ -18,7 +18,7 @@ import { hydrateMessages, messageInclude, type MessageRow } from '../services/me
 import { channelPermissions } from '../services/perms';
 import { revokeAllSessions } from './auth';
 
-async function broadcastUserUpdate(userId: string) {
+export async function broadcastUserUpdate(userId: string) {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
   await bus.toUser(userId, 'USER_UPDATE', toSelfUser(user));
   const audience = (await presenceAudience(userId)).filter((id) => id !== userId);

@@ -20,6 +20,7 @@ export default defineConfig({
       MEDIASOUP_ANNOUNCED_IP: '127.0.0.1',
       MEDIASOUP_LISTEN_IP: '127.0.0.1',
       LOG_LEVEL: 'error',
+      ADMIN_TOKEN: 'test-admin-token-test-admin-token-123',
     },
   },
 });

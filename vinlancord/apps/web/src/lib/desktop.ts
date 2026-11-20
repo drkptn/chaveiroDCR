@@ -70,6 +70,7 @@ export interface DesktopAPI {
     status(): Promise<HostStatus>;
     start(opts: { network?: string; upnp?: boolean }): Promise<HostStatus>;
     stop(): Promise<void>;
+    setBadges(username: string, badges: string[]): Promise<{ username: string; badges: string[] }>;
     onStatus(cb: (s: HostStatus) => void): () => void;
   };
   servers: {

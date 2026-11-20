@@ -25,7 +25,7 @@ import {
   screen,
 } from 'electron';
 import { isPinned } from './pinning';
-import { currentPins, hostAvailable, hostStatus, loadPins, onHostStatus, startHost, stopHost, trustServer } from './host';
+import { currentPins, hostAvailable, hostStatus, loadPins, onHostStatus, setBadges, startHost, stopHost, trustServer } from './host';
 
 declare const __VL_PINS__: Record<string, string> | undefined;
 const PINS: Record<string, string> = typeof __VL_PINS__ === 'undefined' ? {} : __VL_PINS__;
@@ -463,6 +463,7 @@ function setupIpc() {
   ipcMain.handle('host:status', () => hostStatus());
   ipcMain.handle('host:start', (_e, opts: { network?: string; upnp?: boolean }) => startHost(opts ?? {}));
   ipcMain.handle('host:stop', () => stopHost());
+  ipcMain.handle('host:setBadges', (_e, username: string, badges: string[]) => setBadges(String(username), Array.isArray(badges) ? badges.map(String) : []));
   ipcMain.handle('servers:trust', (_e, url: string, pin: string) => {
     if (typeof url !== 'string' || !/^https:\/\//.test(url)) throw new Error('Endereço inválido.');
     trustServer(url, String(pin));

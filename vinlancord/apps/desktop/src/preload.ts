@@ -60,6 +60,7 @@ const api = {
     status: () => ipcRenderer.invoke('host:status'),
     start: (opts: { network?: string; upnp?: boolean }) => ipcRenderer.invoke('host:start', opts),
     stop: () => ipcRenderer.invoke('host:stop') as Promise<void>,
+    setBadges: (username: string, badges: string[]) => ipcRenderer.invoke('host:setBadges', username, badges) as Promise<{ username: string; badges: string[] }>,
     onStatus: (cb: (s: unknown) => void) => on('host-status', cb),
   },
   servers: {

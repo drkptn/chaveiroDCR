@@ -20,6 +20,7 @@ import channelRoutes from './routes/channels';
 import inviteRoutes from './routes/invites';
 import fileRoutes from './routes/files';
 import miscRoutes, { gauges } from './routes/misc';
+import adminRoutes from './routes/admin';
 import { registerGateway } from './gateway';
 
 export async function buildApp() {
@@ -98,6 +99,7 @@ export async function buildApp() {
       await api.register(channelRoutes);
       await api.register(inviteRoutes);
       await api.register(miscRoutes);
+      await api.register(adminRoutes);
     },
     { prefix: '/api/v1' },
   );

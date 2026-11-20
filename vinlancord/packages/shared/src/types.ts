@@ -11,7 +11,15 @@ export interface PublicUser {
   accentColor: string | null;
   createdAt: string;
   system?: boolean;
+  /** selos especiais concedidos pelo operador do servidor (ver BADGES) */
+  badges?: string[];
 }
+
+/** Selos que o app sabe exibir. */
+export const BADGES = {
+  creator: { label: 'Lord of Freedom', description: 'Criador do Vinlancord' },
+} as const;
+export type BadgeId = keyof typeof BADGES;
 
 export interface ProfileLink {
   label: string;

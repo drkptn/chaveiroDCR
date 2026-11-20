@@ -78,6 +78,8 @@ const schema = z.object({
 
   GIPHY_API_KEY: z.string().optional().default(''),
   METRICS_TOKEN: z.string().optional().default(''),
+  /** chave do operador do servidor para ações administrativas (ex.: conceder selos). Vazio = desligado */
+  ADMIN_TOKEN: z.string().optional().default(''),
   WORKER_ID: z.coerce.number().int().min(0).max(1023).default(0),
 });
 

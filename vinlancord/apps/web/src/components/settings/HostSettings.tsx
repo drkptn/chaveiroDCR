@@ -5,7 +5,8 @@ import { desktop, type HostStatus } from '../../lib/desktop';
 import { api } from '../../lib/api';
 import { connectToServer } from '../../lib/serverLink';
 import { ui } from '../../store/ui';
-import { Button, Select, Spinner, cx } from '../ui';
+import { Button, Input, Select, Spinner, cx } from '../ui';
+import { useStore } from '../../store';
 import { SectionTitle, Card } from './SettingsLayout';
 
 const NETWORKS = [
@@ -134,6 +135,8 @@ export default function HostSettings() {
             </Card>
           )}
 
+          <CreatorBadgeCard />
+
           <Card title="Usar no meu app">
             {usingMine ? (
               <p className="text-sm text-fg-1">Este app já está conectado ao seu servidor. ✔</p>
@@ -164,5 +167,41 @@ export default function HostSettings() {
         </ul>
       </Card>
     </>
+  );
+}
+
+/** Selo exclusivo de criador ("Lord of Freedom"): só quem roda o servidor neste PC pode conceder. */
+function CreatorBadgeCard() {
+  const me = useStore((s) => s.me);
+  const [name, setName] = useState(me?.username ?? '');
+  const [busy, setBusy] = useState(false);
+  const apply = async (badges: string[]) => {
+    if (!desktop || !name.trim()) return;
+    setBusy(true);
+    try {
+      await desktop.host.setBadges(name, badges);
+      ui.success(badges.length ? `Selo "Lord of Freedom" dado para ${name.trim()}! 👑` : `Selo removido de ${name.trim()}.`);
+    } catch (e) {
+      ui.error(e);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Card title="Selo de criador">
+      <p className="mb-3 text-sm text-fg-1">
+        Dê o selo <span className="vl-badge-creator inline-flex items-center rounded-full px-2 py-0.5 font-heading text-[12px]">👑 Lord of Freedom</span> para a sua conta neste servidor. Só dá pra fazer
+        isso daqui, do PC que roda o servidor.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Input className="max-w-[220px]" value={name} onChange={(e) => setName(e.target.value)} placeholder="seu nome de usuário" />
+        <Button loading={busy} onClick={() => void apply(['creator'])}>
+          Dar selo
+        </Button>
+        <Button variant="ghost" disabled={busy} onClick={() => void apply([])}>
+          Remover
+        </Button>
+      </div>
+    </Card>
   );
 }

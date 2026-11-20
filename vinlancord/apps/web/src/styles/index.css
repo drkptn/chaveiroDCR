@@ -688,3 +688,15 @@ input, textarea, [contenteditable], .selectable { user-select: text; }
   /* alvos de toque maiores */
   .vl-header button, .vl-header [role='button'] { min-height: 36px; min-width: 36px; }
 }
+
+/* ═══════════════════════════════ SELO DO CRIADOR ═══════════════════════════════ */
+@keyframes vl-badge-shine { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.vl-badge-creator {
+  color: #1a1206;
+  background: linear-gradient(110deg, #b8860b 0%, #f7d774 25%, #fff3c4 40%, #e0b84a 55%, #b8860b 75%, #f7d774 100%);
+  background-size: 200% 100%;
+  animation: vl-badge-shine calc(4s * var(--vl-dur-mult)) linear infinite;
+  box-shadow: 0 0 0 1px rgb(255 220 120 / 0.55), 0 0 14px -2px rgb(247 215 116 / 0.65);
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.35);
+  white-space: nowrap;
+}

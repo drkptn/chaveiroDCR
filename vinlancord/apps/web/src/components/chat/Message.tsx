@@ -34,6 +34,7 @@ import { Markdown } from '../../lib/markdown';
 import { channelPerms } from '../../lib/perms';
 import { Avatar, Tooltip, cx } from '../ui';
 import { isFresh } from '../../lib/fresh';
+import { UserBadges } from '../UserBadges';
 import { EmojiPickerPopover } from './Pickers';
 import { InviteEmbed } from './InviteEmbed';
 import { MessageEditor } from './MessageEditor';
@@ -56,6 +57,7 @@ function Header({ m, guildId }: { m: ClientMessage; guildId: string | null }) {
         {name}
       </button>
       {m.author.system && <span className="rounded bg-accent px-1 text-[10px] font-bold text-accent-fg">SISTEMA</span>}
+      <UserBadges userId={m.author.id} className="self-center" />
       <Tooltip label={formatFull(m.createdAt)}>
         <span className="text-xs text-fg-2">{formatMessageDate(m.createdAt, showSeconds)}</span>
       </Tooltip>
